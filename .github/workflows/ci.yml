@@ -44,15 +44,13 @@ jobs:
           echo "=== Checking MongoDB ==="
           mongosh --eval "db.adminCommand('ping')" mongodb://localhost:27017/test 2>&1 || echo "MongoDB ping failed"
           echo "=== Starting server ==="
-          node dist/main > /tmp/server.log 2>&1 &
-          SERVER_PID=$!
-          echo "Server PID: $SERVER_PID"
-          sleep 5
-          echo "=== Process list after 5s ==="
-          ps aux | grep node | grep -v grep || echo "No node process found"
-          echo "=== Server log ==="
+          nohup node dist/main > /tmp/server.log 2>&1 &
+          echo "Server started in background, PID=$!"
+          sleep 10
+          echo "=== Process list after 10s ==="
+          ps aux | grep node | grep -v grep || echo "No node process"
+          echo "=== Server log so far ==="
           cat /tmp/server.log
-          echo "=== End of log ==="
         env:
           MONGODB_URI: mongodb://localhost:27017/nova
           JWT_SECRET: test-jwt-secret
