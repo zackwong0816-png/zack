@@ -34,6 +34,11 @@ jobs:
       - run: npm run build
       - run: sleep 120 && node dist/main > /tmp/server.log 2>&1 &
       - run: |
+          echo "=== Server log before check ==="
+          cat /tmp/server.log 2>&1 || echo "(log empty or missing)"
+          echo "=== Attempting curl ==="
+          curl -v http://localhost:3000/api 2>&1 | head -20
+          echo "=== Curl done ==="
           for i in $(seq 1 30); do
             sleep 2
             if curl -sf http://localhost:3000/api > /dev/null 2>&1; then
