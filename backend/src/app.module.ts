@@ -15,7 +15,10 @@ import { HealthController } from './health.controller'
 
 @Module({
   imports: [
-    MongooseModule.forRoot('mongodb://localhost:27017/nova'),
+    MongooseModule.forRoot('mongodb://localhost:27017/nova', {
+      serverSelectionTimeoutMS: 5000,
+      connectTimeoutMS: 5000,
+    }),
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }]),
     AuthModule,
     MembersModule,
