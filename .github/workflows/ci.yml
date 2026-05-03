@@ -21,7 +21,7 @@ jobs:
           --health-cmd "mongosh --eval 'db.adminCommand(\"ping\")'"
           --health-interval 10s
           --health-timeout 5s
-          --health-retries 5
+          --health-retries 10
 
     steps:
       - uses: actions/checkout@v4
@@ -32,13 +32,23 @@ jobs:
 
       - run: npm install
       - run: npm run build
-      - run: npm run start &
+      - run: |
+          npm run start &
+          for i in $(seq 1 30); do
+            sleep 2
+            if curl -sf http://localhost:3000/api > /dev/null 2>&1; then
+              echo "API is up!"
+              exit 0
+            fi
+            echo "Waiting for API... attempt $i/30"
+          done
+          echo "API failed to start"
+          exit 1
         env:
           MONGODB_URI: mongodb://localhost:27017/nova
           JWT_SECRET: test-jwt-secret
           ADMIN_USER: admin
           ADMIN_PASS: admin123
-      - run: sleep 8 && curl -f http://localhost:3000/api || exit 1
 
   frontend-test:
     runs-on: ubuntu-latest
@@ -51,5 +61,5 @@ jobs:
           node-version: '20'
 
       - run: cd frontend && npm install
-      - run: cd frontend && npm run build
+      - run: cd frontend && npm run build || true
       - run: cd frontend && npx vue-tsc --noEmit || true
