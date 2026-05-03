@@ -21,7 +21,7 @@ jobs:
           --health-cmd "mongosh --eval 'db.adminCommand(\"ping\")'"
           --health-interval 10s
           --health-timeout 5s
-          --health-retries 10
+          --health-retries 15
 
     steps:
       - uses: actions/checkout@v4
@@ -32,24 +32,45 @@ jobs:
 
       - run: npm install
       - run: npm run build
-      - run: sleep 120 && node dist/main > /tmp/server.log 2>&1 &
+
+      - run: sleep 120
+        env:
+          MONGODB_URI: mongodb://localhost:27017/nova
+          JWT_SECRET: test-jwt-secret
+          ADMIN_USER: admin
+          ADMIN_PASS: admin123
+
       - run: |
-          echo "=== Server log before check ==="
-          cat /tmp/server.log 2>&1 || echo "(log empty or missing)"
-          echo "=== Attempting curl ==="
-          curl -v http://localhost:3000/api 2>&1 | head -20
-          echo "=== Curl done ==="
-          for i in $(seq 1 30); do
+          node dist/main > /tmp/server.log 2>&1 &
+          SERVER_PID=$!
+          echo "Server started with PID $SERVER_PID"
+          echo "PID: $SERVER_PID" > /tmp/server.pid
+        env:
+          MONGODB_URI: mongodb://localhost:27017/nova
+          JWT_SECRET: test-jwt-secret
+          ADMIN_USER: admin
+          ADMIN_PASS: admin123
+
+      - run: |
+          echo "=== Process list ==="
+          ps aux | grep node || true
+          echo "=== Server PID ==="
+          cat /tmp/server.pid 2>&1 || true
+          echo "=== Server log ==="
+          cat /tmp/server.log 2>&1 || echo "(empty)"
+          echo "=== Waiting for API ==="
+          for i in $(seq 1 60); do
             sleep 2
-            if curl -sf http://localhost:3000/api > /dev/null 2>&1; then
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/api 2>/dev/null || echo "000")
+            echo "Attempt $i/60: HTTP $HTTP_CODE"
+            if [ "$HTTP_CODE" = "200" ]; then
               echo "API is up!"
               cat /tmp/server.log | tail -5
               exit 0
             fi
-            echo "Waiting... $i/30"
           done
-          echo "API failed"
-          cat /tmp/server.log | tail -20
+          echo "API failed after 120s"
+          cat /tmp/server.log | tail -30
           exit 1
         env:
           MONGODB_URI: mongodb://localhost:27017/nova
