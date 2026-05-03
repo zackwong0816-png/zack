@@ -41,10 +41,18 @@ jobs:
           ADMIN_PASS: admin123
 
       - run: |
+          echo "=== Checking MongoDB ==="
+          mongosh --eval "db.adminCommand('ping')" mongodb://localhost:27017/test 2>&1 || echo "MongoDB ping failed"
+          echo "=== Starting server ==="
           node dist/main > /tmp/server.log 2>&1 &
           SERVER_PID=$!
-          echo "Server started with PID $SERVER_PID"
-          echo "PID: $SERVER_PID" > /tmp/server.pid
+          echo "Server PID: $SERVER_PID"
+          sleep 5
+          echo "=== Process list after 5s ==="
+          ps aux | grep node | grep -v grep || echo "No node process found"
+          echo "=== Server log ==="
+          cat /tmp/server.log
+          echo "=== End of log ==="
         env:
           MONGODB_URI: mongodb://localhost:27017/nova
           JWT_SECRET: test-jwt-secret
@@ -52,12 +60,6 @@ jobs:
           ADMIN_PASS: admin123
 
       - run: |
-          echo "=== Process list ==="
-          ps aux | grep node || true
-          echo "=== Server PID ==="
-          cat /tmp/server.pid 2>&1 || true
-          echo "=== Server log ==="
-          cat /tmp/server.log 2>&1 || echo "(empty)"
           echo "=== Waiting for API ==="
           for i in $(seq 1 60); do
             sleep 2
@@ -65,11 +67,10 @@ jobs:
             echo "Attempt $i/60: HTTP $HTTP_CODE"
             if [ "$HTTP_CODE" = "200" ]; then
               echo "API is up!"
-              cat /tmp/server.log | tail -5
               exit 0
             fi
           done
-          echo "API failed after 120s"
+          echo "API failed"
           cat /tmp/server.log | tail -30
           exit 1
         env:
