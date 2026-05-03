@@ -25,7 +25,7 @@ async function bootstrap() {
     console.log('[Bootstrap] CORS enabled')
 
     console.log('[Bootstrap] Starting to listen on port 3000...')
-    await app.listen(3000)
+    await app.listen(3000, '0.0.0.0')
     console.log('[Bootstrap] 🚀 Nova Backend running on http://localhost:3000')
   } catch (e) {
     console.error('[Bootstrap] Failed to start:', e)

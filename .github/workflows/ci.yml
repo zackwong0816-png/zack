@@ -21,7 +21,7 @@ jobs:
           --health-cmd "mongosh --eval 'db.adminCommand(\"ping\")'"
           --health-interval 10s
           --health-timeout 5s
-          --health-retries 15
+          --health-retries 10
 
     steps:
       - uses: actions/checkout@v4
@@ -33,56 +33,50 @@ jobs:
       - run: npm install
       - run: npm run build
 
-      - run: sleep 120
-        env:
-          MONGODB_URI: mongodb://localhost:27017/nova
-          JWT_SECRET: test-jwt-secret
-          ADMIN_USER: admin
-          ADMIN_PASS: admin123
-
       - run: |
-          echo "=== Checking MongoDB ==="
-          mongosh --eval "db.adminCommand('ping')" mongodb://localhost:27017/test 2>&1 || echo "MongoDB ping failed"
-          echo "=== Starting server ==="
-          nohup node dist/main > /tmp/server.log 2>&1 &
-          echo "Server started in background, PID=$!"
-          sleep 10
-          echo "=== Process list after 10s ==="
-          ps aux | grep node | grep -v grep || echo "No node process"
-          echo "=== Server log so far ==="
-          cat /tmp/server.log
-        env:
-          MONGODB_URI: mongodb://localhost:27017/nova
-          JWT_SECRET: test-jwt-secret
-          ADMIN_USER: admin
-          ADMIN_PASS: admin123
+          echo "Waiting for MongoDB to be ready..."
+          for i in $(seq 1 30); do
+            if mongosh --eval "db.adminCommand('ping')" mongodb://localhost:27017/test --quiet 2>/dev/null; then
+              echo "MongoDB is ready!"
+              break
+            fi
+            echo "Waiting for MongoDB... $i/30"
+            sleep 5
+          done
 
-      - run: |
-          echo "=== Server log ==="
-          cat /tmp/server.log 2>&1 || echo "(log missing)"
-          echo "=== Node processes ==="
-          ps aux | grep node | grep -v grep || echo "No node"
-          echo "=== curl attempt (single) ==="
-          curl -v http://localhost:3000/api 2>&1 | head -30 || echo "curl failed"
-        env:
-          MONGODB_URI: mongodb://localhost:27017/nova
-          JWT_SECRET: test-jwt-secret
-          ADMIN_USER: admin
-          ADMIN_PASS: admin123
+          echo "Starting server with 60s MongoDB connection timeout..."
+          node --maxHttpHeaderSize=65536 -e "
+            process.env.MONGODB_URI = 'mongodb://localhost:27017/nova';
+            process.env.JWT_SECRET = 'test-jwt-secret';
+            process.env.ADMIN_USER = 'admin';
+            process.env.ADMIN_PASS = 'admin123';
+            require('./dist/main.js');
+          " &
+          SERVER_PID=$!
+          echo "Server PID: $SERVER_PID"
 
-      - run: |
-          echo "=== Waiting for API ==="
-          for i in $(seq 1 60); do
-            sleep 2
-            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/api 2>/dev/null || echo "000")
-            echo "Attempt $i/60: HTTP $HTTP_CODE"
+          echo "Waiting for server to start (30s)..."
+          sleep 30
+
+          echo "=== Server process ==="
+          ps aux | grep node | grep -v grep || echo "No node process found"
+          kill -0 $SERVER_PID 2>/dev/null && echo "Process is alive" || echo "Process is dead"
+
+          echo "=== Testing API at 127.0.0.1 ==="
+          for i in $(seq 1 10); do
+            HTTP_CODE=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3000/api 2>/dev/null || echo "000")
+            echo "Attempt $i: HTTP $HTTP_CODE"
             if [ "$HTTP_CODE" = "200" ]; then
               echo "API is up!"
               exit 0
             fi
+            sleep 2
           done
-          echo "API failed"
+
+          echo "API did not respond after 50s"
+          kill -0 $SERVER_PID 2>/dev/null && kill $SERVER_PID 2>/dev/null
           exit 1
+
         env:
           MONGODB_URI: mongodb://localhost:27017/nova
           JWT_SECRET: test-jwt-secret
