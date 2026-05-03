@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>数据统计 · NOVA CMS</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root { --bg: #0a0a0a; --surface: #141414; --surface2: #1c1c1c; --border: #2a2a2a; --text: #e0e0e0; --muted: #666; --accent: #e07b39; --green: #48bb78; --red: #f56565; --yellow: #ecc94b; --sidebar-w: 220px; }
+    body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    .admin-layout { display: flex; min-height: 100vh; }
+    .sidebar { width: var(--sidebar-w); background: var(--surface); border-right: 1px solid var(--border); position: fixed; height: 100vh; overflow-y: auto; display: flex; flex-direction: column; }
+    .sidebar-logo { padding: 20px; border-bottom: 1px solid var(--border); }
+    .sidebar-logo h1 { font-size: 20px; color: #fff; letter-spacing: 3px; }
+    .sidebar-logo span { font-size: 10px; color: var(--muted); }
+    .sidebar-nav { flex: 1; padding: 12px 0; }
+    .nav-group { margin-bottom: 8px; }
+    .nav-group-title { padding: 8px 20px; font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 20px; color: #999; font-size: 13px; cursor: pointer; border-left: 3px solid transparent; transition: all 0.15s; }
+    .nav-item:hover { background: var(--surface2); color: var(--text); }
+    .nav-item.active { background: var(--surface2); color: var(--accent); border-left-color: var(--accent); }
+    .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+    .main { flex: 1; margin-left: var(--sidebar-w); }
+    .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; height: 60px; display: flex; align-items: center; justify-content: space-between; }
+    .topbar-left { display: flex; align-items: center; gap: 16px; }
+    .topbar h2 { font-size: 15px; }
+    .breadcrumb { color: var(--muted); font-size: 13px; }
+    .admin-avatar { width: 36px; height: 36px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; cursor: pointer; }
+    .content { padding: 24px; }
+    .panel { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); margin-bottom: 24px; }
+    .panel-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .panel-title { font-size: 14px; font-weight: 500; }
+    .panel-body { padding: 20px; }
+    .btn { display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; border: none; }
+    .btn-sm { padding: 4px 8px; font-size: 11px; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-ghost { background: transparent; color: #999; border: 1px solid var(--border); }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+    .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+    @media (max-width: 1100px) { .stat-grid { grid-template-columns: repeat(2, 1fr); } }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+    .stat-card .label { font-size: 12px; color: var(--muted); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+    .stat-card .value { font-size: 28px; font-weight: 600; color: #fff; margin-bottom: 4px; }
+    .stat-card .change { font-size: 12px; }
+    .stat-card .up { color: var(--green); }
+    .stat-card .down { color: var(--red); }
+
+    .chart-area { background: var(--surface2); border-radius: 8px; height: 300px; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 13px; margin-bottom: 16px; position: relative; overflow: hidden; }
+    .chart-bars { display: flex; align-items: flex-end; gap: 8px; height: 200px; padding: 20px; }
+    .chart-bar { flex: 1; background: var(--accent); border-radius: 4px 4px 0 0; min-height: 20px; transition: height 0.5s ease; position: relative; }
+    .chart-bar:hover { opacity: 0.8; }
+    .chart-bar-label { position: absolute; bottom: -24px; left: 50%; transform: translateX(-50%); font-size: 10px; color: var(--muted); white-space: nowrap; }
+    .chart-bar-value { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 10px; color: var(--text); }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    @media (max-width: 1100px) { .grid-2 { grid-template-columns: 1fr; } }
+
+    .rank-list { padding: 0; }
+    .rank-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+    .rank-item:last-child { border-bottom: none; }
+    .rank-num { width: 24px; height: 24px; background: var(--surface2); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: var(--muted); flex-shrink: 0; }
+    .rank-num.top { background: var(--accent); color: #fff; }
+    .rank-info { flex: 1; }
+    .rank-name { font-size: 13px; margin-bottom: 2px; }
+    .rank-meta { font-size: 11px; color: var(--muted); }
+    .rank-value { font-size: 13px; font-weight: 600; color: var(--accent); }
+
+    .period-tabs { display: flex; gap: 4px; }
+    .period-tab { padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; color: var(--muted); background: none; border: none; }
+    .period-tab:hover { color: var(--text); }
+    .period-tab.active { background: var(--accent); color: #fff; }
+
+    .progress-item { margin-bottom: 16px; }
+    .progress-label { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 12px; }
+    .progress-bar { height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.5s ease; }
+
+    .text-muted { color: var(--muted); }
+    .text-sm { font-size: 12px; }
+    .mb-16 { margin-bottom: 16px; }
+    .toast { position: fixed; bottom: 24px; right: 24px; background: var(--text); color: var(--bg); padding: 14px 20px; border-radius: 8px; font-size: 13px; z-index: 2000; animation: slideIn 0.3s ease; }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+  </style>
+</head>
+<body>
+  <div class="admin-layout">
+    <aside class="sidebar">
+      <div class="sidebar-logo"><h1>NOVA</h1><span>CMS ADMIN</span></div>
+      <nav class="sidebar-nav">
+        <div class="nav-group"><div class="nav-group-title">主面板</div>
+          <a class="nav-item" href="index.html"><span class="nav-icon">📊</span> 工作台</a>
+          <a class="nav-item active" href="analytics.html"><span class="nav-icon">📈</span> 数据统计</a>
+        </div>
+        <div class="nav-group"><div class="nav-group-title">内容管理</div>
+          <a class="nav-item" href="pages.html"><span class="nav-icon">📄</span> 页面管理</a>
+          <a class="nav-item" href="media.html"><span class="nav-icon">🖼️</span> 素材中心</a>
+          <a class="nav-item" href="content.html"><span class="nav-icon">📝</span> 内容管理</a>
+          <a class="nav-item" href="messages.html"><span class="nav-icon">💬</span> 留言管理</a>
+        </div>
+        <div class="nav-group"><div class="nav-group-title">商品管理</div>
+          <a class="nav-item" href="products.html"><span class="nav-icon">📦</span> 产品管理</a>
+          <a class="nav-item" href="categories.html"><span class="nav-icon">🏷️</span> 分类管理</a>
+          <a class="nav-item" href="inventory.html"><span class="nav-icon">📋</span> 库存管理</a>
+        </div>
+        <div class="nav-group"><div class="nav-group-title">用户与订单</div>
+          <a class="nav-item" href="members.html"><span class="nav-icon">👥</span> 会员管理</a>
+          <a class="nav-item" href="orders.html"><span class="nav-icon">🛒</span> 订单管理</a>
+          <a class="nav-item" href="stores.html"><span class="nav-icon">🏪</span> 门店管理</a>
+        </div>
+        <div class="nav-group"><div class="nav-group-title">营销工具</div>
+          <a class="nav-item" href="coupon.html"><span class="nav-icon">🎫</span> 优惠券</a>
+          <a class="nav-item" href="promo.html"><span class="nav-icon">🔥</span> 促销活动</a>
+        </div>
+        <div class="nav-group"><div class="nav-group-title">系统</div>
+          <a class="nav-item" href="settings.html"><span class="nav-icon">⚙️</span> 设置</a>
+          <a class="nav-item" href="login.html"><span class="nav-icon">🚪</span> 退出</a>
+        </div>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-left"><h2>NOVA 管理后台</h2><span class="breadcrumb">/ 主面板 / 数据统计</span></div>
+        <div class="topbar-right">
+          <div class="period-tabs">
+            <button class="period-tab" onclick="setPeriod(this, '7')">近7天</button>
+            <button class="period-tab active" onclick="setPeriod(this, '30')">近30天</button>
+            <button class="period-tab" onclick="setPeriod(this, '90')">近90天</button>
+          </div>
+          <button class="btn btn-primary btn-sm">📊 导出报表</button>
+          <div class="admin-avatar">管</div>
+        </div>
+      </header>
+
+      <div class="content">
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="label">总销售额 <span style="opacity:0.5;">💰</span></div>
+            <div class="value" id="stat-sales">¥386,580</div>
+            <div class="change up">↑ 12.5% 较上月</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">总订单数 <span style="opacity:0.5;">🛒</span></div>
+            <div class="value" id="stat-orders">2,458</div>
+            <div class="change up">↑ 8.3% 较上月</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">已完成订单 <span style="opacity:0.5;">✅</span></div>
+            <div class="value" id="stat-completed">-</div>
+            <div class="change up">本月完成</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">待处理订单 <span style="opacity:0.5;">⏳</span></div>
+            <div class="value" id="stat-pending">-</div>
+            <div class="change" style="color:var(--yellow);">待处理</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">商品总数 <span style="opacity:0.5;">📦</span></div>
+            <div class="value" id="stat-products">-</div>
+            <div class="change">在售商品</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">低库存预警 <span style="opacity:0.5;">⚠️</span></div>
+            <div class="value" id="stat-lowstock">-</div>
+            <div class="change down">需补货</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">已缺货 <span style="opacity:0.5;">🚫</span></div>
+            <div class="value" id="stat-outofstock">-</div>
+            <div class="change down">立即补货</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">会员总数 <span style="opacity:0.5;">👥</span></div>
+            <div class="value" id="stat-members">-</div>
+            <div class="change up">注册会员</div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">📈 销售趋势</span>
+          </div>
+          <div class="panel-body">
+            <div class="chart-area">
+              <div class="chart-bars" id="chart-bars">
+                <div class="chart-bar" style="height:45%;" onclick="showBarDetail(this)"><span class="chart-bar-value">¥12,580</span><span class="chart-bar-label">周一</span></div>
+                <div class="chart-bar" style="height:62%;" onclick="showBarDetail(this)"><span class="chart-bar-value">¥18,420</span><span class="chart-bar-label">周二</span></div>
+                <div class="chart-bar" style="height:38%;" onclick="showBarDetail(this)"><span class="chart-bar-value">¥9,850</span><span class="chart-bar-label">周三</span></div>
+                <div class="chart-bar" style="height:78%;" onclick="showBarDetail(this)"><span class="chart-bar-value">¥22,100</span><span class="chart-bar-label">周四</span></div>
+                <div class="chart-bar" style="height:95%;" onclick="showBarDetail(this)"><span class="chart-bar-value">¥28,500</span><span class="chart-bar-label">周五</span></div>
+                <div class="chart-bar" style="height:100%;" onclick="showBarDetail(this)"><span class="chart-bar-value">¥32,180</span><span class="chart-bar-label">周六</span></div>
+                <div class="chart-bar" style="height:88%;" onclick="showBarDetail(this)"><span class="chart-bar-value">¥25,600</span><span class="chart-bar-label">周日</span></div>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px;text-align:center;font-size:11px;color:var(--muted);">
+              <span>周一<br><span style="color:var(--text);">¥12,580</span></span>
+              <span>周二<br><span style="color:var(--text);">¥18,420</span></span>
+              <span>周三<br><span style="color:var(--text);">¥9,850</span></span>
+              <span>周四<br><span style="color:var(--text);">¥22,100</span></span>
+              <span>周五<br><span style="color:var(--text);">¥28,500</span></span>
+              <span>周六<br><span style="color:var(--text);">¥32,180</span></span>
+              <span>周日<br><span style="color:var(--text);">¥25,600</span></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="panel">
+            <div class="panel-header"><span class="panel-title">🏆 热销产品 TOP 5</span></div>
+            <div class="panel-body">
+              <div class="rank-list">
+                <div class="rank-item">
+                  <div class="rank-num top">1</div>
+                  <div class="rank-info"><div class="rank-name">极简陶瓷餐具套装</div><div class="rank-meta">销量 234 件</div></div>
+                  <div class="rank-value">¥299,520</div>
+                </div>
+                <div class="rank-item">
+                  <div class="rank-num top">2</div>
+                  <div class="rank-info"><div class="rank-name">智能香薰机</div><div class="rank-meta">销量 567 件</div></div>
+                  <div class="rank-value">¥259,686</div>
+                </div>
+                <div class="rank-item">
+                  <div class="rank-num top">3</div>
+                  <div class="rank-info"><div class="rank-name">北欧实木书桌</div><div class="rank-meta">销量 89 件</div></div>
+                  <div class="rank-value">¥338,200</div>
+                </div>
+                <div class="rank-item">
+                  <div class="rank-num">4</div>
+                  <div class="rank-info"><div class="rank-name">不锈钢保温杯</div><div class="rank-meta">销量 890 件</div></div>
+                  <div class="rank-value">¥176,220</div>
+                </div>
+                <div class="rank-item">
+                  <div class="rank-num">5</div>
+                  <div class="rank-info"><div class="rank-name">记忆棉抱枕</div><div class="rank-meta">销量 445 件</div></div>
+                  <div class="rank-value">¥70,310</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header"><span class="panel-title">📦 库存预警</span></div>
+            <div class="panel-body">
+              <div class="progress-item">
+                <div class="progress-label"><span>智能香薰机</span><span style="color:var(--red);">0 件</span></div>
+                <div class="progress-bar"><div class="progress-fill" style="width:0%;background:var(--red);"></div></div>
+              </div>
+              <div class="progress-item">
+                <div class="progress-label"><span>北欧实木书桌</span><span style="color:var(--yellow);">12 件</span></div>
+                <div class="progress-bar"><div class="progress-fill" style="width:24%;background:var(--yellow);"></div></div>
+              </div>
+              <div class="progress-item">
+                <div class="progress-label"><span>羊毛盖毯</span><span style="color:var(--red);">0 件</span></div>
+                <div class="progress-bar"><div class="progress-fill" style="width:0%;background:var(--red);"></div></div>
+              </div>
+              <div class="progress-item">
+                <div class="progress-label"><span>极简台灯</span><span style="color:var(--green);">45 件</span></div>
+                <div class="progress-bar"><div class="progress-fill" style="width:75%;background:var(--green);"></div></div>
+              </div>
+              <div class="progress-item">
+                <div class="progress-label"><span>极简陶瓷餐具套装</span><span style="color:var(--green);">58 件</span></div>
+                <div class="progress-bar"><div class="progress-fill" style="width:96%;background:var(--green);"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="panel">
+            <div class="panel-header"><span class="panel-title">👥 用户趋势</span></div>
+            <div class="panel-body">
+              <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px;align-items:end;height:120px;padding-bottom:24px;">
+                <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+                  <div style="width:100%;height:60px;background:var(--accent2);border-radius:3px;opacity:0.6;"></div>
+                  <span style="font-size:10px;color:var(--muted);">周一</span>
+                </div>
+                <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+                  <div style="width:100%;height:45px;background:var(--accent2);border-radius:3px;opacity:0.6;"></div>
+                  <span style="font-size:10px;color:var(--muted);">周二</span>
+                </div>
+                <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+                  <div style="width:100%;height:80px;background:var(--accent2);border-radius:3px;opacity:0.8;"></div>
+                  <span style="font-size:10px;color:var(--muted);">周三</span>
+                </div>
+                <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+                  <div style="width:100%;height:55px;background:var(--accent2);border-radius:3px;opacity:0.6;"></div>
+                  <span style="font-size:10px;color:var(--muted);">周四</span>
+                </div>
+                <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+                  <div style="width:100%;height:90px;background:var(--accent2);border-radius:3px;"></div>
+                  <span style="font-size:10px;color:var(--muted);">周五</span>
+                </div>
+                <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+                  <div style="width:100%;height:100px;background:var(--accent2);border-radius:3px;"></div>
+                  <span style="font-size:10px;color:var(--muted);">周六</span>
+                </div>
+                <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+                  <div style="width:100%;height:75px;background:var(--accent2);border-radius:3px;opacity:0.8;"></div>
+                  <span style="font-size:10px;color:var(--muted);">周日</span>
+                </div>
+              </div>
+              <div style="text-align:center;font-size:12px;color:var(--muted);">本周新增注册用户 86 人，较上周增长 12.5%</div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header"><span class="panel-title">📍 门店业绩</span></div>
+            <div class="panel-body">
+              <div class="rank-list">
+                <div class="rank-item">
+                  <div class="rank-num top">1</div>
+                  <div class="rank-info"><div class="rank-name">上海旗舰店</div><div class="rank-meta">本月订单 456</div></div>
+                  <div class="rank-value">¥128,580</div>
+                </div>
+                <div class="rank-item">
+                  <div class="rank-num top">2</div>
+                  <div class="rank-info"><div class="rank-name">杭州西湖店</div><div class="rank-meta">本月订单 328</div></div>
+                  <div class="rank-value">¥89,200</div>
+                </div>
+                <div class="rank-item">
+                  <div class="rank-num">3</div>
+                  <div class="rank-info"><div class="rank-name">北京三里屯店</div><div class="rank-meta">本月订单 287</div></div>
+                  <div class="rank-value">¥72,450</div>
+                </div>
+                <div class="rank-item">
+                  <div class="rank-num">4</div>
+                  <div class="rank-info"><div class="rank-name">深圳万象城店</div><div class="rank-meta">本月订单 156</div></div>
+                  <div class="rank-value">¥45,800</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    if (!sessionStorage.getItem('nova_admin')) location.href = 'login.html';
+
+    var orders = JSON.parse(localStorage.getItem('nova_orders') || '[]');
+    var products = JSON.parse(localStorage.getItem('nova_products') || '[]');
+    var members = JSON.parse(localStorage.getItem('nova_members') || '[]');
+
+    function fmt(n) { return '¥' + n.toLocaleString('zh-CN'); }
+
+    var totalSales = orders.filter(function(o){ return o.status !== 'cancelled'; }).reduce(function(s,o){ return s + o.total; }, 0);
+    var totalOrders = orders.length;
+    var totalProducts = products.length;
+    var totalMembers = members.length;
+    var completedOrders = orders.filter(function(o){ return o.status === 'completed'; }).length;
+    var pendingOrders = orders.filter(function(o){ return o.status === 'pending' || o.status === 'paid'; }).length;
+    var lowStock = products.filter(function(p){ return p.stock > 0 && p.stock < 20; }).length;
+    var outOfStock = products.filter(function(p){ return p.stock === 0; }).length;
+
+    document.getElementById('stat-sales').textContent = fmt(totalSales);
+    document.getElementById('stat-orders').textContent = totalOrders;
+    document.getElementById('stat-products').textContent = totalProducts;
+    document.getElementById('stat-members').textContent = totalMembers;
+    document.getElementById('stat-completed').textContent = completedOrders;
+    document.getElementById('stat-pending').textContent = pendingOrders;
+    document.getElementById('stat-lowstock').textContent = lowStock;
+    document.getElementById('stat-outofstock').textContent = outOfStock;
+
+    var days = ['周一','周二','周三','周四','周五','周六','周日'];
+    var now = new Date();
+    var weekData = days.map(function(d, i) {
+      return Math.floor(Math.random() * 50000) + 10000;
+    });
+    var maxVal = Math.max.apply(null, weekData);
+    var chartBars = document.getElementById('chart-bars');
+    if (chartBars) {
+      chartBars.innerHTML = weekData.map(function(v, i) {
+        var h = Math.round((v / maxVal) * 180);
+        return '<div class="chart-bar" onclick="showBarDetail(this)" style="cursor:pointer;">' +
+          '<div class="chart-bar-fill" style="height:' + h + 'px;"></div>' +
+          '<div class="chart-bar-value">¥' + (v/1000).toFixed(1) + 'k</div>' +
+          '<div class="chart-bar-label">' + days[i] + '</div></div>';
+      }).join('');
+    }
+
+    function setPeriod(el, days) {
+      document.querySelectorAll('.period-tab').forEach(function(t){ t.classList.remove('active'); });
+      el.classList.add('active');
+    }
+
+    function showBarDetail(bar) {
+      var val = bar.querySelector('.chart-bar-value').textContent;
+      var label = bar.querySelector('.chart-bar-label').textContent;
+      var t = document.createElement('div'); t.className = 'toast'; t.textContent = label + ' 销售额: ' + val;
+      document.body.appendChild(t);
+      setTimeout(function(){ t.style.animation = 'slideIn 0.3s ease reverse'; setTimeout(function(){ t.remove(); }, 300); }, 2500);
+    }
+
+    document.querySelector('.admin-avatar').addEventListener('click', function() { if (confirm('确定要退出登录吗？')) location.href = 'login.html'; });
+  </script>
+</body>
+</html>

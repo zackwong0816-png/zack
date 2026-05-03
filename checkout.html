@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>订单确认 · NOVA</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .checkout-layout { display: grid; grid-template-columns: 1fr 400px; gap: 48px; padding: 40px 0; }
+    @media (max-width: 992px) { .checkout-layout { grid-template-columns: 1fr; } }
+    .checkout-section { background: var(--surface); border-radius: var(--radius-lg); padding: 28px; margin-bottom: 24px; }
+    .checkout-section h3 { font-size: 16px; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 576px) { .form-row { grid-template-columns: 1fr; } }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 14px; background: var(--bg); color: var(--fg); }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--accent); }
+    .form-group textarea { resize: vertical; min-height: 80px; }
+    .payment-options { display: flex; flex-direction: column; gap: 12px; }
+    .payment-option { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: all 0.2s; }
+    .payment-option:hover { border-color: var(--accent); }
+    .payment-option.selected { border-color: var(--accent); background: rgba(224,123,57,0.05); }
+    .payment-option input { display: none; }
+    .payment-option .radio { width: 18px; height: 18px; border: 2px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .payment-option.selected .radio { border-color: var(--accent); }
+    .payment-option.selected .radio::after { content: ''; width: 10px; height: 10px; background: var(--accent); border-radius: 50%; }
+    .payment-label { font-size: 14px; }
+    .order-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+    .order-item:last-child { border-bottom: none; }
+    .order-item-name { color: var(--muted); }
+    .order-item-price { font-weight: 500; }
+    .summary-sticky { position: sticky; top: 100px; }
+    .checkout-summary { background: var(--surface); border-radius: var(--radius-lg); padding: 28px; }
+    .checkout-summary h3 { font-size: 16px; margin-bottom: 20px; }
+    .summary-line { display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px; }
+    .summary-line.total { border-top: 1px solid var(--border); margin-top: 8px; padding-top: 16px; font-size: 18px; font-weight: 600; }
+    .btn-checkout { width: 100%; padding: 16px; background: var(--accent); color: white; border: none; border-radius: var(--radius); font-size: 15px; cursor: pointer; margin-top: 20px; transition: background 0.2s; }
+    .btn-checkout:hover { background: #c96a2d; }
+    .btn-checkout:disabled { background: var(--muted); cursor: not-allowed; }
+    .cart-items-preview { max-height: 300px; overflow-y: auto; }
+    .back-cart { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 13px; margin-bottom: 24px; }
+    .back-cart:hover { color: var(--fg); }
+  </style>
+</head>
+<body>
+  <header class="topnav">
+    <div class="container topnav-inner">
+      <a href="index.html" class="logo">NOVA</a>
+      <nav class="nav-links">
+        <a href="products.html">产品</a>
+        <a href="about.html">品牌</a>
+        <a href="content.html">内容</a>
+        <a href="stores.html">门店</a>
+        <a href="contact.html">联系我们</a>
+      </nav>
+      <div class="nav-actions">
+        <a href="cart.html" class="btn btn-ghost">🛒</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <a href="cart.html" class="back-cart">← 返回购物车</a>
+      <h1 style="font-family:var(--font-display);font-size:28px;margin-bottom:32px;">确认订单</h1>
+
+      <div class="checkout-layout">
+        <div>
+          <div class="checkout-section">
+            <h3>收货信息</h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label>收货人姓名</label>
+                <input type="text" id="name" placeholder="请输入姓名" value="">
+              </div>
+              <div class="form-group">
+                <label>手机号码</label>
+                <input type="tel" id="phone" placeholder="请输入手机号" value="">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>省份 / 城市</label>
+              <input type="text" id="region" placeholder="如：北京市 / 上海市" value="">
+            </div>
+            <div class="form-group">
+              <label>详细地址</label>
+              <textarea id="address" placeholder="请输入详细地址（街道、门牌号等）"></textarea>
+            </div>
+            <div class="form-group">
+              <label>订单备注（可选）</label>
+              <input type="text" id="note" placeholder="如：周末送货、需上楼">
+            </div>
+          </div>
+
+          <div class="checkout-section">
+            <h3>支付方式</h3>
+            <div class="payment-options">
+              <label class="payment-option selected" data-pay="wechat">
+                <input type="radio" name="payment" value="微信支付" checked>
+                <span class="radio"></span>
+                <span class="payment-label">微信支付</span>
+              </label>
+              <label class="payment-option" data-pay="alipay">
+                <input type="radio" name="payment" value="支付宝">
+                <span class="radio"></span>
+                <span class="payment-label">支付宝</span>
+              </label>
+              <label class="payment-option" data-pay="card">
+                <input type="radio" name="payment" value="银行卡">
+                <span class="radio"></span>
+                <span class="payment-label">银行卡</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="summary-sticky">
+          <div class="checkout-summary">
+            <h3>订单摘要</h3>
+            <div class="cart-items-preview" id="cart-preview"></div>
+            <div style="margin-top:16px;">
+              <div class="summary-line"><span>商品总额</span><span id="summary-subtotal">¥0</span></div>
+              <div class="summary-line"><span>运费</span><span id="summary-shipping">¥0</span></div>
+              <div class="summary-line"><span>优惠</span><span id="summary-discount" style="color:#48bb78;">-¥0</span></div>
+              <div class="summary-line total"><span>合计</span><span id="summary-total">¥0</span></div>
+            </div>
+            <button class="btn-checkout" id="submit-btn" onclick="submitOrder()">提交订单</button>
+            <p style="font-size:12px;color:var(--muted);text-align:center;margin-top:12px;">点击提交即表示您同意我们的购买条款</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom" style="border:none;padding:0;">
+        <span>© 2026 NOVA Design Co. All rights reserved.</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+  <script>
+    (function(){
+      var items = NOVA.Cart.getItems();
+      if (!items.length) {
+        location.href = 'cart.html';
+        return;
+      }
+
+      var subtotal = NOVA.Cart.getTotal();
+      var shipping = subtotal >= 299 ? 0 : 15;
+      var discount = 0;
+      var total = subtotal + shipping;
+
+      var preview = document.getElementById('cart-preview');
+      preview.innerHTML = items.map(function(item) {
+        return '<div class="order-item">' +
+          '<span class="order-item-name">' + item.name + ' x' + item.quantity + '</span>' +
+          '<span class="order-item-price">¥' + (item.price * item.quantity).toFixed(2) + '</span></div>';
+      }).join('');
+
+      document.getElementById('summary-subtotal').textContent = '¥' + subtotal.toFixed(2);
+      document.getElementById('summary-shipping').textContent = shipping === 0 ? '免费' : '¥' + shipping;
+      document.getElementById('summary-discount').textContent = '-¥' + discount.toFixed(2);
+      document.getElementById('summary-total').textContent = '¥' + total.toFixed(2);
+
+      document.querySelectorAll('.payment-option').forEach(function(el) {
+        el.addEventListener('click', function() {
+          document.querySelectorAll('.payment-option').forEach(function(o){ o.classList.remove('selected'); });
+          this.classList.add('selected');
+          this.querySelector('input').checked = true;
+        });
+      });
+
+      window.submitOrder = function() {
+        var name = document.getElementById('name').value.trim();
+        var phone = document.getElementById('phone').value.trim();
+        var region = document.getElementById('region').value.trim();
+        var address = document.getElementById('address').value.trim();
+        var note = document.getElementById('note').value.trim();
+        var payment = document.querySelector('input[name="payment"]:checked').value;
+
+        if (!name || !phone || !address) {
+          NOVA.Utils.toast('请填写完整的收货信息');
+          return;
+        }
+        if (!/^1[3-9]\d{9}$/.test(phone)) {
+          NOVA.Utils.toast('请输入有效的手机号码');
+          return;
+        }
+
+        var btn = document.getElementById('submit-btn');
+        btn.disabled = true;
+        btn.textContent = '提交中...';
+
+        var now = new Date();
+        var dateStr = now.getFullYear() + '-' +
+          String(now.getMonth()+1).padStart(2,'0') + '-' +
+          String(now.getDate()).padStart(2,'0') + ' ' +
+          String(now.getHours()).padStart(2,'0') + ':' +
+          String(now.getMinutes()).padStart(2,'0') + ':' +
+          String(now.getSeconds()).padStart(2,'0');
+
+        var orderId = 'NO' + dateStr.replace(/[-:\s]/g,'');
+
+        var order = {
+          id: orderId,
+          user: name,
+          phone: phone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2'),
+          products: items.map(function(i){ return {name:i.name, qty:i.quantity, price:i.price}; }),
+          total: total,
+          shipping: shipping,
+          discount: discount,
+          payment: payment,
+          status: 'pending',
+          address: (region ? region + ' ' : '') + address,
+          note: note,
+          date: dateStr
+        };
+
+        var orders = JSON.parse(localStorage.getItem('nova_orders') || '[]');
+        orders.unshift(order);
+        localStorage.setItem('nova_orders', JSON.stringify(orders));
+
+        NOVA.Cart.clear();
+
+        NOVA.Utils.toast('订单提交成功！');
+        setTimeout(function() {
+          location.href = 'member.html';
+        }, 1500);
+      };
+    })();
+  </script>
+</body>
+</html>

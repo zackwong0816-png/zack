@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>会员管理 · NOVA CMS</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root { --bg: #0a0a0a; --surface: #141414; --surface2: #1c1c1c; --border: #2a2a2a; --text: #e0e0e0; --muted: #666; --accent: #e07b39; --green: #48bb78; --red: #f56565; --yellow: #ecc94b; --sidebar-w: 220px; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    .admin-layout { display: flex; min-height: 100vh; }
+    .sidebar { width: var(--sidebar-w); background: var(--surface); border-right: 1px solid var(--border); position: fixed; height: 100vh; overflow-y: auto; display: flex; flex-direction: column; }
+    .sidebar-logo { padding: 20px; border-bottom: 1px solid var(--border); }
+    .sidebar-logo h1 { font-size: 20px; color: #fff; letter-spacing: 3px; }
+    .sidebar-logo span { font-size: 10px; color: var(--muted); letter-spacing: 1px; }
+    .sidebar-nav { flex: 1; padding: 12px 0; }
+    .nav-group { margin-bottom: 8px; }
+    .nav-group-title { padding: 8px 20px; font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 20px; color: #999; text-decoration: none; font-size: 13px; cursor: pointer; border-left: 3px solid transparent; transition: all 0.15s; }
+    .nav-item:hover { background: var(--surface2); color: var(--text); }
+    .nav-item.active { background: var(--surface2); color: var(--accent); border-left-color: var(--accent); }
+    .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+    .nav-badge { margin-left: auto; background: var(--accent); color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 10px; }
+    .main { flex: 1; margin-left: var(--sidebar-w); }
+    .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+    .topbar-left { display: flex; align-items: center; gap: 16px; }
+    .topbar h2 { font-size: 15px; font-weight: 500; }
+    .breadcrumb { color: var(--muted); font-size: 13px; }
+    .admin-avatar { width: 36px; height: 36px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; cursor: pointer; }
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+    .content { padding: 24px; }
+    .panel { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); margin-bottom: 24px; }
+    .panel-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .panel-title { font-size: 14px; font-weight: 500; }
+    .panel-body { padding: 20px; }
+    .btn { display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; border: none; text-decoration: none; }
+    .btn-sm { padding: 4px 8px; font-size: 11px; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-ghost { background: transparent; color: #999; border: 1px solid var(--border); }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-danger { background: rgba(245,101,101,0.15); color: var(--red); }
+    .btn-success { background: rgba(72,187,120,0.15); color: var(--green); }
+    .filter-row { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+    .filter-btn { padding: 6px 14px; border: 1px solid var(--border); border-radius: 999px; font-size: 12px; cursor: pointer; color: var(--muted); background: none; }
+    .filter-btn:hover, .filter-btn.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+    .search-box { display: flex; gap: 8px; margin-left: auto; }
+    .search-box input { padding: 8px 14px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 13px; width: 180px; }
+    .search-box input:focus { outline: none; border-color: var(--accent); }
+    .table { width: 100%; border-collapse: collapse; }
+    .table th, .table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); }
+    .table th { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; background: var(--bg); }
+    .table tr:last-child td { border-bottom: none; }
+    .table tr:hover { background: var(--surface2); }
+    .member-row { display: flex; align-items: center; gap: 12px; }
+    .member-avatar { width: 40px; height: 40px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+    .member-name { font-size: 13px; font-weight: 500; }
+    .member-sub { font-size: 11px; color: var(--muted); }
+    .tag { display: inline-block; padding: 2px 8px; background: var(--surface2); border-radius: 4px; font-size: 11px; margin-right: 4px; }
+    .level-bronze { color: #cd7f32; }
+    .level-silver { color: #c0c0c0; }
+    .level-gold { color: var(--accent); }
+    .level-diamond { color: #b9f2ff; }
+    .status { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 11px; }
+    .status-success { background: rgba(72,187,120,0.15); color: var(--green); }
+    .status-warning { background: rgba(236,201,75,0.15); color: var(--yellow); }
+    .action-btns { display: flex; gap: 6px; }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+    .modal { background: var(--surface); border-radius: 12px; padding: 28px; width: 550px; max-width: 90%; max-height: 90vh; overflow-y: auto; border: 1px solid var(--border); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .modal-title { font-size: 16px; font-weight: 500; }
+    .modal-close { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; cursor: pointer; color: var(--muted); font-size: 18px; }
+    .modal-close:hover { background: var(--surface2); }
+    .modal-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
+    .stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+    .stat-card .val { font-size: 28px; font-weight: 600; color: #fff; }
+    .stat-card .label { font-size: 12px; color: var(--muted); margin-top: 4px; }
+    .stat-card .accent { color: var(--accent); }
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+    .form-input, .form-select { width: 100%; padding: 10px 14px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 13px; }
+    .form-input:focus, .form-select:focus { outline: none; border-color: var(--accent); }
+    .form-select { appearance: none; cursor: pointer; }
+    .points-history { background: var(--surface2); border-radius: 8px; padding: 12px; max-height: 200px; overflow-y: auto; }
+    .points-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+    .points-item:last-child { border-bottom: none; }
+    .points-item .desc { color: var(--muted); }
+    .points-item .val { font-weight: 600; }
+    .points-item .plus { color: var(--green); }
+    .points-item .minus { color: var(--red); }
+    .flex { display: flex; }
+    .items-center { align-items: center; }
+    .gap-8 { gap: 8px; }
+    .text-muted { color: var(--muted); }
+    .text-sm { font-size: 12px; }
+    .text-xs { font-size: 11px; }
+    .hidden { display: none !important; }
+    .toast { position: fixed; bottom: 24px; right: 24px; background: var(--text); color: var(--bg); padding: 14px 20px; border-radius: 8px; font-size: 13px; z-index: 2000; animation: slideIn 0.3s ease; }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+  </style>
+</head>
+<body>
+  <div class="admin-layout">
+    <aside class="sidebar">
+      <div class="sidebar-logo"><h1>NOVA</h1><span>CMS ADMIN</span></div>
+      <nav class="sidebar-nav">
+        <div class="nav-group"><div class="nav-group-title">主面板</div>
+          <a class="nav-item" href="index.html"><span class="nav-icon">📊</span> 工作台</a>
+          <a class="nav-item" href="analytics.html"><span class="nav-icon">📈</span> 数据统计</a>
+        </div>
+        <div class="nav-group"><div class="nav-group-title">内容管理</div>
+          <a class="nav-item" href="pages.html"><span class="nav-icon">📄</span> 页面管理</a>
+          <a class="nav-item" href="media.html"><span class="nav-icon">🖼️</span> 素材中心</a>
+          <a class="nav-item" href="content.html"><span class="nav-icon">📝</span> 内容管理</a>
+          <a class="nav-item" href="messages.html"><span class="nav-icon">💬</span> 留言管理</a>
+        </div>
+        <div class="nav-group"><div class="nav-group-title">商品管理</div>
+          <a class="nav-item" href="products.html"><span class="nav-icon">📦</span> 产品管理</a>
+          <a class="nav-item" href="categories.html"><span class="nav-icon">🏷️</span> 分类管理</a>
+          <a class="nav-item" href="inventory.html"><span class="nav-icon">📋</span> 库存管理</a>
+        </div>
+        <div class="nav-group"><div class="nav-group-title">用户与订单</div>
+          <a class="nav-item active" href="members.html"><span class="nav-icon">👥</span> 会员管理</a>
+          <a class="nav-item" href="orders.html"><span class="nav-icon">🛒</span> 订单管理</a>
+          <a class="nav-item" href="stores.html"><span class="nav-icon">🏪</span> 门店管理</a>
+        </div>
+        <div class="nav-group"><div class="nav-group-title">营销工具</div>
+          <a class="nav-item" href="coupon.html"><span class="nav-icon">🎫</span> 优惠券</a>
+          <a class="nav-item" href="promo.html"><span class="nav-icon">🔥</span> 促销活动</a>
+        </div>
+        <div class="nav-group"><div class="nav-group-title">系统</div>
+          <a class="nav-item" href="settings.html"><span class="nav-icon">⚙️</span> 设置</a>
+          <a class="nav-item" href="login.html"><span class="nav-icon">🚪</span> 退出</a>
+        </div>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-left">
+          <h2>NOVA 管理后台</h2>
+          <span class="breadcrumb">/ 用户与订单 / 会员管理</span>
+        </div>
+        <div class="topbar-right">
+          <button class="btn btn-ghost btn-sm">📊 导出数据</button>
+          <div class="admin-avatar">管</div>
+        </div>
+      </header>
+
+      <div class="content">
+        <div class="stat-row">
+          <div class="stat-card"><div class="val accent" id="stat-total">0</div><div class="label">会员总数</div></div>
+          <div class="stat-card"><div class="val" id="stat-new">0</div><div class="label">本月新增</div></div>
+          <div class="stat-card"><div class="val" id="stat-gold">0</div><div class="label">金卡会员</div></div>
+          <div class="stat-card"><div class="val" id="stat-points">0</div><div class="label">积分发放</div></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">👥 会员列表</span>
+          </div>
+          <div class="panel-body">
+            <div class="filter-row">
+              <button class="filter-btn active" data-filter="all" onclick="setFilter('all')">全部</button>
+              <button class="filter-btn" data-filter="bronze" onclick="setFilter('bronze')">普通</button>
+              <button class="filter-btn" data-filter="silver" onclick="setFilter('silver')">银卡</button>
+              <button class="filter-btn" data-filter="gold" onclick="setFilter('gold')">金卡</button>
+              <button class="filter-btn" data-filter="diamond" onclick="setFilter('diamond')">钻石</button>
+              <div class="search-box">
+                <input type="text" placeholder="搜索姓名/手机号..." id="search-input" oninput="renderMembers()">
+              </div>
+            </div>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>会员</th>
+                  <th>手机号</th>
+                  <th>等级</th>
+                  <th>积分</th>
+                  <th>消费金额</th>
+                  <th>注册时间</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="member-table"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="modal-overlay hidden" id="member-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title">👤 会员详情</span>
+        <div class="modal-close" onclick="closeMemberModal()">×</div>
+      </div>
+      <div id="member-detail"></div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeMemberModal()">关闭</button>
+        <button class="btn btn-primary btn-sm" onclick="saveMember()">💾 保存</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    if (!sessionStorage.getItem('nova_admin')) location.href = 'login.html';
+
+    const MEMBERS_KEY = 'nova_members';
+    let members = JSON.parse(localStorage.getItem(MEMBERS_KEY) || 'null') || [
+      { id: 'm1', name: '林晓文', phone: '13812348821', level: 'gold', points: 2850, totalSpent: 12800, orders: 5, note: 'VIP客户', date: '2026-01-15', status: 'active' },
+      { id: 'm2', name: '周明', phone: '13912343301', level: 'bronze', points: 320, totalSpent: 1200, orders: 1, note: '', date: '2026-04-28', status: 'active' },
+      { id: 'm3', name: '吴芳', phone: '13712347762', level: 'gold', points: 12600, totalSpent: 45000, orders: 18, note: '', date: '2025-11-20', status: 'active' },
+      { id: 'm4', name: '郑伟', phone: '13612345510', level: 'silver', points: 5800, totalSpent: 8500, orders: 6, note: '偏好家具类', date: '2026-02-08', status: 'active' },
+      { id: 'm5', name: '刘洋', phone: '13512342289', level: 'silver', points: 4100, totalSpent: 6200, orders: 4, note: '', date: '2026-03-12', status: 'active' },
+      { id: 'm6', name: '王丽', phone: '18612347721', level: 'diamond', points: 28000, totalSpent: 120000, orders: 45, note: '品牌挚友', date: '2025-06-01', status: 'active' },
+      { id: 'm7', name: '陈强', phone: '15512344410', level: 'bronze', points: 890, totalSpent: 2100, orders: 2, note: '', date: '2026-04-10', status: 'active' },
+      { id: 'm8', name: '张婷', phone: '17712343389', level: 'silver', points: 7200, totalSpent: 11000, orders: 8, note: '', date: '2026-01-22', status: 'active' },
+    ];
+    let currentMemberId = null;
+    let currentFilter = 'all';
+
+    save();
+
+    function save() { localStorage.setItem(MEMBERS_KEY, JSON.stringify(members)); }
+
+    function toast(msg) {
+      const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(() => { t.style.animation = 'slideIn 0.3s ease reverse'; setTimeout(() => t.remove(), 300); }, 2500);
+    }
+
+    function levelName(level) {
+      const names = { bronze: '普通', silver: '银卡', gold: '金卡', diamond: '钻石' };
+      return names[level] || level;
+    }
+
+    function levelClass(level) {
+      return 'level-' + level;
+    }
+
+    function updateStats() {
+      document.getElementById('stat-total').textContent = members.length;
+      document.getElementById('stat-new').textContent = members.filter(m => m.date >= '2026-04-01').length;
+      document.getElementById('stat-gold').textContent = members.filter(m => m.level === 'gold' || m.level === 'diamond').length;
+      document.getElementById('stat-points').textContent = members.reduce((s, m) => s + m.points, 0).toLocaleString();
+    }
+
+    function setFilter(f) {
+      currentFilter = f;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.dataset.filter === f));
+      renderMembers();
+    }
+
+    function renderMembers() {
+      const search = document.getElementById('search-input').value.toLowerCase();
+      let filtered = members.filter(m => {
+        const matchFilter = currentFilter === 'all' || m.level === currentFilter;
+        const matchSearch = !search || m.name.toLowerCase().includes(search) || m.phone.includes(search);
+        return matchFilter && matchSearch;
+      });
+
+      const tbody = document.getElementById('member-table');
+      tbody.innerHTML = filtered.map(m => `
+        <tr>
+          <td>
+            <div class="member-row">
+              <div class="member-avatar">${m.name.slice(0, 1)}</div>
+              <div>
+                <div class="member-name">${m.name}</div>
+                <div class="member-sub">ID: ${m.id}</div>
+              </div>
+            </div>
+          </td>
+          <td>${m.phone}</td>
+          <td><span class="tag ${levelClass(m.level)}">${levelName(m.level)}</span></td>
+          <td>${m.points.toLocaleString()}</td>
+          <td>¥${m.totalSpent.toLocaleString()}</td>
+          <td class="text-xs text-muted">${m.date}</td>
+          <td>
+            <div class="action-btns">
+              <button class="btn btn-ghost btn-sm" onclick="openMemberDetail('${m.id}')">查看</button>
+              <button class="btn btn-primary btn-sm" onclick="openMemberDetail('${m.id}')">编辑</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function openMemberDetail(id) {
+      currentMemberId = id;
+      const m = members.find(x => x.id === id);
+      if (!m) return;
+      document.getElementById('member-detail').innerHTML = `
+        <div class="form-group">
+          <label class="form-label">姓名</label>
+          <input class="form-input" id="m-name" value="${m.name}">
+        </div>
+        <div class="form-group">
+          <label class="form-label">手机号</label>
+          <input class="form-input" id="m-phone" value="${m.phone}">
+        </div>
+        <div class="form-group">
+          <label class="form-label">会员等级</label>
+          <select class="form-select" id="m-level">
+            <option value="bronze" ${m.level==='bronze'?'selected':''}>普通</option>
+            <option value="silver" ${m.level==='silver'?'selected':''}>银卡</option>
+            <option value="gold" ${m.level==='gold'?'selected':''}>金卡</option>
+            <option value="diamond" ${m.level==='diamond'?'selected':''}>钻石</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">积分余额</label>
+          <input class="form-input" id="m-points" type="number" value="${m.points}" min="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">累计消费</label>
+          <input class="form-input" value="¥${m.totalSpent.toLocaleString()}" readonly>
+        </div>
+        <div class="form-group">
+          <label class="form-label">订单数</label>
+          <input class="form-input" value="${m.orders} 笔" readonly>
+        </div>
+        <div class="form-group">
+          <label class="form-label">备注</label>
+          <input class="form-input" id="m-note" value="${m.note || ''}" placeholder="会员备注">
+        </div>
+        <div style="margin-top:20px;">
+          <label class="form-label">积分变动记录</label>
+          <div class="points-history">
+            <div class="points-item"><span class="desc">注册奖励</span><span class="val plus">+100</span></div>
+            <div class="points-item"><span class="desc">消费返积分 (订单#NO20260401)</span><span class="val plus">+50</span></div>
+            <div class="points-item"><span class="desc">积分兑换优惠券</span><span class="val minus">-200</span></div>
+            <div class="points-item"><span class="desc">消费返积分 (订单#NO20260315)</span><span class="val plus">+128</span></div>
+          </div>
+        </div>
+      `;
+      document.getElementById('member-modal').classList.remove('hidden');
+    }
+
+    function closeMemberModal() { document.getElementById('member-modal').classList.add('hidden'); currentMemberId = null; }
+
+    function saveMember() {
+      const m = members.find(x => x.id === currentMemberId);
+      if (m) {
+        m.name = document.getElementById('m-name').value;
+        m.phone = document.getElementById('m-phone').value;
+        m.level = document.getElementById('m-level').value;
+        m.points = parseInt(document.getElementById('m-points').value) || 0;
+        m.note = document.getElementById('m-note').value;
+        save();
+        renderMembers();
+        updateStats();
+        toast('会员信息已保存');
+      }
+      closeMemberModal();
+    }
+
+    document.querySelector('.admin-avatar').addEventListener('click', function() { if (confirm('确定要退出登录吗？')) location.href = 'login.html'; });
+
+    updateStats();
+    renderMembers();
+  </script>
+</body>
+</html>

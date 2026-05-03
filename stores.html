@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>门店查询 · NOVA</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .page-header { padding: 60px 0; text-align: center; background: var(--surface); }
+    .page-header h1 { font-family: var(--font-display); font-size: 36px; margin-bottom: 12px; }
+    .search-box {
+      max-width: 500px;
+      margin: 24px auto 0;
+      display: flex;
+      gap: 12px;
+    }
+    .search-box input { flex: 1; padding: 14px 20px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 15px; }
+    .search-box button { padding: 14px 24px; }
+
+    .store-list { padding: 40px 0; }
+    .store-item {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      padding: 32px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    @media (max-width: 768px) { .store-item { grid-template-columns: 1fr; } }
+    .store-map { background: #f5f5f5; border-radius: var(--radius); aspect-ratio: 16/10; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 13px; }
+    .store-info h3 { font-size: 18px; margin-bottom: 8px; }
+    .store-info p { color: var(--muted); font-size: 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+    .store-tags { display: flex; gap: 8px; margin-top: 16px; }
+    .store-tag { padding: 4px 10px; background: var(--bg); border-radius: 4px; font-size: 12px; color: var(--muted); }
+    .store-actions { display: flex; gap: 12px; margin-top: 20px; }
+    .filter-row { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
+    .filter-btn { padding: 8px 16px; border: 1px solid var(--border); border-radius: 999px; font-size: 13px; cursor: pointer; }
+    .filter-btn:hover, .filter-btn.active { background: var(--fg); color: white; border-color: var(--fg); }
+  </style>
+</head>
+<body>
+  <header class="topnav">
+    <div class="container topnav-inner">
+      <a href="index.html" class="logo">NOVA</a>
+      <nav class="nav-links">
+        <a href="products.html">产品</a>
+        <a href="about.html">品牌</a>
+        <a href="content.html">内容</a>
+        <a href="stores.html" class="active">门店</a>
+        <a href="contact.html">联系我们</a>
+      </nav>
+      <div class="nav-actions">
+        <a href="member.html" class="btn btn-ghost">登录</a>
+        <a href="cart.html" class="btn btn-ghost">🛒</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="page-header">
+      <div class="container">
+        <h1>门店查询</h1>
+        <div class="search-box">
+          <input type="text" placeholder="搜索城市或门店名称">
+          <button class="btn btn-primary">搜索</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="container store-list">
+      <div class="filter-row" id="city-filters">
+        <span class="filter-btn active" data-city="">全部</span>
+      </div>
+      <div id="store-list"></div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom" style="border:none;padding:0;">
+        <span>© 2026 NOVA Design Co. All rights reserved.</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+  <script>
+    (function(){
+      var stores = JSON.parse(localStorage.getItem('nova_stores') || '[]');
+      var listEl = document.getElementById('store-list');
+      var filterEl = document.getElementById('city-filters');
+
+      var cities = [''];
+      stores.forEach(function(s) { if (cities.indexOf(s.city) < 0) cities.push(s.city); });
+
+      filterEl.innerHTML = cities.map(function(c) {
+        return '<span class="filter-btn' + (c===''?' active':'') + '" data-city="' + c + '">' + (c||'全部') + '</span>';
+      }).join('');
+
+      function render(city) {
+        var filtered = city ? stores.filter(function(s){ return s.city === city; }) : stores;
+        if (!filtered.length) {
+          listEl.innerHTML = '<p style="text-align:center;color:var(--muted);padding:40px;">暂无门店数据</p>';
+          return;
+        }
+        listEl.innerHTML = filtered.map(function(s) {
+          var tags = (s.tags||[]).map(function(t){ return '<span class="store-tag">' + t + '</span>'; }).join('');
+          var status = s.status === 'open' ? '<span style="color:#48bb78;">营业中</span>' : '<span style="color:#f56565;">暂停营业</span>';
+          return '<div class="store-item">' +
+            '<div class="store-map">[ 地图位置 ]</div>' +
+            '<div class="store-info">' +
+            '<h3>' + s.name + '</h3>' +
+            '<p>📍 ' + s.address + '</p>' +
+            '<p>🕐 营业时间: ' + (s.hours||'10:00-22:00') + '</p>' +
+            '<p>📞 ' + (s.phone||'暂无') + '</p>' +
+            '<div class="store-tags">' + tags + '</div>' +
+            '<div class="store-tags" style="margin-top:8px;">' + status + '</div>' +
+            '<div class="store-actions">' +
+            '<a href="#" class="btn btn-primary btn-sm">导航到店</a>' +
+            '<a href="#" class="btn btn-secondary btn-sm">预约体验</a>' +
+            '</div></div></div>';
+        }).join('');
+      }
+
+      filterEl.addEventListener('click', function(e) {
+        if (e.target.classList.contains('filter-btn')) {
+          filterEl.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.remove('active'); });
+          e.target.classList.add('active');
+          render(e.target.dataset.city);
+        }
+      });
+
+      render('');
+    })();
+  </script>
+</body>
+</html>

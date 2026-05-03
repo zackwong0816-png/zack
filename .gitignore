@@ -1,0 +1,9 @@
+_tmp_upload/
+.vite/
+blob_list*.json
+last_tree_sha.txt
+*.log
+node_modules/
+dist/
+.DS_Store
+.env

@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>页面管理 · NOVA CMS</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #0a0a0a;
+      --surface: #141414;
+      --surface2: #1c1c1c;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --muted: #666;
+      --accent: #e07b39;
+      --accent2: #38b2ac;
+      --green: #48bb78;
+      --red: #f56565;
+      --yellow: #ecc94b;
+      --sidebar-w: 220px;
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    .admin-layout { display: flex; min-height: 100vh; }
+
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    .sidebar-logo { padding: 20px; border-bottom: 1px solid var(--border); }
+    .sidebar-logo h1 { font-size: 20px; color: #fff; letter-spacing: 3px; }
+    .sidebar-logo span { font-size: 10px; color: var(--muted); letter-spacing: 1px; }
+
+    .sidebar-nav { flex: 1; padding: 12px 0; }
+    .nav-group { margin-bottom: 8px; }
+    .nav-group-title { padding: 8px 20px; font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 20px;
+      color: #999;
+      text-decoration: none;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.15s;
+      border-left: 3px solid transparent;
+    }
+    .nav-item:hover { background: var(--surface2); color: var(--text); }
+    .nav-item.active { background: var(--surface2); color: var(--accent); border-left-color: var(--accent); }
+    .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+    .nav-badge { margin-left: auto; background: var(--accent); color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 10px; }
+
+    .main { flex: 1; margin-left: var(--sidebar-w); }
+    .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+    .topbar-left { display: flex; align-items: center; gap: 16px; }
+    .topbar h2 { font-size: 15px; font-weight: 500; }
+    .breadcrumb { color: var(--muted); font-size: 13px; }
+    .breadcrumb span { color: var(--accent); }
+    .topbar-right { display: flex; align-items: center; gap: 16px; }
+    .topbar-btn { background: none; border: 1px solid var(--border); color: #999; padding: 8px 14px; border-radius: 6px; font-size: 12px; cursor: pointer; }
+    .topbar-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .admin-avatar { width: 36px; height: 36px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; cursor: pointer; }
+
+    .content { padding: 24px; }
+
+    .panel { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); margin-bottom: 24px; }
+    .panel-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .panel-title { font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+    .panel-body { padding: 20px; }
+
+    .btn { display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; border: none; text-decoration: none; }
+    .btn-sm { padding: 4px 8px; font-size: 11px; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-ghost { background: transparent; color: #999; border: 1px solid var(--border); }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-danger { background: rgba(245,101,101,0.15); color: var(--red); }
+    .btn-success { background: rgba(72,187,120,0.15); color: var(--green); }
+
+    .page-grid { display: grid; grid-template-columns: 280px 1fr; gap: 24px; min-height: calc(100vh - 140px); }
+    .page-list { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
+    .page-list-header { padding: 16px; border-bottom: 1px solid var(--border); font-size: 13px; font-weight: 500; }
+    .page-list-item { padding: 14px 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: all 0.15s; }
+    .page-list-item:last-child { border-bottom: none; }
+    .page-list-item:hover { background: var(--surface2); }
+    .page-list-item.active { background: var(--surface2); border-left: 3px solid var(--accent); }
+    .page-list-item h4 { font-size: 13px; margin-bottom: 4px; }
+    .page-list-item p { font-size: 11px; color: var(--muted); }
+
+    .editor-area { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); }
+    .editor-toolbar { padding: 12px 20px; border-bottom: 1px solid var(--border); display: flex; gap: 8px; align-items: center; }
+    .editor-toolbar .toolbar-divider { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
+    .editor-toolbar button { padding: 6px 10px; background: none; border: 1px solid transparent; color: #999; border-radius: 4px; cursor: pointer; font-size: 13px; }
+    .editor-toolbar button:hover { background: var(--surface2); color: var(--text); }
+    .editor-toolbar button.active { background: var(--accent); color: #fff; }
+    .editor-toolbar .page-title-input { flex: 1; background: none; border: none; color: var(--text); font-size: 14px; font-weight: 500; outline: none; padding: 4px 8px; border-radius: 4px; }
+    .editor-toolbar .page-title-input:focus { background: var(--surface2); }
+
+    .editor-preview { padding: 24px; min-height: 400px; background: var(--bg); }
+
+    .section-block { background: #fff; border: 2px solid transparent; border-radius: 8px; margin-bottom: 16px; position: relative; transition: all 0.15s; }
+    .section-block:hover { border-color: var(--accent); }
+    .section-block.selected { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(224,123,57,0.2); }
+    .section-block-header { position: absolute; top: -1px; right: -1px; display: flex; gap: 4px; opacity: 0; transition: opacity 0.15s; z-index: 10; }
+    .section-block:hover .section-block-header { opacity: 1; }
+    .section-block-header button { padding: 4px 8px; background: var(--accent); color: #fff; border: none; border-radius: 0 6px 0 4px; font-size: 11px; cursor: pointer; }
+    .section-block-header button.delete { background: var(--red); }
+
+    .preview-placeholder { background: #f5f5f5; border-radius: 8px; padding: 40px; text-align: center; color: #999; font-size: 13px; }
+    .preview-banner { height: 200px; background: linear-gradient(135deg, #c96442, #e07a5f); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; font-weight: 600; }
+    .preview-hero { padding: 40px; background: white; border-radius: 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+    .preview-hero-text h2 { font-size: 28px; color: #1a1916; margin-bottom: 12px; }
+    .preview-hero-text p { color: #6b6964; margin-bottom: 20px; }
+    .preview-hero-img { aspect-ratio: 1; background: #f0f0f0; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #ccc; font-size: 12px; }
+    .preview-products { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .preview-product-card { background: white; border-radius: 8px; overflow: hidden; }
+    .preview-product-img { aspect-ratio: 1; background: #f5f5f5; display: flex; align-items: center; justify-content: center; color: #ccc; font-size: 11px; }
+    .preview-product-info { padding: 12px; }
+    .preview-product-info h4 { font-size: 13px; color: #1a1916; margin-bottom: 4px; }
+    .preview-product-info p { font-size: 12px; color: #c96442; }
+
+    .status { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 11px; }
+    .status-success { background: rgba(72,187,120,0.15); color: var(--green); }
+    .status-warning { background: rgba(236,201,75,0.15); color: var(--yellow); }
+    .status-error { background: rgba(245,101,101,0.15); color: var(--red); }
+    .status-info { background: rgba(56,178,172,0.15); color: var(--accent2); }
+
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+    .modal { background: var(--surface); border-radius: 12px; padding: 28px; width: 500px; max-width: 90%; border: 1px solid var(--border); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .modal-title { font-size: 16px; font-weight: 500; }
+    .modal-close { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; cursor: pointer; color: var(--muted); font-size: 18px; }
+    .modal-close:hover { background: var(--surface2); }
+    .modal-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
+
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+    .form-input, .form-select, .form-textarea { width: 100%; padding: 10px 14px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 13px; }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { outline: none; border-color: var(--accent); }
+    .form-textarea { min-height: 80px; resize: vertical; }
+    .form-select { appearance: none; cursor: pointer; }
+
+    .flex { display: flex; }
+    .flex-1 { flex: 1; }
+    .items-center { align-items: center; }
+    .gap-8 { gap: 8px; }
+    .gap-16 { gap: 16px; }
+    .mb-16 { margin-bottom: 16px; }
+    .mb-24 { margin-bottom: 24px; }
+    .text-muted { color: var(--muted); }
+    .text-sm { font-size: 12px; }
+    .text-xs { font-size: 11px; }
+    .hidden { display: none !important; }
+
+    .toast { position: fixed; bottom: 24px; right: 24px; background: var(--text); color: var(--bg); padding: 14px 20px; border-radius: 8px; font-size: 13px; z-index: 2000; animation: slideIn 0.3s ease; }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+  </style>
+</head>
+<body>
+  <div class="admin-layout">
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <h1>NOVA</h1>
+        <span>CMS ADMIN</span>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-group">
+          <div class="nav-group-title">主面板</div>
+          <a class="nav-item" href="index.html">
+            <span class="nav-icon">📊</span> 工作台
+          </a>
+          <a class="nav-item" href="analytics.html">
+            <span class="nav-icon">📈</span> 数据统计
+          </a>
+        </div>
+        <div class="nav-group">
+          <div class="nav-group-title">内容管理</div>
+          <a class="nav-item active" href="pages.html">
+            <span class="nav-icon">📄</span> 页面管理
+          </a>
+          <a class="nav-item" href="media.html">
+            <span class="nav-icon">🖼️</span> 素材中心
+          </a>
+          <a class="nav-item" href="content.html">
+            <span class="nav-icon">📝</span> 内容管理
+          </a>
+          <a class="nav-item" href="messages.html">
+            <span class="nav-icon">💬</span> 留言管理
+          </a>
+        </div>
+        <div class="nav-group">
+          <div class="nav-group-title">商品管理</div>
+          <a class="nav-item" href="products.html">
+            <span class="nav-icon">📦</span> 产品管理
+          </a>
+          <a class="nav-item" href="categories.html">
+            <span class="nav-icon">🏷️</span> 分类管理
+          </a>
+          <a class="nav-item" href="inventory.html">
+            <span class="nav-icon">📋</span> 库存管理
+          </a>
+        </div>
+        <div class="nav-group">
+          <div class="nav-group-title">用户与订单</div>
+          <a class="nav-item" href="members.html">
+            <span class="nav-icon">👥</span> 会员管理
+          </a>
+          <a class="nav-item" href="orders.html">
+            <span class="nav-icon">🛒</span> 订单管理
+          </a>
+          <a class="nav-item" href="stores.html">
+            <span class="nav-icon">🏪</span> 门店管理
+          </a>
+        </div>
+        <div class="nav-group">
+          <div class="nav-group-title">营销工具</div>
+          <a class="nav-item" href="coupon.html">
+            <span class="nav-icon">🎫</span> 优惠券
+          </a>
+          <a class="nav-item" href="promo.html">
+            <span class="nav-icon">🔥</span> 促销活动
+          </a>
+        </div>
+        <div class="nav-group">
+          <div class="nav-group-title">系统</div>
+          <a class="nav-item" href="settings.html">
+            <span class="nav-icon">⚙️</span> 设置
+          </a>
+          <a class="nav-item" href="login.html">
+            <span class="nav-icon">🚪</span> 退出
+          </a>
+        </div>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-left">
+          <h2>NOVA 管理后台</h2>
+          <span class="breadcrumb">/ 内容管理 / 页面管理</span>
+        </div>
+        <div class="topbar-right">
+          <button class="topbar-btn" onclick="previewPage()">👁️ 预览</button>
+          <button class="topbar-btn btn-primary" onclick="savePage()">💾 保存</button>
+          <div class="admin-avatar" title="管理员">管</div>
+        </div>
+      </header>
+
+      <div class="content">
+        <div class="page-grid">
+          <div class="page-list">
+            <div class="page-list-header flex items-center justify-between">
+              <span>页面列表</span>
+              <button class="btn btn-primary btn-sm" onclick="openNewPageModal()">+ 新建</button>
+            </div>
+            <div id="page-list-items"></div>
+          </div>
+
+          <div class="editor-area">
+            <div class="editor-toolbar">
+              <span style="color:var(--muted);font-size:12px;">🏷️</span>
+              <input type="text" class="page-title-input" id="page-title" value="首页" placeholder="输入页面标题">
+              <div class="toolbar-divider"></div>
+              <button onclick="addSection('banner')">🖼️ 横幅</button>
+              <button onclick="addSection('hero')">📌 焦点区</button>
+              <button onclick="addSection('products')">📦 产品区</button>
+              <button onclick="addSection('text')">📝 文本区</button>
+              <button onclick="addSection('divider')">➖ 分隔线</button>
+              <div class="toolbar-divider"></div>
+              <select class="form-select" style="width:auto;padding:6px 10px;font-size:12px;" id="page-status">
+                <option value="published">已发布</option>
+                <option value="draft">草稿</option>
+              </select>
+            </div>
+            <div class="editor-preview" id="editor-preview">
+              <div class="preview-placeholder">从左侧选择一个页面开始编辑，或添加新的页面区块</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="modal-overlay hidden" id="new-page-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title">创建新页面</span>
+        <div class="modal-close" onclick="closeNewPageModal()">×</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">页面名称</label>
+        <input type="text" class="form-input" id="new-page-name" placeholder="例如：关于我们">
+      </div>
+      <div class="form-group">
+        <label class="form-label">页面路径</label>
+        <input type="text" class="form-input" id="new-page-path" placeholder="例如：about.html">
+      </div>
+      <div class="form-group">
+        <label class="form-label">页面模板</label>
+        <select class="form-select" id="new-page-template">
+          <option value="default">默认模板</option>
+          <option value="landing">落地页</option>
+          <option value="list">列表页</option>
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeNewPageModal()">取消</button>
+        <button class="btn btn-primary" onclick="createPage()">创建</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    if (!sessionStorage.getItem('nova_admin')) { location.href = 'login.html'; }
+
+    const PAGES_KEY = 'nova_pages';
+    let currentPageId = null;
+    let pages = JSON.parse(localStorage.getItem(PAGES_KEY) || 'null') || [
+      { id: 'home', name: '首页', path: 'index.html', status: 'published', sections: [] },
+      { id: 'products', name: '产品列表', path: 'products.html', status: 'published', sections: [] },
+      { id: 'about', name: '品牌故事', path: 'about.html', status: 'published', sections: [] },
+      { id: 'content', name: '内容中心', path: 'content.html', status: 'draft', sections: [] },
+      { id: 'stores', name: '门店查询', path: 'stores.html', status: 'published', sections: [] },
+    ];
+    save();
+
+    function save() { localStorage.setItem(PAGES_KEY, JSON.stringify(pages)); }
+
+    function toast(msg) {
+      const t = document.createElement('div');
+      t.className = 'toast';
+      t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(() => { t.style.animation = 'slideIn 0.3s ease reverse'; setTimeout(() => t.remove(), 300); }, 2500);
+    }
+
+    function renderPageList() {
+      const container = document.getElementById('page-list-items');
+      container.innerHTML = pages.map(p => {
+        const statusMap = { published: ['已发布', 'status-success'], draft: ['草稿', 'status-warning'] };
+        const [label, cls] = statusMap[p.status] || statusMap.draft;
+        return `<div class="page-list-item${p.id === currentPageId ? ' active' : ''}" onclick="selectPage('${p.id}')">
+          <h4>${p.name}</h4>
+          <p>${p.path} · <span class="status ${cls}">${label}</span></p>
+        </div>`;
+      }).join('');
+    }
+
+    function selectPage(id) {
+      currentPageId = id;
+      const page = pages.find(p => p.id === id);
+      if (page) {
+        document.getElementById('page-title').value = page.name;
+        document.getElementById('page-status').value = page.status;
+        renderPreview(page);
+      }
+      renderPageList();
+    }
+
+    function renderPreview(page) {
+      const preview = document.getElementById('editor-preview');
+      if (!page || !page.sections || page.sections.length === 0) {
+        preview.innerHTML = '<div class="preview-placeholder">点击上方工具栏按钮添加区块，或从左侧选择已有页面</div>';
+        return;
+      }
+      preview.innerHTML = page.sections.map((s, i) => renderSection(s, i)).join('');
+    }
+
+    function renderSection(section, index) {
+      let inner = '';
+      switch (section.type) {
+        case 'banner':
+          inner = `<div class="preview-banner">${section.content || '横幅图片区域'}</div>`;
+          break;
+        case 'hero':
+          inner = `<div class="preview-hero">
+            <div class="preview-hero-text">
+              <h2>${section.content?.title || '标题文字'}</h2>
+              <p>${section.content?.desc || '描述文字区域'}</p>
+              <button style="padding:10px 20px;background:#c96442;color:#fff;border:none;border-radius:6px;cursor:pointer;">查看详情</button>
+            </div>
+            <div class="preview-hero-img">${section.content?.img || '[图片]'}</div>
+          </div>`;
+          break;
+        case 'products':
+          const items = section.content?.items || ['产品A', '产品B', '产品C', '产品D'];
+          inner = `<div class="preview-products">${items.map(item => `<div class="preview-product-card">
+            <div class="preview-product-img">[产品图]</div>
+            <div class="preview-product-info"><h4>${item}</h4><p>¥128</p></div>
+          </div>`).join('')}</div>`;
+          break;
+        case 'text':
+          inner = `<div style="background:#fff;padding:32px;border-radius:8px;text-align:center;">
+            <h3 style="color:#1a1916;margin-bottom:12px;">${section.content?.title || '文本标题'}</h3>
+            <p style="color:#6b6964;line-height:1.8;">${section.content?.body || '文本内容区域'}</p>
+          </div>`;
+          break;
+        case 'divider':
+          inner = `<div style="padding:16px 0;text-align:center;color:#e8e5df;">━━━</div>`;
+          break;
+        default:
+          inner = `<div class="preview-placeholder">[ 未定义区块 ]</div>`;
+      }
+
+      return `<div class="section-block" data-index="${index}" onclick="event.stopPropagation(); selectBlock(${index})">
+        <div class="section-block-header">
+          <button onclick="event.stopPropagation(); editBlock(${index})">✏️ 编辑</button>
+          <button class="delete" onclick="event.stopPropagation(); deleteBlock(${index})">🗑️ 删除</button>
+        </div>
+        ${inner}
+      </div>`;
+    }
+
+    function addSection(type) {
+      if (!currentPageId) { toast('请先选择或创建一个页面'); return; }
+      const page = pages.find(p => p.id === currentPageId);
+      if (!page) return;
+      const section = { type, content: {} };
+      if (type === 'hero') section.content = { title: '添加你的标题', desc: '添加描述文字', img: '[图片]' };
+      if (type === 'text') section.content = { title: '添加标题', body: '添加正文内容' };
+      if (type === 'banner') section.content = '点击编辑横幅内容';
+      page.sections.push(section);
+      save();
+      renderPreview(page);
+      renderPageList();
+      toast('已添加 ' + type + ' 区块');
+    }
+
+    function selectBlock(index) {
+      document.querySelectorAll('.section-block').forEach((el, i) => {
+        el.classList.toggle('selected', i === index);
+      });
+    }
+
+    function deleteBlock(index) {
+      const page = pages.find(p => p.id === currentPageId);
+      if (page) {
+        page.sections.splice(index, 1);
+        save();
+        renderPreview(page);
+        toast('区块已删除');
+      }
+    }
+
+    function editBlock(index) {
+      const page = pages.find(p => p.id === currentPageId);
+      if (!page) return;
+      const section = page.sections[index];
+      const content = section.content || {};
+
+      if (section.type === 'hero' || section.type === 'text') {
+        const title = prompt('标题:', content.title || '');
+        const body = section.type === 'hero'
+          ? prompt('描述:', content.desc || '')
+          : prompt('正文:', content.body || '');
+        if (title !== null) {
+          if (section.type === 'hero') {
+            content.title = title; content.desc = body;
+          } else {
+            content.title = title; content.body = body;
+          }
+          section.content = content;
+          save();
+          renderPreview(page);
+        }
+      } else if (section.type === 'banner') {
+        const text = prompt('横幅文字:', content || '');
+        if (text !== null) {
+          section.content = text;
+          save();
+          renderPreview(page);
+        }
+      }
+    }
+
+    function savePage() {
+      const page = pages.find(p => p.id === currentPageId);
+      if (page) {
+        page.name = document.getElementById('page-title').value;
+        page.status = document.getElementById('page-status').value;
+        save();
+        renderPageList();
+        toast('页面已保存！');
+      }
+    }
+
+    function previewPage() {
+      toast('预览功能：在新窗口打开页面');
+    }
+
+    function openNewPageModal() {
+      document.getElementById('new-page-modal').classList.remove('hidden');
+    }
+
+    function closeNewPageModal() {
+      document.getElementById('new-page-modal').classList.add('hidden');
+    }
+
+    function createPage() {
+      const name = document.getElementById('new-page-name').value.trim();
+      const path = document.getElementById('new-page-path').value.trim();
+      const template = document.getElementById('new-page-template').value;
+      if (!name || !path) { toast('请填写页面名称和路径'); return; }
+      const id = 'page_' + Date.now();
+      pages.push({ id, name, path, status: 'draft', sections: [], template });
+      save();
+      closeNewPageModal();
+      renderPageList();
+      selectPage(id);
+      toast('页面已创建！');
+    }
+
+    // Init
+    renderPageList();
+    if (pages.length > 0) selectPage(pages[0].id);
+
+    document.querySelector('.admin-avatar').addEventListener('click', function() {
+      if (confirm('确定要退出登录吗？')) location.href = 'login.html';
+    });
+  </script>
+</body>
+</html>

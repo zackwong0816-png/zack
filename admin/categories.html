@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>分类管理 · NOVA CMS</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root { --bg: #0a0a0a; --surface: #141414; --surface2: #1c1c1c; --border: #2a2a2a; --text: #e0e0e0; --muted: #666; --accent: #e07b39; --green: #48bb78; --red: #f56565; --sidebar-w: 220px; }
+    body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    .admin-layout { display: flex; min-height: 100vh; }
+    .sidebar { width: var(--sidebar-w); background: var(--surface); border-right: 1px solid var(--border); position: fixed; height: 100vh; overflow-y: auto; display: flex; flex-direction: column; }
+    .sidebar-logo { padding: 20px; border-bottom: 1px solid var(--border); }
+    .sidebar-logo h1 { font-size: 20px; color: #fff; letter-spacing: 3px; }
+    .sidebar-logo span { font-size: 10px; color: var(--muted); }
+    .sidebar-nav { flex: 1; padding: 12px 0; }
+    .nav-group { margin-bottom: 8px; }
+    .nav-group-title { padding: 8px 20px; font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 20px; color: #999; font-size: 13px; cursor: pointer; border-left: 3px solid transparent; transition: all 0.15s; }
+    .nav-item:hover { background: var(--surface2); color: var(--text); }
+    .nav-item.active { background: var(--surface2); color: var(--accent); border-left-color: var(--accent); }
+    .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+    .main { flex: 1; margin-left: var(--sidebar-w); }
+    .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; height: 60px; display: flex; align-items: center; justify-content: space-between; }
+    .topbar-left { display: flex; align-items: center; gap: 16px; }
+    .topbar h2 { font-size: 15px; }
+    .breadcrumb { color: var(--muted); font-size: 13px; }
+    .admin-avatar { width: 36px; height: 36px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; cursor: pointer; }
+    .content { padding: 24px; }
+    .panel { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); margin-bottom: 24px; }
+    .panel-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .panel-title { font-size: 14px; font-weight: 500; }
+    .panel-body { padding: 20px; }
+    .btn { display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; border: none; }
+    .btn-sm { padding: 4px 8px; font-size: 11px; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-ghost { background: transparent; color: #999; border: 1px solid var(--border); }
+    .btn-danger { background: rgba(245,101,101,0.15); color: var(--red); }
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+    .form-input { width: 100%; padding: 10px 14px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 13px; max-width: 400px; }
+    .form-input:focus { outline: none; border-color: var(--accent); }
+    .cat-list { }
+    .cat-item { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--border); }
+    .cat-item:last-child { border-bottom: none; }
+    .cat-info { display: flex; align-items: center; gap: 12px; }
+    .cat-icon { width: 36px; height: 36px; background: var(--surface2); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+    .cat-name { font-size: 14px; font-weight: 500; }
+    .cat-slug { font-size: 11px; color: var(--muted); }
+    .cat-count { font-size: 12px; color: var(--muted); }
+    .cat-actions { display: flex; gap: 8px; }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+    .modal { background: var(--surface); border-radius: 12px; padding: 28px; width: 450px; max-width: 90%; border: 1px solid var(--border); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .modal-title { font-size: 16px; font-weight: 500; }
+    .modal-close { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; cursor: pointer; color: var(--muted); }
+    .modal-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
+    .hidden { display: none !important; }
+    .toast { position: fixed; bottom: 24px; right: 24px; background: var(--text); color: var(--bg); padding: 14px 20px; border-radius: 8px; font-size: 13px; z-index: 2000; animation: slideIn 0.3s ease; }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+  </style>
+</head>
+<body>
+  <div class="admin-layout">
+    <aside class="sidebar">
+      <div class="sidebar-logo"><h1>NOVA</h1><span>CMS ADMIN</span></div>
+      <nav class="sidebar-nav">
+        <div class="nav-group"><div class="nav-group-title">主面板</div>
+          <a class="nav-item" href="index.html"><span class="nav-icon">📊</span> 工作台</a>
+          <a class="nav-item" href="analytics.html"><span class="nav-icon">📈</span> 数据统计</a>
+        </div>
+        <div class="nav-group"><div class="nav-group-title">内容管理</div>
+          <a class="nav-item" href="pages.html"><span class="nav-icon">📄</span> 页面管理</a>
+          <a class="nav-item" href="media.html"><span class="nav-icon">🖼️</span> 素材中心</a>
+          <a class="nav-item" href="content.html"><span class="nav-icon">📝</span> 内容管理</a>
+          <a class="nav-item" href="messages.html"><span class="nav-icon">💬</span> 留言管理</a>
+        </div>
+        <div class="nav-group"><div class="nav-group-title">商品管理</div>
+          <a class="nav-item" href="products.html"><span class="nav-icon">📦</span> 产品管理</a>
+          <a class="nav-item active" href="categories.html"><span class="nav-icon">🏷️</span> 分类管理</a>
+          <a class="nav-item" href="inventory.html"><span class="nav-icon">📋</span> 库存管理</a>
+        </div>
+        <div class="nav-group"><div class="nav-group-title">用户与订单</div>
+          <a class="nav-item" href="members.html"><span class="nav-icon">👥</span> 会员管理</a>
+          <a class="nav-item" href="orders.html"><span class="nav-icon">🛒</span> 订单管理</a>
+          <a class="nav-item" href="stores.html"><span class="nav-icon">🏪</span> 门店管理</a>
+        </div>
+        <div class="nav-group"><div class="nav-group-title">营销工具</div>
+          <a class="nav-item" href="coupon.html"><span class="nav-icon">🎫</span> 优惠券</a>
+          <a class="nav-item" href="promo.html"><span class="nav-icon">🔥</span> 促销活动</a>
+        </div>
+        <div class="nav-group"><div class="nav-group-title">系统</div>
+          <a class="nav-item" href="settings.html"><span class="nav-icon">⚙️</span> 设置</a>
+          <a class="nav-item" href="login.html"><span class="nav-icon">🚪</span> 退出</a>
+        </div>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-left"><h2>NOVA 管理后台</h2><span class="breadcrumb">/ 商品管理 / 分类管理</span></div>
+        <div class="topbar-right">
+          <button class="btn btn-primary" onclick="openModal()">+ 添加分类</button>
+          <div class="admin-avatar">管</div>
+        </div>
+      </header>
+      <div class="content">
+        <div class="panel">
+          <div class="panel-header"><span class="panel-title">🏷️ 产品分类</span></div>
+          <div class="panel-body">
+            <div class="cat-list" id="cat-list"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="modal-overlay hidden" id="cat-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title" id="modal-title">添加分类</span>
+        <div class="modal-close" onclick="closeModal()">×</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">分类名称 *</label>
+        <input type="text" class="form-input" id="cat-name" placeholder="例如：家居">
+      </div>
+      <div class="form-group">
+        <label class="form-label">分类图标</label>
+        <input type="text" class="form-input" id="cat-icon" placeholder="🛋️ (输入emoji)">
+      </div>
+      <div class="form-group">
+        <label class="form-label">分类描述</label>
+        <input type="text" class="form-input" id="cat-desc" placeholder="简短描述">
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal()">取消</button>
+        <button class="btn btn-primary" onclick="saveCat()">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    if (!sessionStorage.getItem('nova_admin')) location.href = 'login.html';
+    const CATS_KEY = 'nova_categories';
+    let cats = JSON.parse(localStorage.getItem(CATS_KEY) || 'null') || [
+      { id: 'c1', name: '家居', icon: '🛋️', slug: 'home', desc: '家居装饰品', count: 12 },
+      { id: 'c2', name: '家具', icon: '🪑', slug: 'furniture', desc: '桌椅柜等', count: 8 },
+      { id: 'c3', name: '家电', icon: '💡', slug: 'appliance', desc: '小家电', count: 5 },
+      { id: 'c4', name: '餐厨', icon: '🍽️', slug: 'kitchen', desc: '餐具和厨房用品', count: 15 },
+      { id: 'c5', name: '灯具', icon: '💡', slug: 'lighting', desc: '各类灯具', count: 6 },
+    ];
+    let editingId = null;
+    save();
+
+    function save() { localStorage.setItem(CATS_KEY, JSON.stringify(cats)); }
+    function toast(msg) { const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; document.body.appendChild(t); setTimeout(() => { t.style.animation = 'slideIn 0.3s ease reverse'; setTimeout(() => t.remove(), 300); }, 2500); }
+
+    function render() {
+      document.getElementById('cat-list').innerHTML = cats.map(c => `
+        <div class="cat-item">
+          <div class="cat-info">
+            <div class="cat-icon">${c.icon}</div>
+            <div>
+              <div class="cat-name">${c.name}</div>
+              <div class="cat-slug">/${c.slug}/ · ${c.desc || '无描述'}</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:16px;">
+            <span class="cat-count">${c.count} 个产品</span>
+            <div class="cat-actions">
+              <button class="btn btn-ghost btn-sm" onclick="editCat('${c.id}')">编辑</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteCat('${c.id}')">删除</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openModal(id) {
+      editingId = id;
+      document.getElementById('modal-title').textContent = id ? '编辑分类' : '添加分类';
+      if (id) { const c = cats.find(x => x.id === id); if (c) { document.getElementById('cat-name').value = c.name; document.getElementById('cat-icon').value = c.icon; document.getElementById('cat-desc').value = c.desc || ''; } }
+      else { ['cat-name','cat-icon','cat-desc'].forEach(id => document.getElementById(id).value = ''); }
+      document.getElementById('cat-modal').classList.remove('hidden');
+    }
+    function editCat(id) { openModal(id); }
+    function closeModal() { document.getElementById('cat-modal').classList.add('hidden'); editingId = null; }
+    function saveCat() {
+      const name = document.getElementById('cat-name').value.trim();
+      if (!name) { toast('请填写分类名称'); return; }
+      const data = { name, icon: document.getElementById('cat-icon').value || '📦', desc: document.getElementById('cat-desc').value, slug: name.toLowerCase() };
+      if (editingId) { const idx = cats.findIndex(x => x.id === editingId); if (idx > -1) cats[idx] = { ...cats[idx], ...data }; }
+      else { data.id = 'c_' + Date.now(); data.count = 0; cats.push(data); }
+      save(); closeModal(); render(); toast(editingId ? '分类已更新' : '分类已添加');
+    }
+    function deleteCat(id) { if (!confirm('确定删除？')) return; cats = cats.filter(x => x.id !== id); save(); render(); toast('分类已删除'); }
+    document.querySelector('.admin-avatar').addEventListener('click', function() { if (confirm('确定要退出登录吗？')) location.href = 'login.html'; });
+    render();
+  </script>
+</body>
+</html>

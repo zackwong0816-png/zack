@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>留言管理 · NOVA CMS</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root { --bg: #0a0a0a; --surface: #141414; --surface2: #1c1c1c; --border: #2a2a2a; --text: #e0e0e0; --muted: #666; --accent: #e07b39; --green: #48bb78; --red: #f56565; --yellow: #ecc94b; --sidebar-w: 220px; }
+    body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    .admin-layout { display: flex; min-height: 100vh; }
+    .sidebar { width: var(--sidebar-w); background: var(--surface); border-right: 1px solid var(--border); position: fixed; height: 100vh; overflow-y: auto; display: flex; flex-direction: column; }
+    .sidebar-logo { padding: 20px; border-bottom: 1px solid var(--border); }
+    .sidebar-logo h1 { font-size: 20px; color: #fff; letter-spacing: 3px; }
+    .sidebar-logo span { font-size: 10px; color: var(--muted); }
+    .sidebar-nav { flex: 1; padding: 12px 0; }
+    .nav-group { margin-bottom: 8px; }
+    .nav-group-title { padding: 8px 20px; font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 20px; color: #999; font-size: 13px; cursor: pointer; border-left: 3px solid transparent; transition: all 0.15s; text-decoration: none; }
+    .nav-item:hover { background: var(--surface2); color: var(--text); }
+    .nav-item.active { background: var(--surface2); color: var(--accent); border-left-color: var(--accent); }
+    .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+    .main { flex: 1; margin-left: var(--sidebar-w); }
+    .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; height: 60px; display: flex; align-items: center; justify-content: space-between; }
+    .topbar h2 { font-size: 15px; }
+    .breadcrumb { color: var(--muted); font-size: 13px; }
+    .admin-avatar { width: 36px; height: 36px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; cursor: pointer; }
+    .content { padding: 24px; }
+    .panel { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); margin-bottom: 24px; }
+    .panel-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .panel-title { font-size: 14px; font-weight: 500; }
+    .panel-body { padding: 20px; }
+    .btn { display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; border: none; }
+    .btn-sm { padding: 4px 8px; font-size: 11px; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-ghost { background: transparent; color: #999; border: 1px solid var(--border); }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+    .search-bar { display: flex; gap: 12px; margin-bottom: 20px; }
+    .search-bar input { flex: 1; padding: 10px 14px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px; }
+    .search-bar input:focus { outline: none; border-color: var(--accent); }
+    .filter-tabs { display: flex; gap: 4px; }
+    .filter-btn { padding: 6px 14px; border-radius: 6px; font-size: 12px; cursor: pointer; background: transparent; color: var(--muted); border: 1px solid var(--border); }
+    .filter-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); font-size: 13px; }
+    th { color: var(--muted); font-weight: 400; font-size: 12px; }
+    tr:hover { background: var(--surface2); }
+    .status { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 999px; font-size: 11px; }
+    .status-new { background: rgba(224,123,57,0.15); color: var(--accent); }
+    .status-replied { background: rgba(72,187,120,0.15); color: var(--green); }
+    .status-closed { background: rgba(102,102,102,0.15); color: var(--muted); }
+    .action-btns { display: flex; gap: 6px; }
+    .action-btn { padding: 4px 10px; border-radius: 4px; font-size: 11px; cursor: pointer; border: 1px solid var(--border); background: transparent; color: var(--muted); }
+    .action-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; }
+    .modal-overlay.active { display: flex; }
+    .modal { background: var(--surface); border-radius: 16px; width: 100%; max-width: 560px; max-height: 80vh; overflow-y: auto; border: 1px solid var(--border); }
+    .modal-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .modal-header h3 { font-size: 16px; }
+    .modal-close { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--muted); font-size: 20px; }
+    .modal-body { padding: 24px; }
+    .modal-field { margin-bottom: 16px; }
+    .modal-field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+    .modal-field .value { font-size: 14px; }
+    .modal-field textarea { width: 100%; padding: 10px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px; resize: vertical; min-height: 80px; }
+    .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
+    .toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px 20px; font-size: 13px; z-index: 2000; animation: slideIn 0.3s ease; }
+    @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+  <div class="admin-layout">
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <h1>NOVA</h1>
+        <span>CONTENT MANAGEMENT SYSTEM</span>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-group"><div class="nav-group-title">主面板</div>
+          <a class="nav-item" href="index.html"><span class="nav-icon">📊</span> 工作台</a>
+          <a class="nav-item" href="analytics.html"><span class="nav-icon">📈</span> 数据统计</a>
+        </div>
+        <div class="nav-group"><div class="nav-group-title">内容管理</div>
+          <a class="nav-item" href="pages.html"><span class="nav-icon">📄</span> 页面管理</a>
+          <a class="nav-item" href="media.html"><span class="nav-icon">🖼️</span> 素材中心</a>
+          <a class="nav-item" href="content.html"><span class="nav-icon">📝</span> 内容管理</a>
+          <a class="nav-item active" href="messages.html"><span class="nav-icon">💬</span> 留言管理</a>
+        </div>
+        <div class="nav-group"><div class="nav-group-title">商品管理</div>
+          <a class="nav-item" href="products.html"><span class="nav-icon">📦</span> 产品管理</a>
+          <a class="nav-item" href="categories.html"><span class="nav-icon">🏷️</span> 分类管理</a>
+          <a class="nav-item" href="inventory.html"><span class="nav-icon">📋</span> 库存管理</a>
+        </div>
+        <div class="nav-group"><div class="nav-group-title">用户与订单</div>
+          <a class="nav-item" href="members.html"><span class="nav-icon">👥</span> 会员管理</a>
+          <a class="nav-item" href="orders.html"><span class="nav-icon">🛒</span> 订单管理</a>
+          <a class="nav-item" href="stores.html"><span class="nav-icon">🏪</span> 门店管理</a>
+        </div>
+        <div class="nav-group"><div class="nav-group-title">营销工具</div>
+          <a class="nav-item" href="coupon.html"><span class="nav-icon">🎫</span> 优惠券</a>
+          <a class="nav-item" href="promo.html"><span class="nav-icon">🔥</span> 促销活动</a>
+        </div>
+        <div class="nav-group"><div class="nav-group-title">系统</div>
+          <a class="nav-item" href="settings.html"><span class="nav-icon">⚙️</span> 设置</a>
+          <a class="nav-item" href="login.html"><span class="nav-icon">🚪</span> 退出</a>
+        </div>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-left"><h2>NOVA 管理后台</h2><span class="breadcrumb">/ 用户与订单 / 留言管理</span></div>
+        <div class="admin-avatar">管</div>
+      </header>
+
+      <div class="content">
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">💬 用户留言列表</span>
+            <span style="font-size:12px;color:var(--muted);" id="total-count"></span>
+          </div>
+          <div class="panel-body">
+            <div class="search-bar">
+              <input type="text" id="search-input" placeholder="搜索姓名、手机号或内容...">
+              <div class="filter-tabs">
+                <button class="filter-btn active" data-filter="all">全部</button>
+                <button class="filter-btn" data-filter="new">待处理</button>
+                <button class="filter-btn" data-filter="replied">已回复</button>
+                <button class="filter-btn" data-filter="closed">已关闭</button>
+              </div>
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>姓名</th>
+                  <th>联系方式</th>
+                  <th>类型</th>
+                  <th>内容</th>
+                  <th>状态</th>
+                  <th>时间</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="table-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>💬 留言详情</h3>
+        <span class="modal-close" onclick="closeModal()">×</span>
+      </div>
+      <div class="modal-body">
+        <div class="modal-field"><label>姓名</label><div class="value" id="m-name"></div></div>
+        <div class="modal-field"><label>手机号</label><div class="value" id="m-phone"></div></div>
+        <div class="modal-field"><label>邮箱</label><div class="value" id="m-email"></div></div>
+        <div class="modal-field"><label>咨询类型</label><div class="value" id="m-type"></div></div>
+        <div class="modal-field"><label>留言内容</label><div class="value" id="m-content" style="color:var(--text);line-height:1.6;"></div></div>
+        <div class="modal-field"><label>回复</label><textarea id="m-reply" placeholder="输入回复内容..."></textarea></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal()">关闭</button>
+        <button class="btn btn-primary" onclick="saveReply()">保存回复</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    if (!sessionStorage.getItem('nova_admin')) location.href = 'login.html';
+
+    var MSGS_KEY = 'nova_messages';
+    var msgs = JSON.parse(localStorage.getItem(MSGS_KEY) || 'null') || [];
+    var currentFilter = 'all';
+    var currentMsg = null;
+
+    function save() { localStorage.setItem(MSGS_KEY, JSON.stringify(msgs)); }
+
+    function toast(msg) {
+      var t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(function() { t.style.animation = 'slideIn 0.3s ease reverse'; setTimeout(function(){ t.remove(); }, 300); }, 2500);
+    }
+
+    function render() {
+      var search = document.getElementById('search-input').value.toLowerCase();
+      var filtered = msgs.filter(function(m) {
+        var matchFilter = currentFilter === 'all' || m.status === currentFilter;
+        var matchSearch = !search || m.name.toLowerCase().includes(search) || (m.phone||'').includes(search) || (m.content||'').toLowerCase().includes(search);
+        return matchFilter && matchSearch;
+      });
+
+      document.getElementById('total-count').textContent = '共 ' + msgs.length + ' 条，其中待处理 ' + msgs.filter(function(m){ return m.status==='new'; }).length + ' 条';
+      var tbody = document.getElementById('table-body');
+
+      if (!filtered.length) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:40px;">暂无留言</td></tr>';
+        return;
+      }
+
+      var statusMap = { new:['待处理','status-new'], replied:['已回复','status-replied'], closed:['已关闭','status-closed'] };
+      tbody.innerHTML = filtered.map(function(m) {
+        var [label, cls] = statusMap[m.status] || ['未知','status-closed'];
+        return '<tr>' +
+          '<td style="color:var(--muted);font-size:12px;">' + m.id + '</td>' +
+          '<td>' + m.name + '</td>' +
+          '<td><div style="font-size:12px;">' + m.phone + '</div><div style="font-size:11px;color:var(--muted);">' + (m.email||'-') + '</div></td>' +
+          '<td style="font-size:12px;color:var(--muted);">' + m.type + '</td>' +
+          '<td style="max-width:200px;font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + m.content + '</td>' +
+          '<td><span class="status ' + cls + '">' + label + '</span></td>' +
+          '<td style="font-size:12px;color:var(--muted);">' + m.date + '</td>' +
+          '<td><div class="action-btns">' +
+          '<button class="action-btn" onclick="viewMsg(\'' + m.id + '\')">查看</button>' +
+          '<button class="action-btn" onclick="setStatus(\'' + m.id + '\',\'replied\')">回复</button>' +
+          '<button class="action-btn" onclick="setStatus(\'' + m.id + '\',\'closed\')">关闭</button>' +
+          '<button class="action-btn" onclick="delMsg(\'' + m.id + '\')" style="color:var(--red);">删除</button>' +
+          '</div></td></tr>';
+      }).join('');
+    }
+
+    function viewMsg(id) {
+      currentMsg = msgs.find(function(m){ return m.id === id; });
+      if (!currentMsg) return;
+      document.getElementById('m-name').textContent = currentMsg.name;
+      document.getElementById('m-phone').textContent = currentMsg.phone;
+      document.getElementById('m-email').textContent = currentMsg.email || '-';
+      document.getElementById('m-type').textContent = currentMsg.type;
+      document.getElementById('m-content').textContent = currentMsg.content;
+      document.getElementById('m-reply').value = currentMsg.reply || '';
+      document.getElementById('modal-overlay').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('modal-overlay').classList.remove('active');
+      currentMsg = null;
+    }
+
+    function saveReply() {
+      if (!currentMsg) return;
+      currentMsg.reply = document.getElementById('m-reply').value;
+      currentMsg.status = 'replied';
+      save();
+      toast('回复已保存');
+      closeModal();
+      render();
+    }
+
+    function setStatus(id, status) {
+      var m = msgs.find(function(x){ return x.id === id; });
+      if (!m) return;
+      m.status = status;
+      if (status === 'replied') {
+        document.getElementById('m-reply').value = m.reply || '';
+      }
+      save();
+      toast('状态已更新');
+      render();
+    }
+
+    function delMsg(id) {
+      if (!confirm('确定要删除这条留言吗？')) return;
+      msgs = msgs.filter(function(m){ return m.id !== id; });
+      save();
+      toast('留言已删除');
+      render();
+    }
+
+    document.getElementById('search-input').addEventListener('input', render);
+
+    document.querySelectorAll('.filter-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.remove('active'); });
+        this.classList.add('active');
+        currentFilter = this.dataset.filter;
+        render();
+      });
+    });
+
+    document.querySelector('.admin-avatar').addEventListener('click', function() { if (confirm('确定要退出登录吗？')) location.href = 'login.html'; });
+
+    render();
+  </script>
+</body>
+</html>

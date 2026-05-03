@@ -1,0 +1,2581 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>品牌官网 PRD - 需求文档</title>
+<style>
+:root {
+  --primary: #1a1a2e;
+  --accent: #e94560;
+  --bg: #fafafa;
+  --surface: #ffffff;
+  --text: #333;
+  --muted: #666;
+  --border: #e0e0e0;
+  --success: #10b981;
+  --warning: #f59e0b;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  padding: 2rem;
+}
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  background: var(--surface);
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+  overflow: hidden;
+}
+.header-strip {
+  background: linear-gradient(135deg, var(--primary) 0%, #16213e 100%);
+  color: white;
+  padding: 2rem 3rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.header-strip h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+}
+.status-pill {
+  background: var(--accent);
+  color: white;
+  padding: 0.4rem 1.2rem;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.header-meta {
+  width: 100%;
+  display: flex;
+  gap: 2rem;
+  font-size: 0.9rem;
+  opacity: 0.9;
+  margin-top: 0.5rem;
+}
+.summary {
+  background: linear-gradient(135deg, #fef3f8 0%, #f0f4ff 100%);
+  padding: 2rem 3rem;
+  border-bottom: 1px solid var(--border);
+}
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+.summary-item h3 {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+  margin-bottom: 0.3rem;
+}
+.summary-item p {
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--primary);
+}
+.content {
+  padding: 2.5rem 3rem;
+}
+.section {
+  margin-bottom: 2.5rem;
+}
+.section-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--accent);
+  display: inline-block;
+}
+.problem-box {
+  background: #fff9f0;
+  border-left: 4px solid var(--warning);
+  padding: 1.5rem;
+  border-radius: 0 8px 8px 0;
+  margin-bottom: 1rem;
+}
+.problem-box p {
+  margin-bottom: 1rem;
+}
+.quote {
+  font-style: italic;
+  color: var(--muted);
+  padding-left: 1rem;
+  border-left: 3px solid var(--accent);
+}
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+@media (max-width: 768px) {
+  .two-col { grid-template-columns: 1fr; }
+  .content { padding: 1.5rem; }
+  .summary, .header-strip { padding: 1.5rem; }
+}
+.goals-list, .non-goals-list {
+  list-style: none;
+}
+.goals-list li, .non-goals-list li {
+  padding: 0.6rem 0;
+  padding-left: 1.5rem;
+  position: relative;
+}
+.goals-list li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--success);
+  font-weight: bold;
+}
+.non-goals-list li::before {
+  content: '✗';
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+  font-weight: bold;
+}
+.metrics-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.metrics-table th, .metrics-table td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.metrics-table th {
+  background: #f8f9fa;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.metrics-table tr:hover {
+  background: #fafafa;
+}
+.user-story {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 1.2rem 1.5rem;
+  margin-bottom: 1rem;
+}
+.user-story .role {
+  font-weight: 700;
+  color: var(--primary);
+}
+.user-story .want {
+  color: var(--text);
+}
+.user-story .so-that {
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+.phase-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.phase {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+.phase-num {
+  width: 36px;
+  height: 36px;
+  background: var(--primary);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.phase-content h4 {
+  font-weight: 600;
+  margin-bottom: 0.3rem;
+}
+.phase-content p {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.open-questions {
+  background: #fef9f9;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+.question-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.8rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.question-item:last-child {
+  border-bottom: none;
+}
+.assignee {
+  background: #e8f4f8;
+  color: #2c7a7b;
+  padding: 0.3rem 0.8rem;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+.module-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+.module-card {
+  background: linear-gradient(135deg, #f8f9fa 0%, #fff 100%);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.2rem;
+  text-align: center;
+}
+.module-card .icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+.module-card h4 {
+  font-size: 0.95rem;
+  margin-bottom: 0.3rem;
+}
+.module-card p {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.footer {
+  background: var(--primary);
+  color: white;
+  padding: 1.5rem 3rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header-strip">
+    <h1>品牌官方网站 PRD</h1>
+    <span class="status-pill">Draft</span>
+    <div class="header-meta">
+      <span>日期：2026-05-03</span>
+      <span> Owner：产品团队</span>
+      <span> Version：v6.0</span>
+    </div>
+  </div>
+
+  <div class="summary">
+    <div class="summary-grid">
+      <div class="summary-item">
+        <h3>What | 做什么</h3>
+        <p>打造面向25-35岁年轻消费者的全功能品牌官网，融合品牌展示、电商、内容营销、会员体系与线下门店整合</p>
+      </div>
+      <div class="summary-item">
+        <h3>Who | 目标用户</h3>
+        <p>25-35岁年轻消费者（千禧一代），注重个性化和社交媒体分享</p>
+      </div>
+      <div class="summary-item">
+        <h3>Why Now | 为什么现在</h3>
+        <p>品牌数字化升级关键期，Z世代成为主力消费群体，需要线上线下一体化体验</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="section">
+      <div class="section-title">Problem | 问题背景</div>
+      <div class="problem-box">
+        <p>当前品牌数字化渠道分散，用户体验割裂：官网、天猫、抖音、小程序各自独立，会员体系无法统一，线下门店与线上数据割裂。消费者难以获得一致的品牌体验，品牌也难以建立完整的用户画像。</p>
+        <p>此外，年轻消费者期待更个性化、更具社交属性的购物体验，简单的商品陈列已无法满足他们的需求。</p>
+        <div class="quote">
+          "我希望在一个地方就能了解品牌故事、浏览产品、购买、查看门店，还能和朋友分享我的体验。"
+          <br>— 目标用户访谈
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Goals & Non-Goals | 目标与非目标</div>
+      <div class="two-col">
+        <div>
+          <h4 style="margin-bottom: 0.8rem; color: var(--success);">✓ Goals 目标</h4>
+          <ul class="goals-list">
+            <li>建立统一的品牌形象和沉浸式品牌故事体验</li>
+            <li>实现完整的电商闭环（浏览→加购→支付→售后）</li>
+            <li>构建统一会员体系，实现全渠道用户数据整合</li>
+            <li>打造内容营销阵地（UGC + PGC）提升用户粘性</li>
+            <li>线下门店数字化（门店定位、预约、排号等）</li>
+            <li>支持社交分享和裂变传播</li>
+            <li>移动端优先，适配各类设备</li>
+            <li>CMS 可视化后台：素材管理、页面编辑、模板切换、内容发布全自助</li>
+            <li>完整营销工具：优惠券、满减、限时折扣、拼团等促销系统</li>
+            <li>智能搜索 + 数据分析：搜索推荐、行为漏斗、转化追踪</li>
+            <li>多渠道消息通知：站内信、短信、邮件、推送全覆盖</li>
+            <li>灵活自定义表单：报名、调研、预约多场景支持</li>
+            <li>第三方能力集成：微信登录、支付宝支付、地图定位</li>
+            <li>安全合规：XSS/CSRF防护、操作审计、数据备份</li>
+            <li>可视化编辑器：44项编辑能力，拖拽式页面构建</li>
+            <li>素材中心：AI图片处理、智能抠图、水印、自动压缩</li>
+            <li>产品管理：多规格SKU、库存预警、批量操作</li>
+            <li>会员中心：积分体系、等级权益、流失预警</li>
+            <li>门店系统：LBS定位、预约排队、O2O联动</li>
+            <li>数据分析：流量/转化/业务全链路数据看板</li>
+            <li>API优先：RESTful规范、JWT认证、完整接口文档</li>
+          </ul>
+        </div>
+        <div>
+          <h4 style="margin-bottom: 0.8rem; color: var(--accent);">✗ Non-Goals 非目标</h4>
+          <ul class="non-goals-list">
+            <li>不追求大而全的SKU展示（聚焦核心品类）</li>
+            <li>不开发复杂的ERP/WMS系统对接</li>
+            <li>不支持批发/分销商B2B采购</li>
+            <li>不提供多语言/跨境电商功能</li>
+            <li>不开发独立APP（移动端H5响应式）</li>
+            <li>不提供直播/短视频功能（独立小程序承载）</li>
+            <li>不支持自营配送/物流追踪（对接第三方物流）</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Core Modules | 核心功能模块</div>
+      <div class="module-grid">
+        <div class="module-card">
+          <div class="icon">🏠</div>
+          <h4>品牌展示</h4>
+          <p>品牌故事、价值观、发展历程</p>
+        </div>
+        <div class="module-card">
+          <div class="icon">📦</div>
+          <h4>产品目录</h4>
+          <p>分类浏览、筛选、搜索、详情</p>
+        </div>
+        <div class="module-card">
+          <div class="icon">🛒</div>
+          <h4>电商功能</h4>
+          <p>购物车、订单、支付、售后</p>
+        </div>
+        <div class="module-card">
+          <div class="icon">📝</div>
+          <h4>内容营销</h4>
+          <p>博客、专题、视频、种草</p>
+        </div>
+        <div class="module-card">
+          <div class="icon">👤</div>
+          <h4>会员中心</h4>
+          <p>注册、登录、积分、等级</p>
+        </div>
+        <div class="module-card">
+          <div class="icon">📍</div>
+          <h4>门店定位</h4>
+          <p>LBS门店、预约、排号</p>
+        </div>
+        <div class="module-card">
+          <div class="icon">💬</div>
+          <h4>联系我们</h4>
+          <p>表单、客服、FAQ</p>
+        </div>
+        <div class="module-card">
+          <div class="icon">🎁</div>
+          <h4>营销工具</h4>
+          <p>优惠券、满减、限时折扣、拼团</p>
+        </div>
+        <div class="module-card">
+          <div class="icon">🔍</div>
+          <h4>全站搜索</h4>
+          <p>智能搜索、推荐、热词分析</p>
+        </div>
+        <div class="module-card">
+          <div class="icon">📊</div>
+          <h4>数据统计</h4>
+          <p>流量分析、行为漏斗、转化报表</p>
+        </div>
+        <div class="module-card">
+          <div class="icon">🔔</div>
+          <h4>消息通知</h4>
+          <p>站内信、短信、邮件、推送</p>
+        </div>
+        <div class="module-card">
+          <div class="icon">📝</div>
+          <h4>自定义表单</h4>
+          <p>报名、调查、预约表单构建</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Success Metrics | 成功指标</div>
+      <table class="metrics-table">
+        <thead>
+          <tr>
+            <th>Metric 指标</th>
+            <th>Target 目标</th>
+            <th>Measurement 测量方式</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>月活跃用户 (MAU)</td>
+            <td>50万+</td>
+            <td>Google Analytics / 自有埋点</td>
+          </tr>
+          <tr>
+            <td>官网转化率</td>
+            <td>≥3.5%</td>
+            <td>加购数 / UV</td>
+          </tr>
+          <tr>
+            <td>平均停留时长</td>
+            <td>≥4分钟</td>
+            <td>GA  avg session duration</td>
+          </tr>
+          <tr>
+            <td>会员注册率</td>
+            <td>≥15%</td>
+            <td>注册用户 / UV</td>
+          </tr>
+          <tr>
+            <td>移动端占比</td>
+            <td>≥70%</td>
+            <td>设备维度拆分</td>
+          </tr>
+          <tr>
+            <td>页面加载速度 (LCP)</td>
+            <td>≤2.5s</td>
+            <td>PageSpeed Insights</td>
+          </tr>
+          <tr>
+            <td>客户满意度 (CSAT)</td>
+            <td>≥90%</td>
+            <td>售后调研/评论</td>
+          </tr>
+          <tr>
+            <td>优惠券核销率</td>
+            <td>≥25%</td>
+            <td>核销数/领取数</td>
+          </tr>
+          <tr>
+            <td>营销活动 ROI</td>
+            <td>≥300%</td>
+            <td>活动GMV/活动成本</td>
+          </tr>
+          <tr>
+            <td>搜索转化率</td>
+            <td>≥8%</td>
+            <td>搜索UV→加购UV</td>
+          </tr>
+          <tr>
+            <td>消息打开率</td>
+            <td>≥60%</td>
+            <td>通知推送打开数/发送数</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <div class="section-title">User Stories | 用户故事</div>
+      <div class="user-story">
+        <span class="role">作为</span> 潜在消费者<br>
+        <span class="role">I want to</span> 快速了解品牌故事和核心价值观<br>
+        <span class="so-that">So that 我能建立品牌信任，决定是否继续探索</span>
+      </div>
+      <div class="user-story">
+        <span class="role">作为</span> 有明确购买意图的用户<br>
+        <span class="role">I want to</span> 高效浏览和筛选产品，找到心仪商品<br>
+        <span class="so-that">So that 我能快速完成购买决策</span>
+      </div>
+      <div class="user-story">
+        <span class="role">作为</span> 追求个性化体验的年轻用户<br>
+        <span class="role">I want to</span> 查看穿搭建议、用户评价和种草内容<br>
+        <span class="so-that">So that 我能获得购物灵感并分享给朋友</span>
+      </div>
+      <div class="user-story">
+        <span class="role">作为</span> 会员用户<br>
+        <span class="role">I want to</span> 统一管理订单、积分和会员权益<br>
+        <span class="so-that">So that 我能享受专属优惠和个性化服务</span>
+      </div>
+      <div class="user-story">
+        <span class="role">作为</span> 线下门店潜在顾客<br>
+        <span class="role">I want to</span> 查看附近门店并进行预约/排号<br>
+        <span class="so-that">So that 我能节省到店等待时间</span>
+      </div>
+      <div class="user-story">
+        <span class="role">作为</span> 社交分享型用户<br>
+        <span class="role">I want to</span> 一键分享产品/内容到社交平台<br>
+        <span class="so-that">So that 我能向朋友推荐并获得社交认同</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Scope & Phases | 范围与阶段</div>
+      <div class="phase-list">
+        <div class="phase">
+          <div class="phase-num">1</div>
+          <div class="phase-content">
+            <h4>Phase 1 - MVP + CMS (10-12周)</h4>
+            <p>品牌展示首页 + 产品目录 + 简版电商（下单/支付/售后）+ 基础会员注册 + <strong>CMS后台（素材管理/可视化编辑/内容发布）</strong></p>
+          </div>
+        </div>
+        <div class="phase">
+          <div class="phase-num">2</div>
+          <div class="phase-content">
+            <h4>Phase 2 - 会员与内容 (4-6周)</h4>
+            <p>完整会员中心（积分/等级/权益）+ 内容营销模块（博客/种草）+ 用户评价系统</p>
+          </div>
+        </div>
+        <div class="phase">
+          <div class="phase-num">3</div>
+          <div class="phase-content">
+            <h4>Phase 3 - 线下整合 (4-6周)</h4>
+            <p>门店定位 + 预约排号 + O2O联动（线上领券线下核销）</p>
+          </div>
+        </div>
+        <div class="phase">
+          <div class="phase-num">4</div>
+          <div class="phase-content">
+            <h4>Phase 4 - 社交与个性化 (4周)</h4>
+            <p>社交分享 + UGC内容 + 个性化推荐 + 会员社群</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Open Questions | 待解决问题</div>
+      <div class="open-questions">
+        <div class="question-item">
+          <span>支付方式：是否接入微信分账/支付宝花呗分期？</span>
+          <span class="assignee">@支付产品</span>
+        </div>
+        <div class="question-item">
+          <span>积分体系：积分规则（消费1元=1分？还是按品类差异化）？</span>
+          <span class="assignee">@会员运营</span>
+        </div>
+        <div class="question-item">
+          <span>库存同步：官网库存与门店/POS/天猫是否实时同步？</span>
+          <span class="assignee">@供应链</span>
+        </div>
+        <div class="question-item">
+          <span>CDN与部署：国内访问加速方案（阿里云OSS/腾讯云COS）？</span>
+          <span class="assignee">@基础设施</span>
+        </div>
+        <div class="question-item">
+          <span>数据合规：是否需要ICP备案/网络安全等保？</span>
+          <span class="assignee">@法务</span>
+        </div>
+        <div class="question-item">
+          <span>SEO策略：是否需要独立SEO团队长期运营？</span>
+          <span class="assignee">@市场</span>
+        </div>
+        <div class="question-item">
+          <span>CMS 选型：自研 vs 成熟CMS（如 Strapi / TinaCMS / Webiny）？</span>
+          <span class="assignee">@技术负责人</span>
+        </div>
+        <div class="question-item">
+          <span>页面数量上限：是否限制运营可创建的页面总数？</span>
+          <span class="assignee">@产品</span>
+        </div>
+        <div class="question-item">
+          <span>多语言：是否需要支持中英文切换？</span>
+          <span class="assignee">@国际化</span>
+        </div>
+        <div class="question-item">
+          <span>图标库：使用哪个图标库（Lucide / Heroicons / emoji）？</span>
+          <span class="assignee">@UI设计</span>
+        </div>
+        <div class="question-item">
+          <span>营销工具优先级：优惠券/满减/拼团/秒杀哪个先做？</span>
+          <span class="assignee">@运营</span>
+        </div>
+        <div class="question-item">
+          <span>客服系统：接入现有第三方还是自建IM？</span>
+          <span class="assignee">@客服部门</span>
+        </div>
+        <div class="question-item">
+          <span>数据分析：使用第三方（GA/神策）还是自建埋点？</span>
+          <span class="assignee">@数据产品</span>
+        </div>
+        <div class="question-item">
+          <span>短信通道：使用哪家服务商（阿里云/腾讯云）？</span>
+          <span class="assignee">@运维</span>
+        </div>
+        <div class="question-item">
+          <span>可视化编辑器：自研 vs 基于开源（维、表、疆等）？</span>
+          <span class="assignee">@技术</span>
+        </div>
+        <div class="question-item">
+          <span>数据库选型：PostgreSQL vs MySQL？</span>
+          <span class="assignee">@DBA</span>
+        </div>
+        <div class="question-item">
+          <span>是否需要支持私有化部署？</span>
+          <span class="assignee">@产品</span>
+        </div>
+        <div class="question-item">
+          <span>3D/AR功能是否纳入本期范围？</span>
+          <span class="assignee">@业务</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">CMS Backend | CMS 后台管理系统（最大化编辑能力）</div>
+      <div class="module-grid">
+        <div class="module-card">
+          <div class="icon">🖼️</div>
+          <h4>素材管理中心</h4>
+          <p>图片/视频/文件上传、裁剪、压缩、分类标签管理</p>
+        </div>
+        <div class="module-card">
+          <div class="icon">📝</div>
+          <h4>可视化页面编辑</h4>
+          <p>拖拽式组件编排、实时预览、版本历史</p>
+        </div>
+        <div class="module-card">
+          <div class="icon">🎨</div>
+          <h4>模板与主题</h4>
+          <p>多套首页模板、配色/字体/间距全局控制</p>
+        </div>
+        <div class="module-card">
+          <div class="icon">📄</div>
+          <h4>内容管理</h4>
+          <p>产品/文章/页面 CRUD、批量操作、草稿/发布</p>
+        </div>
+        <div class="module-card">
+          <div class="icon">🔍</div>
+          <h4>SEO 配置</h4>
+          <p>Meta标签、TDK、sitemap、自动推送</p>
+        </div>
+        <div class="module-card">
+          <div class="icon">⚙️</div>
+          <h4>系统设置</h4>
+          <p>导航菜单、底部链接、弹窗/横幅、权限管理</p>
+        </div>
+      </div>
+
+      <h4 style="margin: 1.5rem 0 1rem; color: var(--primary);">🔧 最大化编辑能力细节</h4>
+      <table class="metrics-table">
+        <thead>
+          <tr>
+            <th>可编辑元素</th>
+            <th>说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Icon / 图标</td>
+            <td>所有 UI 图标（导航/功能按钮/列表项/卡片标识）均可替换，支持 emoji / iconfont / 图片上传</td>
+          </tr>
+          <tr>
+            <td>文字内容</td>
+            <td>所有页面文本（标题/正文/按钮/占位符/提示语/错误信息）均可编辑</td>
+          </tr>
+          <tr>
+            <td>图片素材</td>
+            <td>所有图片（Banner/产品图/背景图/头像/图标）均可替换/裁剪/上传</td>
+          </tr>
+          <tr>
+            <td>颜色/配色</td>
+            <td>全局主色/辅色/背景色/文字色/边框色，支持颜色选择器 + HEX/RGB 输入</td>
+          </tr>
+          <tr>
+            <td>字体/字号</td>
+            <td>标题/正文字体选择、字号大小、行高、字重、间距</td>
+          </tr>
+          <tr>
+            <td>间距/布局</td>
+            <td>组件内边距/外边距、组件间距、栅格列数、容器宽度</td>
+          </tr>
+          <tr>
+            <td>圆角/阴影</td>
+            <td>卡片/按钮/图片圆角大小、阴影深度/颜色/偏移</td>
+          </tr>
+          <tr>
+            <td>动效/动画</td>
+            <td>页面/组件入场动画、悬停效果、过渡时长、动画曲线</td>
+          </tr>
+          <tr>
+            <td>链接/跳转</td>
+            <td>所有链接（导航/按钮/图片/文字）可配置跳转地址/行为</td>
+          </tr>
+          <tr>
+            <td>显示/隐藏</td>
+            <td>任意组件/模块可独立显示/隐藏，无需删除</td>
+          </tr>
+          <tr>
+            <td>排序/层级</td>
+            <td>拖拽调整组件/模块/导航顺序，z-index 层级控制</td>
+          </tr>
+          <tr>
+            <td>条件逻辑</td>
+            <td>组件显示条件（登录/未登录/会员等级/设备类型）</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4 style="margin: 1.5rem 0 1rem; color: var(--primary);">CMS 权限角色设计</h4>
+      <table class="metrics-table">
+        <thead>
+          <tr>
+            <th>角色</th>
+            <th>可管理范围</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>管理员</td>
+            <td>全部功能（素材/页面/产品/内容/模板/SEO/系统配置）</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4 style="margin: 1.5rem 0 1rem; color: var(--primary);">CMS 核心功能详情</h4>
+      <div class="two-col">
+        <div>
+          <h4 style="font-size: 0.9rem; margin-bottom: 0.5rem;">素材管理中心</h4>
+          <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+            <li>支持拖拽批量上传（图片/视频/文档）</li>
+            <li>自动压缩（WebP/AVIF 格式转换）</li>
+            <li>图片裁剪、旋转、水印</li>
+            <li>文件夹/标签分类管理</li>
+            <li>图片复用统计（被哪些页面引用）</li>
+            <li>素材使用排行、清理未使用素材</li>
+          </ul>
+        </div>
+        <div>
+          <h4 style="font-size: 0.9rem; margin-bottom: 0.5rem;">可视化页面编辑</h4>
+          <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+            <li>拖拽式布局（栅格系统）</li>
+            <li>预设组件库（轮播/卡片/图文/视频/按钮等）</li>
+            <li>组件属性面板（样式/数据/行为）</li>
+            <li>PC/平板/手机三端实时预览</li>
+            <li>页面版本历史 + 一键回滚</li>
+            <li>页面草稿/定时发布/AB测试</li>
+          </ul>
+        </div>
+
+        <h4 style="margin: 2rem 0 1rem; color: var(--accent);">⭐ Visual Editor | 可视化页面编辑器（重点）</h4>
+
+        <h4 style="font-size: 0.95rem; margin-bottom: 0.5rem;">1. 编辑器整体架构</h4>
+        <table class="metrics-table">
+          <thead>
+            <tr>
+              <th>区域</th>
+              <th>功能</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>左侧组件面板</td>
+              <td>组件分类列表 + 组件缩略图 + 拖拽到画布</td>
+            </tr>
+            <tr>
+              <td>中间画布区域</td>
+              <td>实时渲染页面 + 缩放控制 + 设备切换 + 网格辅助线</td>
+            </tr>
+            <tr>
+              <td>右侧属性面板</td>
+              <td>选中组件样式/数据/行为配置 + 图层树</td>
+            </tr>
+            <tr>
+              <td>顶部工具栏</td>
+              <td>撤销/重做 + 保存 + 预览 + 发布 + 历史版本</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">2. 组件库清单</h4>
+        <table class="metrics-table">
+          <thead>
+            <tr>
+              <th>组件分类</th>
+              <th>包含组件</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>布局组件</td>
+              <td>栅格布局 / 自由布局 / 吸顶导航 / 吸底导航 / 侧边栏 / Tabs切换</td>
+            </tr>
+            <tr>
+              <td>基础组件</td>
+              <td>文字 / 图片 / 按钮 / 图标 / 分割线 / 间距 / 背景</td>
+            </tr>
+            <tr>
+              <td>内容组件</td>
+              <td>轮播图 / 视频 / 音频 / 富文本 / 倒计时 / 进度条</td>
+            </tr>
+            <tr>
+              <td>产品组件</td>
+              <td>产品卡片 / 产品列表 / 产品详情 / 产品橱窗 / 关联产品</td>
+            </tr>
+            <tr>
+              <td>营销组件</td>
+              <td>优惠券领取 / 弹窗 / 公告栏 / 活动横幅 / 倒计时秒杀</td>
+            </tr>
+            <tr>
+              <td>媒体组件</td>
+              <td>图片画廊 / 瀑布流 / 懒加载图 / 视差滚动</td>
+            </tr>
+            <tr>
+              <td>互动组件</td>
+              <td>评分/评论 / 问答卡片 / 投票 / 抽奖转盘 / 签到</td>
+            </tr>
+            <tr>
+              <td>表单组件</td>
+              <td>输入框 / 下拉框 / 日期选择 / 文件上传 / 表单提交</td>
+            </tr>
+            <tr>
+              <td>会员组件</td>
+              <td>登录/注册 / 会员卡片 / 积分展示 / 等级进度</td>
+            </tr>
+            <tr>
+              <td>第三方组件</td>
+              <td>微信分享 / 地图定位 / 客服入口 / 视频播放</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">3. 组件属性配置项</h4>
+        <div class="two-col">
+          <div>
+            <h5 style="font-size: 0.85rem; color: var(--primary); margin-bottom: 0.3rem;">样式属性（Style）</h5>
+            <ul style="font-size: 0.85rem; color: var(--muted); padding-left: 1.2rem; margin-bottom: 1rem;">
+              <li>宽 / 高 / 最小宽高</li>
+              <li>内边距 / 外边距</li>
+              <li>背景色 / 背景图 / 背景渐变</li>
+              <li>圆角（四角独立/统一）</li>
+              <li>阴影（X/Y/模糊/扩展/颜色）</li>
+              <li>边框（宽度/样式/颜色）</li>
+              <li>透明度 / 混合模式</li>
+              <li>旋转 / 缩放 / 变形</li>
+            </ul>
+            <h5 style="font-size: 0.85rem; color: var(--primary); margin-bottom: 0.3rem;">动画属性（Animation）</h5>
+            <ul style="font-size: 0.85rem; color: var(--muted); padding-left: 1.2rem;">
+              <li>入场动画（淡入/滑入/缩放/弹性）</li>
+              <li>动画时长 / 延迟 / 缓动曲线</li>
+              <li>悬停效果（变化/位移/缩放）</li>
+              <li>点击效果（涟漪/缩放/变色）</li>
+              <li>循环动画（摇摆/脉冲/呼吸）</li>
+            </ul>
+          </div>
+          <div>
+            <h5 style="font-size: 0.85rem; color: var(--primary); margin-bottom: 0.3rem;">数据属性（Data）</h5>
+            <ul style="font-size: 0.85rem; color: var(--muted); padding-left: 1.2rem; margin-bottom: 1rem;">
+              <li>静态内容 / 动态数据源绑定</li>
+              <li>条件显示逻辑（登录/会员等级/设备）</li>
+              <li>数据筛选 / 排序规则</li>
+              <li>分页 / 每页数量</li>
+              <li>空状态 / 加载状态配置</li>
+            </ul>
+            <h5 style="font-size: 0.85rem; color: var(--primary); margin-bottom: 0.3rem;">行为属性（Behavior）</h5>
+            <ul style="font-size: 0.85rem; color: var(--muted); padding-left: 1.2rem;">
+              <li>点击跳转（页面/锚点/链接）</li>
+              <li>提交动作（表单/弹窗/下载）</li>
+              <li>分享行为（微信/微博/复制链接）</li>
+              <li>曝光埋点 / 点击埋点</li>
+              <li>生命周期（挂载/卸载/滚动触发）</li>
+            </ul>
+          </div>
+        </div>
+
+        <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">4. 图层管理（图层面板）</h4>
+        <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+          <li>树形结构展示所有组件层级</li>
+          <li>显示/隐藏切换（眼睛图标）</li>
+          <li>锁定/解锁（防止误操作）</li>
+          <li>拖拽排序调整z-index</li>
+          <li>批量选择 + 批量操作</li>
+          <li>快速定位（点击图层高亮画布组件）</li>
+          <li>组件命名（可自定义名称便于管理）</li>
+          <li>分组 / 解组操作</li>
+        </ul>
+
+        <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">5. 响应式预览与适配</h4>
+        <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+          <li>设备切换：PC / 平板（768px） / 手机（375px） / 自定义分辨率</li>
+          <li>实时预览不同设备效果</li>
+          <li>组件断点适配（PC优先 / 移动优先）</li>
+          <li>各设备下组件样式独立覆盖</li>
+          <li>隐藏组件（某设备不显示）</li>
+          <li>适配预览参考线（安全区/危险区）</li>
+        </ul>
+
+        <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">6. 页面版本管理</h4>
+        <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+          <li>自动保存草稿（每30秒/每次操作后）</li>
+          <li>手动保存快照（可命名）</li>
+          <li>版本历史列表（时间/版本名/操作人）</li>
+          <li>版本对比（修改前后diff高亮）</li>
+          <li>一键回滚到任意历史版本</li>
+          <li>版本发布记录（谁/何时/发布了哪个版本）</li>
+        </ul>
+
+        <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">7. 页面发布流程</h4>
+        <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+          <li>保存草稿（不发布，仅后台保存）</li>
+          <li>预览确认（生成临时链接供内部预览）</li>
+          <li>立即发布（一键上线）</li>
+          <li>定时发布（指定时间自动上线）</li>
+          <li>发布前检查（链接校验/图片检查/性能预估）</li>
+          <li>灰度发布（可选：先对10%用户生效）</li>
+          <li>发布记录（所有人可查看历史发布）</li>
+          <li>回滚（立即回滚到上一版本）</li>
+        </ul>
+
+        <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">8. 模板市场</h4>
+        <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+          <li>预置行业模板（服装/美妆/食品/科技等）</li>
+          <li>模板预览（缩略图+在线预览）</li>
+          <li>一键应用模板（替换当前页面）</li>
+          <li>保存当前页面为模板</li>
+          <li>模板分类管理</li>
+          <li>模板市场（未来开放第三方模板）</li>
+        </ul>
+
+        <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">9. 快捷操作与效率工具</h4>
+        <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+          <li>快捷键：Ctrl+Z撤销 / Ctrl+Y重做 / Ctrl+S保存 / Delete删除</li>
+          <li>复制粘贴组件（跨页面复制）</li>
+          <li>组件吸边/对齐辅助线</li>
+          <li>组件分布对齐（一键等距/顶对齐/水平居中）</li>
+          <li>批量选择父级/子级</li>
+          <li>快速复制（Alt+拖拽）</li>
+          <li>智能填充（自动生成占位图/随机文本）</li>
+          <li>多选批量属性修改</li>
+        </ul>
+
+        <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">10. 编辑器技术实现</h4>
+        <table class="metrics-table">
+          <thead>
+            <tr>
+              <th>模块</th>
+              <th>技术方案</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>拖拽引擎</td>
+              <td>react-dnd / dnd-kit / react-grid-layout</td>
+            </tr>
+            <tr>
+              <td>画布渲染</td>
+              <td>iframe 隔离渲染 / 前台 SSR 同构渲染</td>
+            </tr>
+            <tr>
+              <td>状态管理</td>
+              <td>Redux Toolkit / Zustand（轻量）</td>
+            </tr>
+            <tr>
+              <td>撤销重做</td>
+              <td>Immer + 命令模式（Command Pattern）</td>
+            </tr>
+            <tr>
+              <td>版本存储</td>
+              <td>JSON Schema 页面配置 + 版本快照</td>
+            </tr>
+            <tr>
+              <td>实时预览</td>
+              <td>WebSocket 同步 / or 父窗口操控iframe</td>
+            </tr>
+            <tr>
+              <td>组件注册</td>
+              <td>JSON Schema 定义 + 动态组件注册表</td>
+            </tr>
+            <tr>
+              <td>样式方案</td>
+              <td>CSS-in-JS（styled-components）or Tailwind + className</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">11. 动态数据绑定</h4>
+        <div class="two-col">
+          <div>
+            <h5 style="font-size: 0.85rem; color: var(--primary); margin-bottom: 0.3rem;">数据源类型</h5>
+            <ul style="font-size: 0.85rem; color: var(--muted); padding-left: 1.2rem;">
+              <li>静态数据（JSON / YAML 配置）</li>
+              <li>CMS 内容（文章/产品/专题）</li>
+              <li>API 接口（第三方数据）</li>
+              <li>用户数据（登录/会员/订单）</li>
+              <li>本地存储（LocalStorage）</li>
+            </ul>
+          </div>
+          <div>
+            <h5 style="font-size: 0.85rem; color: var(--primary); margin-bottom: 0.3rem;">绑定配置项</h5>
+            <ul style="font-size: 0.85rem; color: var(--muted); padding-left: 1.2rem;">
+              <li>数据源选择（下拉）</li>
+              <li>字段映射（拖拽绑定）</li>
+              <li>筛选条件（AND/OR 规则）</li>
+              <li>排序规则（字段 + 升序/降序）</li>
+              <li>分页 / 每页条数</li>
+              <li>缓存策略（实时/定时/手动刷新）</li>
+            </ul>
+          </div>
+        </div>
+        <div style="margin-top: 0.8rem;">
+          <h5 style="font-size: 0.85rem; color: var(--primary); margin-bottom: 0.3rem;">数据调试工具</h5>
+          <ul style="font-size: 0.85rem; color: var(--muted); padding-left: 1.2rem;">
+            <li>实时数据预览（JSON Tree View）</li>
+            <li>模拟数据填充（开发阶段）</li>
+            <li>接口请求日志</li>
+            <li>错误状态展示（加载失败/空数据）</li>
+          </ul>
+        </div>
+
+        <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">12. 样式继承与覆盖机制</h4>
+        <table class="metrics-table">
+          <thead>
+            <tr>
+              <th>层级</th>
+              <th>说明</th>
+              <th>优先级</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>全局主题</td>
+              <td>品牌主色/字体/圆角等全局变量</td>
+              <td>最低</td>
+            </tr>
+            <tr>
+              <td>模板样式</td>
+              <td>模板预置的组件样式</td>
+              <td>⬆️</td>
+            </tr>
+            <tr>
+              <td>容器样式</td>
+              <td>父级容器（栅格/自由布局）样式</td>
+              <td>⬆️</td>
+            </tr>
+            <tr>
+              <td>组件默认</td>
+              <td>组件本身的默认样式</td>
+              <td>⬆️</td>
+            </tr>
+            <tr>
+              <td>用户修改</td>
+              <td>运营手动调整的属性值</td>
+              <td>最高</td>
+            </tr>
+          </tbody>
+        </table>
+        <ul style="font-size: 0.85rem; color: var(--muted); padding-left: 1.2rem; margin-top: 0.8rem;">
+          <li>支持重置单项属性（恢复继承值）</li>
+          <li>支持重置全部（恢复组件默认）</li>
+          <li>继承值可视化（灰色/虚线标识）</li>
+          <li>覆盖值高亮标识（橙色/蓝色标识）</li>
+        </ul>
+
+        <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">13. 条件逻辑配置</h4>
+        <div class="two-col">
+          <div>
+            <h5 style="font-size: 0.85rem; color: var(--primary); margin-bottom: 0.3rem;">触发条件类型</h5>
+            <ul style="font-size: 0.85rem; color: var(--muted); padding-left: 1.2rem;">
+              <li>登录状态（已登录/未登录）</li>
+              <li>会员等级（普通/银卡/金卡/钻卡）</li>
+              <li>用户标签（新人/活跃/沉默）</li>
+              <li>设备类型（PC/平板/手机）</li>
+              <li>地区/城市</li>
+              <li>时间段（白天/晚上/节假日）</li>
+              <li>来源渠道（微信/搜索/直接访问）</li>
+              <li>自定义JS表达式</li>
+            </ul>
+          </div>
+          <div>
+            <h5 style="font-size: 0.85rem; color: var(--primary); margin-bottom: 0.3rem;">条件动作</h5>
+            <ul style="font-size: 0.85rem; color: var(--muted); padding-left: 1.2rem;">
+              <li>显示 / 隐藏组件</li>
+              <li>切换内容（不同条件显示不同内容）</li>
+              <li>切换样式（不同条件不同配色）</li>
+              <li>跳转不同页面</li>
+              <li>触发不同数据源</li>
+              <li>显示/隐藏表单项</li>
+            </ul>
+          </div>
+        </div>
+        <ul style="font-size: 0.85rem; color: var(--muted); padding-left: 1.2rem; margin-top: 0.8rem;">
+          <li>条件组合（AND / OR 逻辑）</li>
+          <li>条件优先级排序</li>
+          <li>条件预览（模拟不同条件下的页面效果）</li>
+        </ul>
+
+        <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">14. 动画时间线编辑器</h4>
+        <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+          <li>时间轴面板（横轴为时间，竖轴为组件）</li>
+          <li>关键帧设置（位置/缩放/旋转/透明度）</li>
+          <li>缓动曲线选择（linear / ease / ease-in / ease-out / bounce）</li>
+          <li>动画预览播放（暂停/播放/快进/循环）</li>
+          <li>多个动画叠加（出场动画 + 循环动画）</li>
+          <li>滚动触发动画（滚动到视口触发）</li>
+          <li>预设动画模板（一键应用）</li>
+        </ul>
+
+        <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">15. 协作编辑（可选）</h4>
+        <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+          <li>多用户同时编辑（类似Figma协作）</li>
+          <li>实时光标显示（谁在编辑哪个组件）</li>
+          <li>编辑锁（有人正在编辑时显示锁定）</li>
+          <li>协作人员列表（在线/离线状态）</li>
+          <li>评论功能（对组件/页面添加评论）</li>
+          <li>@提及通知</li>
+          <li>协作编辑权限（可编辑/可预览/可评论）</li>
+        </ul>
+
+        <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">16. 错误处理与降级策略</h4>
+        <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+          <li>组件加载失败时显示占位图（而非页面崩溃）</li>
+          <li>数据源请求失败时显示兜底内容</li>
+          <li>JS错误捕获与隔离（不影响其他组件）</li>
+          <li>降级配置（指定错误时显示哪个备用组件）</li>
+          <li>错误日志上报（前端监控）</li>
+          <li>编辑器内错误提示（组件配置错误时给出提示）</li>
+        </ul>
+
+        <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">17. 编辑器操作引导</h4>
+        <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+          <li>新用户引导（首次使用时的操作教程）</li>
+          <li>组件提示（hover时显示组件名称和快捷操作）</li>
+          <li>操作反馈（拖拽时吸附/对齐反馈）</li>
+          <li>帮助文档入口（F1快捷键）</li>
+          <li>视频教程（常见操作录屏）</li>
+          <li>模板使用引导（从模板创建页面的步骤引导）</li>
+        </ul>
+
+        <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">18. 页面SEO配置</h4>
+        <table class="metrics-table">
+          <thead>
+            <tr>
+              <th>配置项</th>
+              <th>说明</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>页面标题（Title）</td>
+              <td>每个页面独立配置，支持变量占位 {page_title}</td>
+            </tr>
+            <tr>
+              <td>页面描述（Description）</td>
+              <td>SEO描述，控制在160字符内</td>
+            </tr>
+            <tr>
+              <td>关键词（Keywords）</td>
+              <td>SEO关键词，多个逗号分隔</td>
+            </tr>
+            <tr>
+              <td>URL别名</td>
+              <td>自定义页面路径（如 /about-us）</td>
+            </tr>
+            <tr>
+              <td>Canonical URL</td>
+              <td>规范化链接（避免重复内容）</td>
+            </tr>
+            <tr>
+              <td>Open Graph</td>
+              <td>分享到社交平台时的标题/图片/描述</td>
+            </tr>
+            <tr>
+              <td>结构化数据</td>
+              <td>JSON-LD（Organization/Product/Article）</td>
+            </tr>
+            <tr>
+              <td>Robots</td>
+              <td>索引/跟随设置（index/follow/noindex）</td>
+            </tr>
+            <tr>
+              <td>重定向</td>
+              <td>301/302重定向配置（页面下线/改址）</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">19. 自定义组件开发</h4>
+        <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+          <li>组件开发规范文档（Schema定义 + 渲染函数）</li>
+          <li>本地组件调试环境</li>
+          <li>组件打包发布（npm包 / 内部私有仓库）</li>
+          <li>组件市场（内部共享 / 未来开放）</li>
+          <li>组件版本管理（升级/回滚/依赖）</li>
+          <li>组件审核机制（提交后需审核才能使用）</li>
+          <li>官方组件 vs 自定义组件标识</li>
+        </ul>
+
+        <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">20. 性能优化策略</h4>
+        <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+          <li>组件懒加载（按需加载，非首屏组件延迟加载）</li>
+          <li>代码分割（每个组件独立chunk）</li>
+          <li>图片优化（WebP/AVIF / 响应式图片 / 懒加载）</li>
+          <li>骨架屏（Loading占位）</li>
+          <li>服务端渲染（SSR）优化首屏加载</li>
+          <li>运行时性能监控（FPS / 内存占用）</li>
+          <li>编辑器内性能警告（组件过重时提示优化）</li>
+        </ul>
+
+        <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">21. 多语言/i18n 支持（可选）</h4>
+        <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+          <li>语言包管理（中/英/其他）</li>
+          <li>静态文本翻译字段编辑</li>
+          <li>语言切换器组件</li>
+          <li>RTL布局支持（阿拉伯文等）</li>
+          <li>多语言页面版本管理</li>
+          <li>翻译进度统计</li>
+        </ul>
+
+        <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">22. AB测试集成</h4>
+        <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+          <li>页面版本创建（A版/B版）</li>
+          <li>流量分配配置（50%/50% 或 自定义比例）</li>
+          <li>实验指标绑定（点击率/转化率/停留时长）</li>
+          <li>实时数据看板</li>
+          <li>显著性检验（统计显著性判断）</li>
+          <li>一键切分流量/全量切换</li>
+        </ul>
+
+        <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">23. 编辑器操作日志与审计</h4>
+        <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+          <li>所有编辑操作记录（操作人/时间/操作内容/操作详情）</li>
+          <li>页面配置变更diff（修改前/后对比）</li>
+          <li>危险操作告警（删除页面/批量修改/发布）</li>
+          <li>操作日志导出（Excel/CSV）</li>
+          <li>审计报表（按人/按页面/按时间筛选）</li>
+          <li>操作回放（可选：回放用户操作过程）</li>
+        </ul>
+
+        <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">24. 画布辅助工具</h4>
+        <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+          <li>网格系统（12栅格/24栅格/自由）</li>
+          <li>智能吸附（吸附到网格/其他组件边缘/中心点）</li>
+          <li>辅助线（可拖拽创建自定义参考线）</li>
+          <li>标尺（顶部/左侧标尺显示尺寸）</li>
+          <li>缩放控制（10%-400% / 适应画布 / 100%）</li>
+          <li>画布背景（纯色/网格/透明）</li>
+          <li>选中区域高亮（边框/填充色/动画）</li>
+          <li>画布锁定（防止误操作）</li>
+        </ul>
+
+        <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">25. 组件属性面板设计</h4>
+        <div class="two-col">
+          <div>
+            <h5 style="font-size: 0.85rem; color: var(--primary); margin-bottom: 0.3rem;">面板结构</h5>
+            <ul style="font-size: 0.85rem; color: var(--muted); padding-left: 1.2rem;">
+              <li>Tab切换（样式/数据/行为/动画）</li>
+              <li>属性分组折叠（布局/颜色/边框/阴影）</li>
+              <li>常用属性置顶（收藏置顶功能）</li>
+              <li>搜索属性（快速定位属性项）</li>
+              <li>属性说明（hover显示帮助提示）</li>
+            </ul>
+          </div>
+          <div>
+            <h5 style="font-size: 0.85rem; color: var(--primary); margin-bottom: 0.3rem;">控件类型</h5>
+            <ul style="font-size: 0.85rem; color: var(--muted); padding-left: 1.2rem;">
+              <li>输入框（文本/数字/颜色）</li>
+              <li>选择器（下拉/单选/多选）</li>
+              <li>滑块（范围选择）</li>
+              <li>开关（布尔值）</li>
+              <li>颜色选择器（色板/HEX/取色器）</li>
+              <li>图片选择器（素材库/上传）</li>
+              <li>图标选择器（emoji/iconfont/图片）</li>
+              <li>富文本编辑器（文字样式）</li>
+            </ul>
+          </div>
+        </div>
+
+        <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">26. 右键菜单与快捷操作</h4>
+        <table class="metrics-table">
+          <thead>
+            <tr>
+              <th>触发方式</th>
+              <th>可用操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>组件右键菜单</td>
+              <td>复制/剪切/粘贴/删除/置顶/置底/上移一层/下移一层/锁定/解锁/分组/复制样式/粘贴样式</td>
+            </tr>
+            <tr>
+              <td>画布右键菜单</td>
+              <td>粘贴/全选/画布设置/网格设置/显示辅助线/撤销/重做</td>
+            </tr>
+            <tr>
+              <td>组件快捷菜单</td>
+              <td>hover时显示快捷操作栏（复制/删除/上移/下移）</td>
+            </tr>
+            <tr>
+              <td>多选快捷菜单</td>
+              <td>批量删除/批量复制/批量对齐/批量分组</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">27. 页面管理与组织</h4>
+        <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+          <li>页面列表管理（创建/复制/移动/删除/排序）</li>
+          <li>页面分类/文件夹管理</li>
+          <li>页面标签/状态标识（草稿/已发布/已归档）</li>
+          <li>页面搜索/筛选（按名称/状态/更新时间/创建人）</li>
+          <li>批量操作（批量发布/批量删除/批量移动）</li>
+          <li>页面引用关系（某组件被哪些页面使用）</li>
+          <li>模板创建（基于现有页面创建模板）</li>
+          <li>页面复制（跨站点复制页面）</li>
+        </ul>
+
+        <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">28. 响应式设计专项</h4>
+        <div class="two-col">
+          <div>
+            <h5 style="font-size: 0.85rem; color: var(--primary); margin-bottom: 0.3rem;">断点管理</h5>
+            <ul style="font-size: 0.85rem; color: var(--muted); padding-left: 1.2rem;">
+              <li>预设断点（手机375/平板768/桌面1920）</li>
+              <li>自定义断点（添加额外尺寸）</li>
+              <li>断点预览切换</li>
+              <li>断点间组件状态复制</li>
+            </ul>
+          </div>
+          <div>
+            <h5 style="font-size: 0.85rem; color: var(--primary); margin-bottom: 0.3rem;">适配策略</h5>
+            <ul style="font-size: 0.85rem; color: var(--muted); padding-left: 1.2rem;">
+              <li>流式布局（flex/grid自动适配）</li>
+              <li>rem/vw单位自动转换</li>
+              <li>图片响应式srcset生成</li>
+              <li>字体大小响应式缩放</li>
+            </ul>
+          </div>
+        </div>
+
+        <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">29. 可访问性/无障碍支持（a11y）</h4>
+        <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+          <li>组件语义化标签（header/nav/main/section/article）</li>
+          <li>图片Alt文本编辑</li>
+          <li>链接Title编辑</li>
+          <li>表单标签关联</li>
+          <li>键盘导航支持（Tab切换/Enter确认/Esc取消）</li>
+          <li>焦点管理（焦点指示器/焦点顺序）</li>
+          <li>颜色对比度检测（文本/背景对比度自动检测）</li>
+          <li>屏幕阅读器友好（aria-label/role）</li>
+        </ul>
+
+        <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">30. 编辑器性能优化</h4>
+        <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+          <li>大页面优化（100+组件时按需渲染）</li>
+          <li>编辑操作防抖（减少重复渲染）</li>
+          <li>历史记录限制（最多保留100条）</li>
+          <li>组件懒加载（属性面板/组件列表）</li>
+          <li>编辑器启动速度优化</li>
+          <li>内存占用监控</li>
+          <li>操作响应时延监控（<100ms）</li>
+        </ul>
+
+        <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">31. 导出与迁移</h4>
+        <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+          <li>导出页面配置JSON</li>
+          <li>导出静态HTML/CSS/JS</li>
+          <li>导出React/Vue组件代码</li>
+          <li>整站配置导出/导入</li>
+          <li>跨环境迁移（测试→生产）</li>
+          <li>第三方平台适配（导出为WordPress/Shopify格式）</li>
+        </ul>
+
+        <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">32. 编辑器设置与偏好</h4>
+        <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+          <li>默认画布尺寸设置</li>
+          <li>默认栅格系统设置</li>
+          <li>自动保存间隔设置</li>
+          <li>撤销历史条数设置</li>
+          <li>编辑器主题（亮色/暗色/跟随系统）</li>
+          <li>面板布局保存（用户自定义面板位置）</li>
+          <li>快捷键自定义</li>
+          <li>个人偏好云同步（换设备也能恢复）</li>
+        </ul>
+
+        <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">33. 组件市场生态</h4>
+        <table class="metrics-table">
+          <thead>
+            <tr>
+              <th>角色</th>
+              <th>能力</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>官方组件</td>
+              <td>开箱即用，持续维护，文档完善</td>
+            </tr>
+            <tr>
+              <td>认证组件</td>
+              <td>第三方开发，经过官方认证，品质保证</td>
+            </tr>
+            <tr>
+              <td>社区组件</td>
+              <td>社区开发者贡献，免费使用，社群支持</td>
+            </tr>
+            <tr>
+              <td>私有组件</td>
+              <td>企业内部组件，仅对内可见</td>
+            </tr>
+          </tbody>
+        </table>
+        <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem; margin-top: 0.8rem;">
+          <li>组件上架审核流程</li>
+          <li>组件版本更新与通知</li>
+          <li>组件评分与评论</li>
+          <li>组件使用统计（作者可见）</li>
+          <li>组件依赖管理</li>
+        </ul>
+
+        <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">34. 可视化编辑器组件开发SDK</h4>
+        <div class="two-col">
+          <div>
+            <h5 style="font-size: 0.85rem; color: var(--primary); margin-bottom: 0.3rem;">SDK规范</h5>
+            <ul style="font-size: 0.85rem; color: var(--muted); padding-left: 1.2rem;">
+              <li>组件定义文件（component.json）</li>
+              <li>属性Schema定义（JSON Schema）</li>
+              <li>渲染函数（React/Vue）</li>
+              <li>样式文件（CSS Modules / Tailwind）</li>
+              <li>资源文件（图标的SVG/字体）</li>
+            </ul>
+          </div>
+          <div>
+            <h5 style="font-size: 0.85rem; color: var(--primary); margin-bottom: 0.3rem;">生命周期钩子</h5>
+            <ul style="font-size: 0.85rem; color: var(--muted); padding-left: 1.2rem;">
+              <li>onMount - 组件挂载时</li>
+              <li>onUnmount - 组件卸载时</li>
+              <li>onUpdate - 属性变更时</li>
+              <li>onResize - 尺寸变化时</li>
+              <li>onScroll - 滚动触发时</li>
+              <li>onError - 错误捕获时</li>
+            </ul>
+          </div>
+        </div>
+
+        <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">35. 编辑器上下文菜单与操作流</h4>
+        <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+          <li>拖拽插入（从左侧拖入画布）</li>
+          <li>双击插入（双击组件自动添加到画布中心）</li>
+          <li>快捷面板（Ctrl+K 快速搜索组件）</li>
+          <li>最近使用（显示最近使用的10个组件）</li>
+          <li>收藏组件（收藏常用组件快速访问）</li>
+          <li>拖拽排序（画布内直接拖拽调整位置）</li>
+          <li>缩放插入（Ctrl+滚轮 调整画布缩放）</li>
+          <li>快速查找（Ctrl+F 查找页面内组件）</li>
+        </ul>
+
+        <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">36. 复杂布局支持</h4>
+        <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+          <li>多列布局（2/3/4列响应式）</li>
+          <li> masonry瀑布流布局</li>
+          <li>时间线布局（横向/纵向）</li>
+          <li>卡片网格布局（支持不同尺寸卡片混排）</li>
+          <li>轮播列表（可滑动的列表）</li>
+          <li>标签布局（标签云/分类标签）</li>
+          <li>定价表格布局</li>
+          <li>FAQ折叠布局</li>
+        </ul>
+
+        <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">37. 编辑器主题定制</h4>
+        <table class="metrics-table">
+          <thead>
+            <tr>
+              <th>定制维度</th>
+              <th>选项</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>编辑器皮肤</td>
+              <td>亮色主题 / 暗色主题 / 跟随系统</td>
+            </tr>
+            <tr>
+              <td>面板布局</td>
+              <td>左-中-右 / 上-下 / 自由拖拽</td>
+            </tr>
+            <tr>
+              <td>默认视图</td>
+              <td>桌面编辑 / 移动编辑 / 响应式编辑</td>
+            </tr>
+            <tr>
+              <td>辅助工具</td>
+              <td>显示/隐藏网格 / 标尺 / 辅助线 / 图层</td>
+            </tr>
+            <tr>
+              <td>快捷键方案</td>
+              <td>Figma风格 / Sketch风格 / 自定义</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">38. 可视化数据大屏模式</h4>
+        <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+          <li>大屏画布尺寸（1920×1080 / 2560×1440 / 自定义）</li>
+          <li>大屏组件（数字翻牌器/仪表盘/中国地图/关系图）</li>
+          <li>数据源绑定（实时数据/API轮询/WebSocket）</li>
+          <li>大屏轮播（多个页面定时切换）</li>
+          <li>大屏TV模式（隐藏浏览器UI / 自动全屏）</li>
+          <li>大屏操控面板（编辑时隐藏Ctrl块）</li>
+        </ul>
+
+        <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">39. 表单生成器增强</h4>
+        <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+          <li>多步表单（分步填写 + 进度指示）</li>
+          <li>条件字段（满足条件才显示字段）</li>
+          <li>字段联动（选择A后B字段自动填充）</li>
+          <li>表单验证（必填/格式/自定义规则）</li>
+          <li>表单计算（字段自动求和/联动计算）</li>
+          <li>表单样式定制（对齐方式/标签位置）</li>
+          <li>表单提交动画（成功/失败反馈）</li>
+          <li>表单数据导出（Excel / CSV）</li>
+        </ul>
+
+        <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">40. 互动组件进阶</h4>
+        <table class="metrics-table">
+          <thead>
+            <tr>
+              <th>组件</th>
+              <th>功能</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>投票/问卷</td>
+              <td>单选/多选/评分/量表/投票统计</td>
+            </tr>
+            <tr>
+              <td>抽奖转盘</td>
+              <td>九宫格/大转盘/概率控制/次数限制</td>
+            </tr>
+            <tr>
+              <td>砸金蛋</td>
+              <td>动画效果/奖品配置/中奖率/领取方式</td>
+            </tr>
+            <tr>
+              <td>红包</td>
+              <td>随机金额/固定金额/领取限制/有效期</td>
+            </tr>
+            <tr>
+              <td>签到</td>
+              <td>连续签到奖励/日历打卡/积分发放</td>
+            </tr>
+            <tr>
+              <td>排行榜</td>
+              <td>实时排名/会员等级/自定义规则</td>
+            </tr>
+            <tr>
+              <td>弹幕</td>
+              <td>评论弹幕/祝福弹幕/自定义样式</td>
+            </tr>
+            <tr>
+              <td>接礼物</td>
+              <td>游戏化互动/积分奖励/排行榜</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">41. 3D组件支持（可选）</h4>
+        <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+          <li>3D旋转木马（产品3D展示）</li>
+          <li>3D模型展示（GLB/GLTF格式）</li>
+          <li>3D房间/场景漫游</li>
+          <li>Three.js集成</li>
+          <li>VR全景图组件</li>
+          <li>AR预览（手机扫码预览）</li>
+        </ul>
+
+        <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">42. 编辑器开放API</h4>
+        <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+          <li>页面CRUD API（创建/读取/更新/删除页面）</li>
+          <li>组件操作API（添加/删除/更新组件）</li>
+          <li>模板API（获取模板列表/应用模板）</li>
+          <li>素材API（上传/查询/删除素材）</li>
+          <li>版本API（保存版本/获取历史/回滚）</li>
+          <li>发布API（发布页面/获取发布状态）</li>
+          <li>Webhook通知（页面发布/内容变更回调）</li>
+        </ul>
+
+        <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">43. 国际化/本地化支持</h4>
+        <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+          <li>编辑器界面多语言（中文/英文/其他）</li>
+          <li>编辑器语言切换器</li>
+          <li>静态文本字段标记</li>
+          <li>翻译进度看板</li>
+          <li>翻译导出/导入（XLIFF格式）</li>
+          <li>RTL布局支持</li>
+          <li>数字/日期/货币格式化</li>
+        </ul>
+
+        <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">44. 可视化编辑器权限细化</h4>
+        <table class="metrics-table">
+          <thead>
+            <tr>
+              <th>权限项</th>
+              <th>说明</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>页面查看</td>
+              <td>可查看页面内容，不可编辑</td>
+            </tr>
+            <tr>
+              <td>页面编辑</td>
+              <td>可编辑页面内容</td>
+            </tr>
+            <tr>
+              <td>页面发布</td>
+              <td>可发布页面到线上</td>
+            </tr>
+            <tr>
+              <td>模板管理</td>
+              <td>可创建/修改/删除模板</td>
+            </tr>
+            <tr>
+              <td>组件管理</td>
+              <td>可上传/修改自定义组件</td>
+            </tr>
+            <tr>
+              <td>全局配置</td>
+              <td>可修改全局样式/主题配置</td>
+            </tr>
+            <tr>
+              <td>用户管理</td>
+              <td>可添加/删除/修改其他用户权限</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4 style="margin: 2rem 0 1rem; color: var(--accent);">📦 Asset Center | 素材管理中心（详细）</h4>
+
+      <h4 style="font-size: 0.95rem; margin-bottom: 0.5rem;">1. 素材上传与管理</h4>
+      <table class="metrics-table">
+        <thead>
+          <tr>
+            <th>功能</th>
+            <th>说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>拖拽上传</td>
+            <td>支持拖拽文件或文件夹批量上传</td>
+          </tr>
+          <tr>
+            <td>粘贴上传</td>
+            <td>支持Ctrl+V粘贴图片</td>
+          </tr>
+          <tr>
+            <td>摄像头拍照</td>
+            <td>支持移动端摄像头拍照上传</td>
+          </tr>
+          <tr>
+            <td>相册选择</td>
+            <td>支持从手机相册选择</td>
+          </tr>
+          <tr>
+            <td>URL导入</td>
+            <td>支持输入图片URL拉取图片</td>
+          </tr>
+          <tr>
+            <td>批量上传</td>
+            <td>最多一次50个文件</td>
+          </tr>
+          <tr>
+            <td>上传进度</td>
+            <td>实时显示上传进度/速度/预计时间</td>
+          </tr>
+          <tr>
+            <td>秒传</td>
+            <td>MD5比对，已存在文件秒传</td>
+          </tr>
+          <tr>
+            <td>断点续传</td>
+            <td>上传中断可续传</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">2. 素材处理能力</h4>
+      <div class="two-col">
+        <div>
+          <h5 style="font-size: 0.85rem; color: var(--primary); margin-bottom: 0.3rem;">图片处理</h5>
+          <ul style="font-size: 0.85rem; color: var(--muted); padding-left: 1.2rem;">
+            <li>自动格式转换（WebP/AVIF优先）</li>
+            <li>自动压缩（质量/分辨率控制）</li>
+            <li>裁剪（自由裁剪/比例裁剪/正方形）</li>
+            <li>旋转（90°/180°/任意角度）</li>
+            <li>水印（文字水印/图片水印/位置控制）</li>
+            <li>美白/磨皮（人像照片优化）</li>
+            <li>背景移除（AI抠图）</li>
+            <li>图片拼接（横拼/竖拼）</li>
+          </ul>
+        </div>
+        <div>
+          <h5 style="font-size: 0.85rem; color: var(--primary); margin-bottom: 0.3rem;">视频处理</h5>
+          <ul style="font-size: 0.85rem; color: var(--muted); padding-left: 1.2rem;">
+            <li>视频转码（MP4/WebM格式）</li>
+            <li>缩略图提取（自动/手动选择）</li>
+            <li>视频压缩（分辨率/码率控制）</li>
+            <li>分段截取（起止时间）</li>
+            <li>GIF提取（指定时间段）</li>
+            <li>视频水印（片头片尾/字幕）</li>
+          </ul>
+        </div>
+      </div>
+
+      <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">3. 素材组织与管理</h4>
+      <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+        <li>文件夹层级（支持多级目录）</li>
+        <li>标签系统（多标签/标签筛选）</li>
+        <li>素材重命名（支持批量重命名）</li>
+        <li>收藏素材（标记收藏快速访问）</li>
+        <li>最近使用（显示最近使用素材）</li>
+        <li>回收站（30天内可恢复）</li>
+        <li>批量移动/复制/删除</li>
+        <li>素材详情（尺寸/大小/格式/上传时间/使用位置）</li>
+      </ul>
+
+      <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">4. 素材分析与统计</h4>
+      <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+        <li>空间使用统计（已用/总容量/预警阈值）</li>
+        <li>素材使用排行（被引用次数）</li>
+        <li>未使用素材（未被任何页面引用）</li>
+        <li>重复素材检测（相似图片提示）</li>
+        <li>素材上传趋势（按日/周/月统计）</li>
+        <li>素材类型分布（图片/视频/文档占比）</li>
+      </ul>
+
+      <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">5. 素材安全与权限</h4>
+      <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+        <li>图片版权信息（来源/作者/版权声明）</li>
+        <li>敏感内容检测（黄暴恐AI检测）</li>
+        <li>私有素材（登录后可见）</li>
+        <li>素材访问日志</li>
+        <li>防盗链配置</li>
+        <li>下载权限控制（防止恶意下载）</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <div class="section-title">📦 Product Management | 产品管理系统</div>
+      <div class="two-col">
+        <div>
+          <h4 style="font-size: 0.95rem; margin-bottom: 0.5rem;">产品基础信息</h4>
+          <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+            <li>产品名称/副标题/品牌</li>
+            <li>产品分类（多级分类）</li>
+            <li>产品标签（新品/热卖/促销）</li>
+            <li>产品描述/详情（富文本）</li>
+            <li>产品规格（尺码/颜色/规格）</li>
+            <li>产品属性（自定义属性）</li>
+            <li>产品视频/图片相册</li>
+            <li>SEO信息（标题/描述/关键词）</li>
+          </ul>
+        </div>
+        <div>
+          <h4 style="font-size: 0.95rem; margin-bottom: 0.5rem;">产品库存与价格</h4>
+          <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+            <li>SKU管理（编码/条码/规格组合）</li>
+            <li>库存数量/预警值</li>
+            <li>售价/划线价/会员价</li>
+            <li>成本价（仅内部可见）</li>
+            <li>库存同步策略（实时/定时）</li>
+            <li>多仓库库存管理</li>
+            <li>库存批次管理（生产日期/有效期）</li>
+          </ul>
+        </div>
+      </div>
+
+      <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">产品运营功能</h4>
+      <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+        <li>产品上下架（立即/定时）</li>
+        <li>产品排序权重</li>
+        <li>产品推荐/关联产品</li>
+        <li>产品对比</li>
+        <li>产品收藏/浏览历史</li>
+        <li>产品评价/问答</li>
+        <li>产品分享</li>
+      </ul>
+
+      <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">产品批量操作</h4>
+      <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+        <li>批量上下架</li>
+        <li>批量修改价格/库存</li>
+        <li>批量设置标签</li>
+        <li>批量移动分类</li>
+        <li>批量导出/导入（Excel）</li>
+        <li>产品复制（快速创建相似产品）</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <div class="section-title">👥 Member Management | 会员管理系统</div>
+      <div class="two-col">
+        <div>
+          <h4 style="font-size: 0.95rem; margin-bottom: 0.5rem;">会员基础信息</h4>
+          <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+            <li>手机号/邮箱/昵称/头像</li>
+            <li>注册时间/来源渠道</li>
+            <li>会员等级（普通/银/金/钻）</li>
+            <li>会员标签（自定义）</li>
+            <li>地址管理（收货地址）</li>
+            <li>实名认证信息</li>
+          </ul>
+        </div>
+        <div>
+          <h4 style="font-size: 0.95rem; margin-bottom: 0.5rem;">会员权益体系</h4>
+          <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+            <li>积分规则（获取/消耗）</li>
+            <li>会员等级权益（折扣/优先/专属）</li>
+            <li>生日礼/节日礼</li>
+            <li>专属优惠券/活动</li>
+            <li>积分抵现比例</li>
+            <li>升级条件/保级条件</li>
+          </ul>
+        </div>
+      </div>
+
+      <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">会员运营</h4>
+      <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+        <li>会员列表/筛选/搜索</li>
+        <li>会员详情/消费记录</li>
+        <li>手动调整积分/等级</li>
+        <li>会员分组/标签管理</li>
+        <li>流失预警（沉默/流失会员）</li>
+        <li>会员唤醒（Push/短信/邮件）</li>
+        <li>会员升级/降级通知</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <div class="section-title">🛒 Order Management | 订单管理系统</div>
+      <table class="metrics-table">
+        <thead>
+          <tr>
+            <th>模块</th>
+            <th>功能</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>订单列表</td>
+            <td>订单号/用户/时间/状态/金额筛选；批量操作；导出</td>
+          </tr>
+          <tr>
+            <td>订单详情</td>
+            <td>商品信息/收货地址/支付信息/物流信息/操作日志</td>
+          </tr>
+          <tr>
+            <td>订单状态</td>
+            <td>待付款/待发货/已发货/已完成/已取消/退款中/已退款</td>
+          </tr>
+          <tr>
+            <td>发货管理</td>
+            <td>批量发货/电子面单/物流公司/物流单号</td>
+          </tr>
+          <tr>
+            <td>售后管理</td>
+            <td>退款/退货/换货；审核流程；退款进度</td>
+          </tr>
+          <tr>
+            <td>评价管理</td>
+            <td>评价审核/差评管理/评价回复/评价统计</td>
+          </tr>
+          <tr>
+            <td>发票管理</td>
+            <td>发票申请/开具/寄送/作废</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <div class="section-title">📍 Store Management | 门店管理系统</div>
+      <div class="two-col">
+        <div>
+          <h4 style="font-size: 0.95rem; margin-bottom: 0.5rem;">门店信息</h4>
+          <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+            <li>门店名称/地址/电话</li>
+            <li>门店经纬度（地图标注）</li>
+            <li>营业时间/休息日</li>
+            <li>门店图片/环境照</li>
+            <li>门店简介/特色服务</li>
+            <li>门店标签（直营/加盟）</li>
+          </ul>
+        </div>
+        <div>
+          <h4 style="font-size: 0.95rem; margin-bottom: 0.5rem;">门店功能</h4>
+          <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+            <li>LBS门店查找（距离排序）</li>
+            <li>门店详情/导航</li>
+            <li>门店预约（服务/试吃/试驾）</li>
+            <li>门店排队/取号</li>
+            <li>门店优惠券领取</li>
+            <li>门店评价</li>
+            <li>门店收藏</li>
+          </ul>
+        </div>
+      </div>
+
+      <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">门店运营</h4>
+      <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+        <li>门店列表/地图视图</li>
+        <li>门店新增/编辑/下线</li>
+        <li>门店账号管理（店员/店长）</li>
+        <li>门店数据统计（客流/订单/转化）</li>
+        <li>门店配置（预约规则/排队规则）</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <div class="section-title">📊 Data Analytics | 数据分析体系（详细）</div>
+      <div class="two-col">
+        <div>
+          <h4 style="font-size: 0.95rem; margin-bottom: 0.5rem;">流量分析</h4>
+          <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+            <li>实时访客（在线人数/实时曲线）</li>
+            <li>趋势分析（UV/ PV / 访问时长）</li>
+            <li>来源分析（直接/搜索/社交/广告）</li>
+            <li>地域分布（省/市/城市等级）</li>
+            <li>设备分析（PC/平板/手机）</li>
+            <li>新老访客占比</li>
+            <li>访问深度（1页/2-3页/4页+）</li>
+          </ul>
+        </div>
+        <div>
+          <h4 style="font-size: 0.95rem; margin-bottom: 0.5rem;">转化分析</h4>
+          <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+            <li>漏斗分析（访问→加购→下单→支付）</li>
+            <li>转化率趋势</li>
+            <li>流失节点分析</li>
+            <li>归因分析（哪个渠道贡献最大）</li>
+            <li>ROI分析（广告投放回报）</li>
+          </ul>
+        </div>
+      </div>
+
+      <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">业务分析</h4>
+      <table class="metrics-table">
+        <thead>
+          <tr>
+            <th>维度</th>
+            <th>指标</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>商品</td>
+            <td>曝光/点击/加购/收藏/下单/支付/退货</td>
+          </tr>
+          <tr>
+            <td>订单</td>
+            <td>订单数/金额/客单价/件单价/满减笔数</td>
+          </tr>
+          <tr>
+            <td>会员</td>
+            <td>新增/活跃/留存/流失/升级/降级</td>
+          </tr>
+          <tr>
+            <td>营销</td>
+            <td>优惠领取/核销/带动GMV/ROI</td>
+          </tr>
+          <tr>
+            <td>内容</td>
+            <td>阅读/点赞/评论/收藏/分享</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">数据报表</h4>
+      <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+        <li>核心看板（关键指标一张图）</li>
+        <li>自定义报表（指标/维度/筛选/对比）</li>
+        <li>数据订阅（日报/周报/月报自动推送）</li>
+        <li>异动预警（指标波动超阈值告警）</li>
+        <li>数据导出（Excel/PDF）</li>
+        <li>报表分享（链接/邮件）</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <div class="section-title">🔌 API Design | API设计规范</div>
+      <div class="two-col">
+        <div>
+          <h4 style="font-size: 0.95rem; margin-bottom: 0.5rem;">API规范</h4>
+          <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+            <li>RESTful风格</li>
+            <li>统一响应格式｛code, message, data｝</li>
+            <li>JWT Token认证</li>
+            <li>分页参数（page/ pageSize）</li>
+            <li>时间格式（ISO 8601）</li>
+            <li>国际化字段（i18n）</li>
+            <li>接口版本管理（/v1/ /v2/）</li>
+          </ul>
+        </div>
+        <div>
+          <h4 style="font-size: 0.95rem; margin-bottom: 0.5rem;">接口安全</h4>
+          <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+            <li>签名验证（防止篡改）</li>
+            <li>频率限制（防刷）</li>
+            <li>敏感数据加密</li>
+            <li>CORS跨域配置</li>
+            <li>接口文档（Swagger/OpenAPI）</li>
+          </ul>
+        </div>
+      </div>
+
+      <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">核心接口模块</h4>
+      <table class="metrics-table">
+        <thead>
+          <tr>
+            <th>模块</th>
+            <th>接口示例</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>认证</td>
+            <td>/auth/login, /auth/register, /auth/refresh</td>
+          </tr>
+          <tr>
+            <td>用户</td>
+            <td>/users, /users/:id, /users/me, /users/:id/addresses</td>
+          </tr>
+          <tr>
+            <td>产品</td>
+            <td>/products, /products/:id, /products/:id/reviews</td>
+          </tr>
+          <tr>
+            <td>订单</td>
+            <td>/orders, /orders/:id, /orders/:id/cancel</td>
+          </tr>
+          <tr>
+            <td>支付</td>
+            <td>/payments, /payments/:id/create, /payments/:id/notify</td>
+          </tr>
+          <tr>
+            <td>营销</td>
+            <td>/coupons, /coupons/:id/claim, /promotions</td>
+          </tr>
+          <tr>
+            <td>内容</td>
+            <td>/articles, /articles/:id, /articles/:id/comments</td>
+          </tr>
+          <tr>
+            <td>门店</td>
+            <td>/stores, /stores/:id, /stores/:id/reserve</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <div class="section-title">🗄️ Database Design | 数据库设计要点</div>
+      <table class="metrics-table">
+        <thead>
+          <tr>
+            <th>模块</th>
+            <th>核心表</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>用户</td>
+            <td>users, user_addresses, user_tokens</td>
+          </tr>
+          <tr>
+            <td>会员</td>
+            <td>members, member_levels, member_points_log</td>
+          </tr>
+          <tr>
+            <td>产品</td>
+            <td>products, product_skus, product_specs, categories</td>
+          </tr>
+          <tr>
+            <td>订单</td>
+            <td>orders, order_items, order_refunds, order_comments</td>
+          </tr>
+          <tr>
+            <td>支付</td>
+            <td>payments, payment_logs</td>
+          </tr>
+          <tr>
+            <td>营销</td>
+            <td>coupons, coupon_records, promotions, promotion_rules</td>
+          </tr>
+          <tr>
+            <td>内容</td>
+            <td>articles, article_comments, tags</td>
+          </tr>
+          <tr>
+            <td>门店</td>
+            <td>stores, store_reservations, store_queues</td>
+          </tr>
+          <tr>
+            <td>CMS</td>
+            <td>pages, page_versions, components, templates, assets</td>
+          </tr>
+          <tr>
+            <td>日志</td>
+            <td>operation_logs, login_logs, error_logs</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">数据库设计原则</h4>
+      <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+        <li>字段命名：snake_case</li>
+        <li>主键：bigint自增/UUID</li>
+        <li>时间字段：created_at/updated_at</li>
+        <li>软删除：deleted_at</li>
+        <li>索引：业务查询字段建立索引</li>
+        <li>分库分表：按业务拆分（可选）</li>
+        <li>读写分离：主从复制</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <div class="section-title">🏗️ Deployment Architecture | 部署架构</div>
+      <table class="metrics-table">
+        <thead>
+          <tr>
+            <th>层级</th>
+            <th>组件</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>CDN</td>
+            <td>静态资源（图片/视频/CSS/JS）全球加速</td>
+          </tr>
+          <tr>
+            <td>负载均衡</td>
+            <td>Nginx / SLB 多节点分发</td>
+          </tr>
+          <tr>
+            <td>应用服务</td>
+            <td>多实例容器化部署（K8s）</td>
+          </tr>
+          <tr>
+            <td>缓存层</td>
+            <td>Redis 集群（热点数据/会话/Session）</td>
+          </tr>
+          <tr>
+            <td>数据库</td>
+            <td>PostgreSQL 主从 + 读写分离</td>
+          </tr>
+          <tr>
+            <td>对象存储</td>
+            <td>OSS/COS（图片/视频/文件）</td>
+          </tr>
+          <tr>
+            <td>消息队列</td>
+            <td>RabbitMQ/RocketMQ（异步任务/消息通知）</td>
+          </tr>
+          <tr>
+            <td>搜索服务</td>
+            <td>ElasticSearch（全文搜索/商品搜索）</td>
+          </tr>
+          <tr>
+            <td>日志服务</td>
+            <td>ELK Stack（日志收集/分析/搜索）</td>
+          </tr>
+          <tr>
+            <td>监控告警</td>
+            <td>Prometheus + Grafana（指标/告警）</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4 style="font-size: 0.95rem; margin: 1.5rem 0 0.5rem;">高可用与容灾</h4>
+      <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+        <li>多可用区部署（主备切换）</li>
+        <li>自动扩缩容（K8s HPA）</li>
+        <li>熔断降级（Sentinel/Hystrix）</li>
+        <li>定时备份（数据库/文件）</li>
+        <li>跨地域容灾（可选）</li>
+        <li>灰度发布（金丝雀/蓝绿）</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Technical Stack Recommendations | 技术栈建议</div>
+      <div class="two-col" style="margin-top: 1rem;">
+        <div>
+          <h4 style="font-size: 0.9rem; margin-bottom: 0.5rem;">模板与主题系统</h4>
+          <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+            <li>多套首页模板一键切换</li>
+            <li>全局样式控制（主色/辅色/字体/圆角）</li>
+            <li>组件样式继承/覆盖机制</li>
+            <li>主题预览（不发布即可预览效果）</li>
+            <li>模板市场（未来可扩展）</li>
+          </ul>
+        </div>
+        <div>
+          <h4 style="font-size: 0.9rem; margin-bottom: 0.5rem;">内容审核流</h4>
+          <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+            <li>文章/产品新增需审核（或直接发布）</li>
+            <li>编辑记录完整留存</li>
+            <li>内容变更通知（钉钉/企微/邮件）</li>
+            <li>定时上下架（双11/618自动切换）</li>
+            <li>内容复用（专题/频道灵活组装）</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">🎁 Marketing Tools | 营销工具</div>
+      <div class="two-col">
+        <div>
+          <h4 style="font-size: 0.95rem; margin-bottom: 0.5rem;">优惠券系统</h4>
+          <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+            <li>满减券 / 折扣券 / 兑换券多种类型</li>
+            <li>领取 / 发放 / 批量导入</li>
+            <li>使用条件（满X元/指定品类/新人专享）</li>
+            <li>有效期 / 发放数量 / 每人限领</li>
+            <li>使用统计（领取率/核销率/带动GMV）</li>
+          </ul>
+        </div>
+        <div>
+          <h4 style="font-size: 0.95rem; margin-bottom: 0.5rem;">促销活动</h4>
+          <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+            <li>限时折扣（倒计时 / 秒杀）</li>
+            <li>满额包邮 / 满减 / 买赠</li>
+            <li>拼团（两人团/多人团/阶梯拼团）</li>
+            <li>预售 / 首发 / 会员专享价</li>
+            <li>活动氛围（飘红/专属标签/抢购按钮）</li>
+          </ul>
+        </div>
+      </div>
+      <div style="margin-top: 1rem;">
+        <h4 style="font-size: 0.95rem; margin-bottom: 0.5rem;">CMS 营销配置</h4>
+        <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+          <li>营销活动创建 / 编辑 / 上下架</li>
+          <li>活动时段配置（预热 / 开售 / 结束）</li>
+          <li>库存 / 限购 / 会员等级门槛</li>
+          <li>活动页面可视化编辑</li>
+          <li>促销标签 / Banner 自动展示</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">🔍 Search | 全站搜索</div>
+      <div class="two-col">
+        <div>
+          <h4 style="font-size: 0.95rem; margin-bottom: 0.5rem;">搜索能力</h4>
+          <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+            <li>全文搜索（产品/文章/页面）</li>
+            <li>智能纠错 / 拼音搜索 / 同义词</li>
+            <li>搜索下拉推荐（历史/热词/个性）</li>
+            <li>搜索结果分页 / 排序（相关性/销量/价格）</li>
+            <li>无结果兜底（推荐商品/猜你喜欢）</li>
+          </ul>
+        </div>
+        <div>
+          <h4 style="font-size: 0.95rem; margin-bottom: 0.5rem;">搜索运营</h4>
+          <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+            <li>热搜词管理（添加/删除/排序）</li>
+            <li>搜索词分析（关键词报表/转化率）</li>
+            <li>搜索屏蔽（敏感词/竞品词）</li>
+            <li>搜索排序权重配置</li>
+            <li>搜索广告位（付费推广位）</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">📊 Data Analytics | 数据统计</div>
+      <table class="metrics-table">
+        <thead>
+          <tr>
+            <th>模块</th>
+            <th>指标</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>流量分析</td>
+            <td>UV / PV / 访问深度 / 跳出率 / 页面停留时长 / 来源渠道</td>
+          </tr>
+          <tr>
+            <td>用户行为</td>
+            <td>点击热图 / 滚动深度 / 关注区域 / 路径漏斗</td>
+          </tr>
+          <tr>
+            <td>转化分析</td>
+            <td>浏览→加购率 / 加购→下单率 / 下单→支付率 / 总转化率</td>
+          </tr>
+          <tr>
+            <td>商品分析</td>
+            <td>曝光 / 点击 / 加购 / 收藏 / 销量排行 / 连带率</td>
+          </tr>
+          <tr>
+            <td>营销分析</td>
+            <td>优惠券领取/核销 / 活动GMV / ROI / 客单价提升</td>
+          </tr>
+          <tr>
+            <td>会员分析</td>
+            <td>新增会员 / 活跃度 / 留存率 / 会员GMV占比</td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="margin-top: 1rem;">
+        <h4 style="font-size: 0.95rem; margin-bottom: 0.5rem;">数据报表与导出</h4>
+        <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+          <li>核心指标看板（实时 / 日 / 周 / 月）</li>
+          <li>自定义报表（字段/筛选/分组/图表）</li>
+          <li>数据导出（Excel / CSV / PDF）</li>
+          <li>订阅报表（邮件/推送定期推送）</li>
+          <li>异动预警（指标波动超阈值通知）</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">🔔 Notifications | 消息通知</div>
+      <div class="two-col">
+        <div>
+          <h4 style="font-size: 0.95rem; margin-bottom: 0.5rem;">通知渠道</h4>
+          <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+            <li>站内消息（通知中心/消息列表）</li>
+            <li>短信通知（阿里云/腾讯云SMS）</li>
+            <li>邮件通知（SMTP/发送日志）</li>
+            <li>Push推送（Web Push/APP推送）</li>
+            <li>微信服务号模板消息</li>
+          </ul>
+        </div>
+        <div>
+          <h4 style="font-size: 0.95rem; margin-bottom: 0.5rem;">通知场景</h4>
+          <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+            <li>订单状态通知（付款/发货/收货/退款）</li>
+            <li>会员权益通知（积分变动/等级升级）</li>
+            <li>营销通知（活动开始/优惠券到期）</li>
+            <li>系统通知（账号异常/安全验证）</li>
+            <li>客服通知（工单回复/评价提醒）</li>
+          </ul>
+        </div>
+      </div>
+      <div style="margin-top: 1rem;">
+        <h4 style="font-size: 0.95rem; margin-bottom: 0.5rem;">CMS 通知配置</h4>
+        <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+          <li>通知模板编辑（标题/内容/变量）</li>
+          <li>渠道开关（短信/邮件/推送）</li>
+          <li>发送规则（触发条件/频率限制）</li>
+          <li>黑名单管理（用户拒收）</li>
+          <li>发送记录与失败重试</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">🔗 Third-party Integration | 第三方集成</div>
+      <table class="metrics-table">
+        <thead>
+          <tr>
+            <th>类型</th>
+            <th>集成内容</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>社交登录</td>
+            <td>微信扫码登录 / 支付宝登录 / Apple登录</td>
+          </tr>
+          <tr>
+            <td>支付集成</td>
+            <td>微信支付 / 支付宝 / 云闪付 / 信用卡分期</td>
+          </tr>
+          <tr>
+            <td>地图服务</td>
+            <td>高德地图 / 腾讯地图（门店标注/导航/距离计算）</td>
+          </tr>
+          <tr>
+            <td>客服系统</td>
+            <td>接入现有客服（美洽 / Intercom / 企点）或自建IM</td>
+          </tr>
+          <tr>
+            <td>数据分析</td>
+            <td>Google Analytics / 百度统计 / GrowingIO / 神策</td>
+          </tr>
+          <tr>
+            <td>CDN/存储</td>
+            <td>阿里云OSS / 腾讯云COS / 七牛云</td>
+          </tr>
+          <tr>
+            <td>短信/邮件</td>
+            <td>阿里云SMS / 腾讯云SMS / SendGrid / 邮件推送</td>
+          </tr>
+          <tr>
+            <td>安全验证</td>
+            <td>行为验证码（顶象/腾讯防水墙）/ 短信验证码</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <div class="section-title">📝 Custom Forms | 自定义表单</div>
+      <div class="two-col">
+        <div>
+          <h4 style="font-size: 0.95rem; margin-bottom: 0.5rem;">表单构建器</h4>
+          <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+            <li>拖拽式表单组件（输入框/下拉/日期/文件上传）</li>
+            <li>表单字段自定义（名称/提示/校验/必填）</li>
+            <li>表单布局（单列/多列/分步）</li>
+            <li>条件逻辑（字段显示条件/跳步逻辑）</li>
+            <li>表单预览（PC/手机）</li>
+          </ul>
+        </div>
+        <div>
+          <h4 style="font-size: 0.95rem; margin-bottom: 0.5rem;">应用场景</h4>
+          <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+            <li>活动报名（线下活动/培训/体验）</li>
+            <li>用户调研（问卷/满意度/反馈）</li>
+            <li>预约服务（门店预约/试吃/试驾）</li>
+            <li>加盟申请（信息登记/资质上传）</li>
+            <li>联系我们（多场景表单）</li>
+          </ul>
+        </div>
+      </div>
+      <div style="margin-top: 1rem;">
+        <h4 style="font-size: 0.95rem; margin-bottom: 0.5rem;">表单数据管理</h4>
+        <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+          <li>数据列表（筛选/搜索/导出）</li>
+          <li>数据详情（完整信息/操作记录）</li>
+          <li>表单统计（提交量/转化率/来源分析）</li>
+          <li>自动提醒（新提交通知/超时未处理）</li>
+          <li>数据回落（CRM/Excel/ webhook）</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">🛡️ Security & Compliance | 安全与合规</div>
+      <div class="two-col">
+        <div>
+          <h4 style="font-size: 0.95rem; margin-bottom: 0.5rem;">安全防护</h4>
+          <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+            <li>XSS 跨站脚本过滤</li>
+            <li>CSRF Token 防护</li>
+            <li>SQL 注入防护</li>
+            <li>请求频率限制（防爬/防刷）</li>
+            <li>敏感数据加密存储</li>
+            <li>操作日志完整记录</li>
+          </ul>
+        </div>
+        <div>
+          <h4 style="font-size: 0.95rem; margin-bottom: 0.5rem;">合规要求</h4>
+          <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+            <li>用户隐私协议（弹窗确认）</li>
+            <li>Cookie consent 欧盟标准</li>
+            <li>数据导出权（用户申请导出）</li>
+            <li>账号注销功能</li>
+            <li>ICP 备案（国内服务器）</li>
+            <li>网络安全等保（可选）</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">📋 Operation Logs | 操作日志与备份</div>
+      <div class="two-col">
+        <div>
+          <h4 style="font-size: 0.95rem; margin-bottom: 0.5rem;">操作日志</h4>
+          <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+            <li>后台所有操作记录（谁/何时/做了什么）</li>
+            <li>内容变更记录（修改前/后对比）</li>
+            <li>登录日志（IP/设备/时间）</li>
+            <li>危险操作告警（删除/批量操作）</li>
+            <li>日志查询与导出</li>
+          </ul>
+        </div>
+        <div>
+          <h4 style="font-size: 0.95rem; margin-bottom: 0.5rem;">数据备份</h4>
+          <ul style="font-size: 0.9rem; color: var(--muted); padding-left: 1.2rem;">
+            <li>数据库自动定时备份</li>
+            <li>文件/素材备份</li>
+            <li>备份恢复演练</li>
+            <li>跨区域容灾（可选）</li>
+            <li>CMS 配置导出/导入（换环境迁移）</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Technical Stack Recommendations | 技术栈建议</div>
+      <div class="two-col">
+        <div>
+          <h4 style="margin-bottom: 0.8rem;">官网前台</h4>
+          <ul>
+            <li>Next.js 14+ (App Router, SSR/SSG)</li>
+            <li>Tailwind CSS / styled-components</li>
+            <li>Framer Motion (动画)</li>
+            <li>TypeScript</li>
+          </ul>
+        </div>
+        <div>
+          <h4 style="margin-bottom: 0.8rem;">CMS 后台</h4>
+          <ul>
+            <li>React + Ant Design Pro / semi-design</li>
+            <li>Node.js / Express</li>
+            <li>JSON Schema 动态表单引擎</li>
+            <li>OSS/COS SDK 文件上传</li>
+          </ul>
+        </div>
+      </div>
+      <div class="two-col" style="margin-top: 1rem;">
+        <div>
+          <h4 style="margin-bottom: 0.8rem;">可视化编辑器</h4>
+          <ul>
+            <li>Drag-and-drop 布局引擎（如 react-grid-layout）</li>
+            <li>Block 组件注册机制</li>
+            <li>JSON Schema 定义组件协议</li>
+            <li>Draft.js / Slate 富文本编辑</li>
+          </ul>
+        </div>
+        <div>
+          <h4 style="margin-bottom: 0.8rem;">基础设施</h4>
+          <ul>
+            <li>PostgreSQL + Redis</li>
+            <li>OSS/COS 对象存储（图片/视频/文件）</li>
+            <li>Docker + K8s</li>
+            <li>CI/CD 自动部署</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>品牌官方网站项目组</span>
+    <span>Confidential</span>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>极简台灯 · NOVA</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .breadcrumb {
+      font-size: 13px;
+      color: var(--muted);
+      padding: 20px 0;
+    }
+    .breadcrumb a { color: var(--muted); }
+    .breadcrumb a:hover { color: var(--fg); }
+
+    .product-detail {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      padding: 40px 0;
+    }
+    @media (max-width: 768px) {
+      .product-detail { grid-template-columns: 1fr; }
+    }
+
+    .product-gallery { position: relative; }
+    .main-image {
+      aspect-ratio: 1;
+      background: linear-gradient(135deg, #f5f5f5, #ebebeb);
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+    .thumbnail-list {
+      display: flex;
+      gap: 12px;
+    }
+    .thumbnail {
+      width: 80px;
+      height: 80px;
+      background: #f5f5f5;
+      border-radius: var(--radius);
+      border: 2px solid transparent;
+      cursor: pointer;
+    }
+    .thumbnail.active { border-color: var(--accent); }
+
+    .product-info h1 {
+      font-family: var(--font-display);
+      font-size: 28px;
+      margin-bottom: 12px;
+    }
+    .product-subtitle {
+      color: var(--muted);
+      font-size: 15px;
+      margin-bottom: 24px;
+    }
+    .product-price {
+      font-family: var(--font-mono);
+      font-size: 32px;
+      color: var(--accent);
+      font-weight: 600;
+      margin-bottom: 24px;
+    }
+    .product-price .original {
+      font-size: 16px;
+      color: var(--muted);
+      text-decoration: line-through;
+      margin-left: 12px;
+    }
+
+    .product-promo {
+      background: rgba(201, 100, 66, 0.08);
+      border: 1px solid rgba(201, 100, 66, 0.2);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 24px;
+    }
+    .promo-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--accent);
+    }
+    .promo-item + .promo-item { margin-top: 8px; }
+
+    .product-options { margin-bottom: 24px; }
+    .option-label {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .option-values {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .option-value {
+      padding: 8px 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .option-value:hover, .option-value.active {
+      border-color: var(--fg);
+      background: var(--fg);
+      color: white;
+    }
+    .option-value.disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .quantity-selector {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      width: fit-content;
+    }
+    .quantity-btn {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .quantity-btn:hover { background: var(--bg); }
+    .quantity-input {
+      width: 60px;
+      height: 40px;
+      text-align: center;
+      border: none;
+      border-left: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      font-size: 15px;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: 32px;
+    }
+    .action-buttons .btn { flex: 1; padding: 14px 24px; }
+
+    .product-tabs {
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .tab-header {
+      display: flex;
+      gap: 32px;
+      border-bottom: 1px solid var(--border);
+    }
+    .tab-item {
+      padding: 16px 0;
+      font-size: 14px;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+    }
+    .tab-item.active { color: var(--fg); border-color: var(--accent); }
+    .tab-content { padding: 32px 0; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .spec-table {
+      width: 100%;
+    }
+    .spec-table tr:nth-child(even) { background: var(--bg); }
+    .spec-table th, .spec-table td {
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 14px;
+    }
+    .spec-table th { color: var(--muted); width: 120px; }
+
+    .reviews-list { display: flex; flex-direction: column; gap: 24px; }
+    .review-item {
+      padding: 24px;
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+    }
+    .review-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .reviewer {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .reviewer-avatar {
+      width: 40px;
+      height: 40px;
+      background: var(--accent);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+    .reviewer-name { font-weight: 500; }
+    .review-date { font-size: 12px; color: var(--muted); }
+    .review-rating { color: #f59e0b; }
+    .review-content { color: var(--muted); font-size: 14px; line-height: 1.7; }
+
+    .related-products {
+      margin-top: 80px;
+    }
+    .related-title {
+      font-family: var(--font-display);
+      font-size: 24px;
+      margin-bottom: 24px;
+    }
+    .related-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+    }
+    @media (max-width: 768px) {
+      .related-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <header class="topnav">
+    <div class="container topnav-inner">
+      <a href="index.html" class="logo">NOVA</a>
+      <nav class="nav-links">
+        <a href="products.html">产品</a>
+        <a href="about.html">品牌</a>
+        <a href="content.html">内容</a>
+        <a href="stores.html">门店</a>
+        <a href="contact.html">联系我们</a>
+      </nav>
+      <div class="nav-actions">
+        <a href="member.html" class="btn btn-ghost">登录</a>
+        <a href="cart.html" class="btn btn-ghost" style="position:relative;">
+          🛒
+          <span class="cart-count" style="position:absolute;top:0;right:0;background:var(--accent);color:white;width:18px;height:18px;border-radius:50%;font-size:10px;display:none;align-items:center;justify-content:center;">0</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <p class="breadcrumb">
+        <a href="index.html">首页</a> /
+        <a href="products.html">产品</a> /
+        极简台灯
+      </p>
+
+      <div class="product-detail">
+        <div class="product-gallery">
+          <div class="main-image">[ 产品主图 ]</div>
+          <div class="thumbnail-list">
+            <div class="thumbnail active"></div>
+            <div class="thumbnail"></div>
+            <div class="thumbnail"></div>
+            <div class="thumbnail"></div>
+          </div>
+        </div>
+
+        <div class="product-info">
+          <h1>极简台灯</h1>
+          <p class="product-subtitle">黑胡桃木底座 · 三档调光 · 护眼LED</p>
+
+          <div class="product-price">
+            ¥599 <span class="original">¥799</span>
+          </div>
+
+          <div class="product-promo">
+            <div class="promo-item">🎁 新人首单立减20元</div>
+            <div class="promo-item">🚚 满299包邮</div>
+            <div class="promo-item">⭐ 会员积分可抵用</div>
+          </div>
+
+          <div class="product-options">
+            <div class="option-label">颜色</div>
+            <div class="option-values">
+              <span class="option-value active">原木色</span>
+              <span class="option-value">深木色</span>
+              <span class="option-value disabled">黑色</span>
+            </div>
+          </div>
+
+          <div class="product-options">
+            <div class="option-label">规格</div>
+            <div class="option-values">
+              <span class="option-value active">小号</span>
+              <span class="option-value">大号</span>
+            </div>
+          </div>
+
+          <div class="product-options">
+            <div class="option-label">数量</div>
+            <div class="quantity-selector">
+              <span class="quantity-btn" onclick="changeQty(-1)">−</span>
+              <input type="number" class="quantity-input" value="1" min="1" id="quantity">
+              <span class="quantity-btn" onclick="changeQty(1)">+</span>
+            </div>
+          </div>
+
+          <div class="action-buttons">
+            <button class="btn btn-primary" onclick="addToCart()">加入购物车</button>
+            <button class="btn btn-secondary">立即购买</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-tabs">
+        <div class="tab-header">
+          <span class="tab-item active" data-tab="desc">商品详情</span>
+          <span class="tab-item" data-tab="spec">规格参数</span>
+          <span class="tab-item" data-tab="reviews">用户评价 (128)</span>
+        </div>
+
+        <div class="tab-content">
+          <div class="tab-panel active" id="desc">
+            <div style="max-width:800px;color:var(--muted);line-height:1.8;">
+              <p style="margin-bottom:16px;"><strong>设计理念</strong></p>
+              <p style="margin-bottom:16px;">NOVA 极简台灯采用北欧极简设计语言，以黑胡桃木为底座，搭配磨砂质感灯罩，呈现出温润而现代的气质。灯臂可360°旋转，满足多角度照明需求。</p>
+              <p style="margin-bottom:16px;"><strong>护眼光源</strong></p>
+              <p style="margin-bottom:16px;">采用进口LED芯片，无频闪、无蓝光危害。三档色温可调（3000K暖光/4500K自然光/6000K白光），适应不同场景需求。最大亮度可达800lux，轻松满足阅读照明。</p>
+              <p style="margin-bottom:16px;"><strong>材质工艺</strong></p>
+              <p style="margin-bottom:16px;">底座采用FAS级黑胡桃木，经过12道抛光工艺处理，手感细腻温润。灯罩采用航空级铝合金，表面阳极氧化处理，耐磨耐腐蚀。</p>
+              <p style="margin-bottom:16px;"><strong>智能控制</strong></p>
+              <p>支持触摸调光，长按开/关。USB-C接口供电，支持移动电源供电，方便在多种场景使用。</p>
+            </div>
+          </div>
+
+          <div class="tab-panel" id="spec">
+            <table class="spec-table">
+              <tr><th>品牌</th><td>NOVA</td></tr>
+              <tr><th>型号</th><td>NVD-L001</td></tr>
+              <tr><th>材质</th><td>黑胡桃木 + 航空铝合金</td></tr>
+              <tr><th>光源</th><td>LED (12W)</td></tr>
+              <tr><th>色温</th><td>3000K-6000K 三档可调</td></tr>
+              <tr><th>亮度</th><td>最高800lux</td></tr>
+              <tr><th>尺寸</th><td>小号: 35cm / 大号: 45cm</td></tr>
+              <tr><th>重量</th><td>约1.2kg</td></tr>
+              <tr><th>供电</th><td>DC 12V / USB-C</td></tr>
+              <tr><th>保修</th><td>2年质保</td></tr>
+            </table>
+          </div>
+
+          <div class="tab-panel" id="reviews">
+            <div class="reviews-list">
+              <div class="review-item">
+                <div class="review-header">
+                  <div class="reviewer">
+                    <div class="reviewer-avatar">李</div>
+                    <div>
+                      <div class="reviewer-name">李女士</div>
+                      <div class="review-date">2026-04-15</div>
+                    </div>
+                  </div>
+                  <div class="review-rating">★★★★★</div>
+                </div>
+                <p class="review-content">台灯质量非常好，木质的底座很有质感。灯光柔和不刺眼，暖光模式下特别适合晚上看书。强烈推荐！</p>
+              </div>
+              <div class="review-item">
+                <div class="review-header">
+                  <div class="reviewer">
+                    <div class="reviewer-avatar">张</div>
+                    <div>
+                      <div class="reviewer-name">张先生</div>
+                      <div class="review-date">2026-04-10</div>
+                    </div>
+                  </div>
+                  <div class="review-rating">★★★★★</div>
+                </div>
+                <p class="review-content">设计简约大方，放在书桌上很百搭。三档调光很实用，可以根据不同需求切换。物流也很快，好评！</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <section class="related-products">
+        <h2 class="related-title">为你推荐</h2>
+        <div class="related-grid">
+          <div class="product-card">
+            <div class="product-card-img" style="aspect-ratio:1;background:#f5f5f5;">产品图</div>
+            <div class="product-card-body">
+              <h3 class="product-card-title">香薰蜡烛套装</h3>
+              <span class="product-card-price">¥168</span>
+            </div>
+          </div>
+          <div class="product-card">
+            <div class="product-card-img" style="aspect-ratio:1;background:#f5f5f5;">产品图</div>
+            <div class="product-card-body">
+              <h3 class="product-card-title">实木相框</h3>
+              <span class="product-card-price">¥89</span>
+            </div>
+          </div>
+          <div class="product-card">
+            <div class="product-card-img" style="aspect-ratio:1;background:#f5f5f5;">产品图</div>
+            <div class="product-card-body">
+              <h3 class="product-card-title">超声波香薰机</h3>
+              <span class="product-card-price">¥328</span>
+            </div>
+          </div>
+          <div class="product-card">
+            <div class="product-card-img" style="aspect-ratio:1;background:#f5f5f5;">产品图</div>
+            <div class="product-card-body">
+              <h3 class="product-card-title">陶瓷储物罐</h3>
+              <span class="product-card-price">¥128</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom" style="border:none;padding:0;">
+        <span>© 2026 NOVA Design Co. All rights reserved.</span>
+        <div class="flex gap-lg">
+          <a href="#" style="color:rgba(255,255,255,0.5);">隐私政策</a>
+          <a href="#" style="color:rgba(255,255,255,0.5);">使用条款</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+  <script>
+    (function(){
+      var params = new URLSearchParams(location.search);
+      var pid = params.get('id');
+      var products = JSON.parse(localStorage.getItem('nova_products') || '[]');
+      var p = pid ? products.find(function(x){ return x.id === pid; }) : null;
+
+      if (!p) {
+        document.querySelector('.product-info').innerHTML = '<h1>产品未找到</h1><p style="color:var(--muted);margin-top:16px;">该产品可能已下架或不存在。</p><a href="products.html" class="btn btn-primary" style="margin-top:24px;display:inline-block;">返回产品列表</a>';
+        document.querySelector('.product-gallery').style.display = 'none';
+        document.querySelector('.product-tabs').style.display = 'none';
+        return;
+      }
+
+      document.title = p.name + ' · NOVA';
+      document.querySelector('.breadcrumb').innerHTML = '<a href="index.html">首页</a> / <a href="products.html">产品</a> / ' + NOVA.Utils.escapeHtml(p.name);
+      document.querySelector('.product-info h1').textContent = p.name;
+      document.querySelector('.product-subtitle').textContent = p.desc ? p.desc.substring(0,50) : '';
+      var priceHtml = '¥' + p.price;
+      if (p.originalPrice && p.originalPrice > p.price) {
+        priceHtml = '¥' + p.price + ' <span class="original">¥' + p.originalPrice + '</span>';
+      }
+      document.querySelector('.product-price').innerHTML = priceHtml;
+      document.querySelector('.product-promo').innerHTML = '<div class="promo-item">🎁 新人首单立减20元</div><div class="promo-item">🚚 满299包邮</div><div class="promo-item">⭐ 会员积分可抵用</div>';
+      document.querySelector('.tab-item[data-tab="reviews"]').textContent = '用户评价 (' + (p.reviews||128) + ')';
+
+      window._currentProduct = p;
+    })();
+
+    function changeQty(delta) {
+      var input = document.getElementById('quantity');
+      var val = parseInt(input.value) + delta;
+      if (val < 1) val = 1;
+      if (val > 99) val = 99;
+      input.value = val;
+    }
+
+    function addToCart() {
+      var qty = parseInt(document.getElementById('quantity').value);
+      var p = window._currentProduct;
+      if (p) NOVA.Cart.addItem({id: p.id, name: p.name, price: p.price}, qty);
+    }
+
+    document.querySelectorAll('.tab-item').forEach(function(tab) {
+      tab.addEventListener('click', function() {
+        document.querySelectorAll('.tab-item').forEach(function(t){ t.classList.remove('active'); });
+        document.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.remove('active'); });
+        this.classList.add('active');
+        document.getElementById(this.dataset.tab).classList.add('active');
+      });
+    });
+
+    document.querySelectorAll('.option-values').forEach(function(group) {
+      group.querySelectorAll('.option-value:not(.disabled)').forEach(function(opt) {
+        opt.addEventListener('click', function() {
+          group.querySelectorAll('.option-value').forEach(function(o){ o.classList.remove('active'); });
+          this.classList.add('active');
+        });
+      });
+    });
+
+    document.querySelectorAll('.thumbnail').forEach(function(thumb) {
+      thumb.addEventListener('click', function() {
+        document.querySelectorAll('.thumbnail').forEach(function(t){ t.classList.remove('active'); });
+        this.classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>

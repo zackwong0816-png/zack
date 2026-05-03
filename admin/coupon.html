@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>优惠券 · NOVA CMS</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root { --bg: #0a0a0a; --surface: #141414; --surface2: #1c1c1c; --border: #2a2a2a; --text: #e0e0e0; --muted: #666; --accent: #e07b39; --green: #48bb78; --red: #f56565; --yellow: #ecc94b; --sidebar-w: 220px; }
+    body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    .admin-layout { display: flex; min-height: 100vh; }
+    .sidebar { width: var(--sidebar-w); background: var(--surface); border-right: 1px solid var(--border); position: fixed; height: 100vh; overflow-y: auto; display: flex; flex-direction: column; }
+    .sidebar-logo { padding: 20px; border-bottom: 1px solid var(--border); }
+    .sidebar-logo h1 { font-size: 20px; color: #fff; letter-spacing: 3px; }
+    .sidebar-logo span { font-size: 10px; color: var(--muted); }
+    .sidebar-nav { flex: 1; padding: 12px 0; }
+    .nav-group { margin-bottom: 8px; }
+    .nav-group-title { padding: 8px 20px; font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 20px; color: #999; font-size: 13px; cursor: pointer; border-left: 3px solid transparent; transition: all 0.15s; }
+    .nav-item:hover { background: var(--surface2); color: var(--text); }
+    .nav-item.active { background: var(--surface2); color: var(--accent); border-left-color: var(--accent); }
+    .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+    .main { flex: 1; margin-left: var(--sidebar-w); }
+    .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+    .topbar-left { display: flex; align-items: center; gap: 16px; }
+    .topbar h2 { font-size: 15px; }
+    .breadcrumb { color: var(--muted); font-size: 13px; }
+    .admin-avatar { width: 36px; height: 36px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; cursor: pointer; }
+    .content { padding: 24px; }
+    .panel { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); margin-bottom: 24px; }
+    .panel-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .panel-title { font-size: 14px; font-weight: 500; }
+    .panel-body { padding: 20px; }
+    .btn { display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; border: none; }
+    .btn-sm { padding: 4px 8px; font-size: 11px; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-ghost { background: transparent; color: #999; border: 1px solid var(--border); }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-danger { background: rgba(245,101,101,0.15); color: var(--red); }
+    .btn-success { background: rgba(72,187,120,0.15); color: var(--green); }
+    .btn-warning { background: rgba(236,201,75,0.15); color: var(--yellow); }
+    .filter-row { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+    .filter-btn { padding: 6px 14px; border: 1px solid var(--border); border-radius: 999px; font-size: 12px; cursor: pointer; color: var(--muted); background: none; }
+    .filter-btn:hover, .filter-btn.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+    .search-box { display: flex; gap: 8px; margin-left: auto; }
+    .search-box input { padding: 8px 14px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 13px; width: 180px; }
+    .search-box input:focus { outline: none; border-color: var(--accent); }
+    .table { width: 100%; border-collapse: collapse; }
+    .table th, .table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); }
+    .table th { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; background: var(--bg); }
+    .table tr:last-child td { border-bottom: none; }
+    .table tr:hover { background: var(--surface2); }
+    .status { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 11px; }
+    .status-success { background: rgba(72,187,120,0.15); color: var(--green); }
+    .status-warning { background: rgba(236,201,75,0.15); color: var(--yellow); }
+    .status-error { background: rgba(245,101,101,0.15); color: var(--red); }
+    .status-info { background: rgba(56,178,172,0.15); color: #38b2ac; }
+    .action-btns { display: flex; gap: 6px; }
+    .coupon-card { background: linear-gradient(135deg, var(--accent), #c96a2d); border-radius: 12px; padding: 20px; color: #fff; margin-bottom: 16px; }
+    .coupon-card.inactive { background: var(--surface2); }
+    .coupon-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .coupon-name { font-size: 16px; font-weight: 600; }
+    .coupon-type { font-size: 11px; opacity: 0.8; }
+    .coupon-value { font-size: 36px; font-weight: 700; margin-bottom: 8px; }
+    .coupon-desc { font-size: 12px; opacity: 0.9; margin-bottom: 12px; }
+    .coupon-footer { display: flex; justify-content: space-between; font-size: 11px; opacity: 0.8; }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+    .modal { background: var(--surface); border-radius: 12px; padding: 28px; width: 500px; max-width: 90%; border: 1px solid var(--border); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .modal-title { font-size: 16px; font-weight: 500; }
+    .modal-close { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; cursor: pointer; color: var(--muted); }
+    .modal-close:hover { background: var(--surface2); }
+    .modal-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+    .form-input, .form-select { width: 100%; padding: 10px 14px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 13px; }
+    .form-input:focus, .form-select:focus { outline: none; border-color: var(--accent); }
+    .form-select { appearance: none; cursor: pointer; }
+    .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .text-muted { color: var(--muted); }
+    .text-sm { font-size: 12px; }
+    .text-xs { font-size: 11px; }
+    .hidden { display: none !important; }
+    .toast { position: fixed; bottom: 24px; right: 24px; background: var(--text); color: var(--bg); padding: 14px 20px; border-radius: 8px; font-size: 13px; z-index: 2000; animation: slideIn 0.3s ease; }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+  </style>
+</head>
+<body>
+  <div class="admin-layout">
+    <aside class="sidebar">
+      <div class="sidebar-logo"><h1>NOVA</h1><span>CMS ADMIN</span></div>
+      <nav class="sidebar-nav">
+        <div class="nav-group"><div class="nav-group-title">主面板</div>
+          <a class="nav-item" href="index.html"><span class="nav-icon">📊</span> 工作台</a>
+          <a class="nav-item" href="analytics.html"><span class="nav-icon">📈</span> 数据统计</a>
+        </div>
+        <div class="nav-group"><div class="nav-group-title">内容管理</div>
+          <a class="nav-item" href="pages.html"><span class="nav-icon">📄</span> 页面管理</a>
+          <a class="nav-item" href="media.html"><span class="nav-icon">🖼️</span> 素材中心</a>
+          <a class="nav-item" href="content.html"><span class="nav-icon">📝</span> 内容管理</a>
+          <a class="nav-item" href="messages.html"><span class="nav-icon">💬</span> 留言管理</a>
+        </div>
+        <div class="nav-group"><div class="nav-group-title">商品管理</div>
+          <a class="nav-item" href="products.html"><span class="nav-icon">📦</span> 产品管理</a>
+          <a class="nav-item" href="categories.html"><span class="nav-icon">🏷️</span> 分类管理</a>
+          <a class="nav-item" href="inventory.html"><span class="nav-icon">📋</span> 库存管理</a>
+        </div>
+        <div class="nav-group"><div class="nav-group-title">用户与订单</div>
+          <a class="nav-item" href="members.html"><span class="nav-icon">👥</span> 会员管理</a>
+          <a class="nav-item" href="orders.html"><span class="nav-icon">🛒</span> 订单管理</a>
+          <a class="nav-item" href="stores.html"><span class="nav-icon">🏪</span> 门店管理</a>
+        </div>
+        <div class="nav-group"><div class="nav-group-title">营销工具</div>
+          <a class="nav-item active" href="coupon.html"><span class="nav-icon">🎫</span> 优惠券</a>
+          <a class="nav-item" href="promo.html"><span class="nav-icon">🔥</span> 促销活动</a>
+        </div>
+        <div class="nav-group"><div class="nav-group-title">系统</div>
+          <a class="nav-item" href="settings.html"><span class="nav-icon">⚙️</span> 设置</a>
+          <a class="nav-item" href="login.html"><span class="nav-icon">🚪</span> 退出</a>
+        </div>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-left">
+          <h2>NOVA 管理后台</h2>
+          <span class="breadcrumb">/ 营销工具 / 优惠券</span>
+        </div>
+        <div class="topbar-right">
+          <button class="btn btn-primary" onclick="openCouponModal()">+ 创建优惠券</button>
+          <div class="admin-avatar">管</div>
+        </div>
+      </header>
+
+      <div class="content">
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">🎫 优惠券列表</span>
+          </div>
+          <div class="panel-body">
+            <div class="filter-row">
+              <button class="filter-btn active" data-filter="all" onclick="setFilter('all')">全部</button>
+              <button class="filter-btn" data-filter="active" onclick="setFilter('active')">进行中</button>
+              <button class="filter-btn" data-filter="upcoming" onclick="setFilter('upcoming')">未开始</button>
+              <button class="filter-btn" data-filter="expired" onclick="setFilter('expired')">已过期</button>
+              <div class="search-box">
+                <input type="text" placeholder="搜索优惠券名称..." id="search-input" oninput="renderCoupons()">
+              </div>
+            </div>
+            <div id="coupon-list"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="modal-overlay hidden" id="coupon-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title" id="modal-title">创建优惠券</span>
+        <div class="modal-close" onclick="closeCouponModal()">×</div>
+      </div>
+      <div class="modal-grid">
+        <div class="form-group" style="grid-column:1/-1;">
+          <label class="form-label">优惠券名称 *</label>
+          <input type="text" class="form-input" id="c-name" placeholder="例如：新人专享50元券">
+        </div>
+        <div class="form-group">
+          <label class="form-label">优惠类型</label>
+          <select class="form-select" id="c-type">
+            <option value="cash">满减券</option>
+            <option value="discount">折扣券</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">面值 *</label>
+          <input type="number" class="form-input" id="c-value" placeholder="50" min="1">
+        </div>
+        <div class="form-group">
+          <label class="form-label">使用门槛 (满X元)</label>
+          <input type="number" class="form-input" id="c-threshold" placeholder="200" min="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">发行数量</label>
+          <input type="number" class="form-input" id="c-total" placeholder="1000" min="1">
+        </div>
+        <div class="form-group">
+          <label class="form-label">每人限领</label>
+          <input type="number" class="form-input" id="c-per-user" placeholder="1" min="1" value="1">
+        </div>
+        <div class="form-group">
+          <label class="form-label">开始时间</label>
+          <input type="date" class="form-input" id="c-start">
+        </div>
+        <div class="form-group">
+          <label class="form-label">结束时间</label>
+          <input type="date" class="form-input" id="c-end">
+        </div>
+        <div class="form-group" style="grid-column:1/-1;">
+          <label class="form-label">描述/使用说明</label>
+          <input type="text" class="form-input" id="c-desc" placeholder="例如：仅限新品使用，不可与其他优惠同用">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeCouponModal()">取消</button>
+        <button class="btn btn-primary" onclick="saveCoupon()">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    if (!sessionStorage.getItem('nova_admin')) location.href = 'login.html';
+
+    const COUPONS_KEY = 'nova_coupons';
+    let coupons = JSON.parse(localStorage.getItem(COUPONS_KEY) || 'null') || [
+      { id: 'c1', name: '新人专享券', type: 'cash', value: 50, threshold: 200, total: 5000, issued: 3420, used: 2156, perUser: 1, start: '2026-01-01', end: '2026-06-30', desc: '新用户首单专享', status: 'active' },
+      { id: 'c2', name: '五一黄金周特惠', type: 'discount', value: 8, threshold: 0, total: 10000, issued: 5230, used: 890, perUser: 2, start: '2026-05-01', end: '2026-05-07', desc: '全场8折，最高减100元', status: 'upcoming' },
+      { id: 'c3', name: '会员专属95折', type: 'discount', value: 95, threshold: 0, total: 99999, issued: 1200, used: 340, perUser: 5, start: '2026-04-01', end: '2026-12-31', desc: '银卡及以上会员专享', status: 'active' },
+      { id: 'c4', name: '满500减80', type: 'cash', value: 80, threshold: 500, total: 3000, issued: 1890, used: 720, perUser: 2, start: '2026-03-01', end: '2026-03-31', desc: '春季家装节', status: 'expired' },
+      { id: 'c5', name: '限时闪购券', type: 'cash', value: 30, threshold: 150, total: 500, issued: 500, used: 489, perUser: 1, start: '2026-04-25', end: '2026-04-28', desc: '周末限时抢', status: 'expired' },
+    ];
+    let editingId = null;
+    let currentFilter = 'all';
+
+    save();
+
+    function save() { localStorage.setItem(COUPONS_KEY, JSON.stringify(coupons)); }
+
+    function toast(msg) {
+      const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(() => { t.style.animation = 'slideIn 0.3s ease reverse'; setTimeout(() => t.remove(), 300); }, 2500);
+    }
+
+    function getStatus(status, start, end) {
+      const now = new Date();
+      const s = new Date(start);
+      const e = new Date(end);
+      if (now < s) return ['未开始', 'status-warning'];
+      if (now > e) return ['已过期', 'status-error'];
+      return ['进行中', 'status-success'];
+    }
+
+    function getCouponValue(c) {
+      if (c.type === 'cash') return '¥' + c.value;
+      return c.value + '折';
+    }
+
+    function setFilter(f) {
+      currentFilter = f;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.dataset.filter === f));
+      renderCoupons();
+    }
+
+    function renderCoupons() {
+      const search = document.getElementById('search-input').value.toLowerCase();
+      const now = new Date();
+      let filtered = coupons.filter(c => {
+        const matchSearch = !search || c.name.toLowerCase().includes(search);
+        if (!matchSearch) return false;
+        if (currentFilter === 'all') return true;
+        const [label] = getStatus(c.status, c.start, c.end);
+        if (currentFilter === 'active') return label === '进行中';
+        if (currentFilter === 'upcoming') return label === '未开始';
+        if (currentFilter === 'expired') return label === '已过期';
+        return true;
+      });
+
+      const list = document.getElementById('coupon-list');
+      if (filtered.length === 0) {
+        list.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);">暂无优惠券</div>';
+        return;
+      }
+
+      list.innerHTML = filtered.map(c => {
+        const [statusLabel, statusClass] = getStatus(c.status, c.start, c.end);
+        const rate = c.total > 0 ? ((c.used / c.total) * 100).toFixed(1) + '%' : '-';
+        return `
+          <div class="coupon-card${statusLabel === '已过期' ? ' inactive' : ''}">
+            <div class="coupon-header">
+              <div>
+                <div class="coupon-name">${c.name}</div>
+                <div class="coupon-type">${c.type === 'cash' ? '满减券' : '折扣券'}</div>
+              </div>
+              <span class="status ${statusClass}">${statusLabel}</span>
+            </div>
+            <div class="coupon-value">${getCouponValue(c)}</div>
+            <div class="coupon-desc">${c.desc || '无描述'}</div>
+            <div class="coupon-footer">
+              <span>${c.start} ~ ${c.end}</span>
+              <span>已用 ${c.used}/${c.total} · 核销率 ${rate}</span>
+            </div>
+            <div style="margin-top:12px;display:flex;gap:8px;">
+              <button class="btn btn-sm" style="background:rgba(255,255,255,0.2);color:#fff;" onclick="editCoupon('${c.id}')">编辑</button>
+              ${statusLabel === '进行中' ? `<button class="btn btn-sm" style="background:rgba(245,101,101,0.3);color:#fff;" onclick="stopCoupon('${c.id}')">停用</button>` : ''}
+              <button class="btn btn-sm" style="background:rgba(245,101,101,0.3);color:#fff;" onclick="deleteCoupon('${c.id}')">删除</button>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    function openCouponModal(id) {
+      editingId = id;
+      document.getElementById('modal-title').textContent = id ? '编辑优惠券' : '创建优惠券';
+      if (id) {
+        const c = coupons.find(x => x.id === id);
+        if (c) {
+          document.getElementById('c-name').value = c.name;
+          document.getElementById('c-type').value = c.type;
+          document.getElementById('c-value').value = c.type === 'discount' ? c.value : c.value;
+          document.getElementById('c-threshold').value = c.threshold || '';
+          document.getElementById('c-total').value = c.total;
+          document.getElementById('c-per-user').value = c.perUser;
+          document.getElementById('c-start').value = c.start;
+          document.getElementById('c-end').value = c.end;
+          document.getElementById('c-desc').value = c.desc || '';
+        }
+      } else {
+        ['c-name', 'c-value', 'c-threshold', 'c-total', 'c-desc'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('c-type').value = 'cash';
+        document.getElementById('c-per-user').value = '1';
+        document.getElementById('c-start').value = new Date().toISOString().slice(0, 10);
+        document.getElementById('c-end').value = '';
+      }
+      document.getElementById('coupon-modal').classList.remove('hidden');
+    }
+
+    function editCoupon(id) { openCouponModal(id); }
+
+    function closeCouponModal() { document.getElementById('coupon-modal').classList.add('hidden'); editingId = null; }
+
+    function saveCoupon() {
+      const name = document.getElementById('c-name').value.trim();
+      const value = parseInt(document.getElementById('c-value').value);
+      if (!name || isNaN(value)) { toast('请填写名称和面值'); return; }
+      const data = {
+        name,
+        type: document.getElementById('c-type').value,
+        value,
+        threshold: parseInt(document.getElementById('c-threshold').value) || 0,
+        total: parseInt(document.getElementById('c-total').value) || 1000,
+        perUser: parseInt(document.getElementById('c-per-user').value) || 1,
+        start: document.getElementById('c-start').value,
+        end: document.getElementById('c-end').value,
+        desc: document.getElementById('c-desc').value,
+        status: 'active',
+        issued: editingId ? coupons.find(x => x.id === editingId)?.issued || 0 : 0,
+        used: editingId ? coupons.find(x => x.id === editingId)?.used || 0 : 0,
+      };
+      if (editingId) {
+        const idx = coupons.findIndex(x => x.id === editingId);
+        if (idx > -1) coupons[idx] = { ...coupons[idx], ...data };
+      } else {
+        data.id = 'c_' + Date.now();
+        coupons.unshift(data);
+      }
+      save();
+      closeCouponModal();
+      renderCoupons();
+      toast(editingId ? '优惠券已更新' : '优惠券已创建');
+    }
+
+    function stopCoupon(id) {
+      if (!confirm('确定停用此优惠券？')) return;
+      const c = coupons.find(x => x.id === id);
+      if (c) { c.status = 'stopped'; save(); renderCoupons(); toast('优惠券已停用'); }
+    }
+
+    function deleteCoupon(id) {
+      if (!confirm('确定删除此优惠券？')) return;
+      coupons = coupons.filter(x => x.id !== id);
+      save();
+      renderCoupons();
+      toast('优惠券已删除');
+    }
+
+    document.querySelector('.admin-avatar').addEventListener('click', function() { if (confirm('确定要退出登录吗？')) location.href = 'login.html'; });
+
+    renderCoupons();
+  </script>
+</body>
+</html>

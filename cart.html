@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>购物车 · NOVA</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .page-header { padding: 40px 0; border-bottom: 1px solid var(--border); }
+    .page-title { font-family: var(--font-display); font-size: 28px; }
+
+    .cart-layout {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 40px;
+      padding: 40px 0;
+    }
+    @media (max-width: 992px) {
+      .cart-layout { grid-template-columns: 1fr; }
+    }
+
+    .cart-items { }
+    .cart-item {
+      display: grid;
+      grid-template-columns: 100px 1fr auto;
+      gap: 20px;
+      padding: 24px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .cart-item-img {
+      width: 100px;
+      height: 100px;
+      background: #f5f5f5;
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      font-size: 11px;
+    }
+    .cart-item-info h3 { font-size: 16px; margin-bottom: 4px; }
+    .cart-item-info p { color: var(--muted); font-size: 13px; }
+    .cart-item-price {
+      font-family: var(--font-mono);
+      font-size: 18px;
+      color: var(--accent);
+      font-weight: 600;
+      margin-top: 8px;
+    }
+    .cart-item-actions { text-align: right; }
+    .qty-control {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .qty-control button {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg);
+    }
+    .qty-control input {
+      width: 48px;
+      height: 32px;
+      text-align: center;
+      border: none;
+      font-size: 14px;
+    }
+    .remove-btn {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 12px;
+      display: inline-block;
+    }
+    .remove-btn:hover { color: var(--error); }
+
+    .cart-summary {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      position: sticky;
+      top: 100px;
+    }
+    .summary-title { font-size: 18px; font-weight: 600; margin-bottom: 20px; }
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      font-size: 14px;
+    }
+    .summary-row.total {
+      border-top: 1px solid var(--border);
+      margin-top: 10px;
+      padding-top: 16px;
+      font-size: 18px;
+      font-weight: 600;
+    }
+    .summary-row.total .summary-value {
+      color: var(--accent);
+      font-family: var(--font-mono);
+    }
+    .checkout-btn {
+      width: 100%;
+      margin-top: 20px;
+    }
+    .summary-note {
+      font-size: 12px;
+      color: var(--muted);
+      text-align: center;
+      margin-top: 16px;
+    }
+
+    .empty-cart {
+      text-align: center;
+      padding: 80px 0;
+    }
+    .empty-cart-icon {
+      font-size: 64px;
+      margin-bottom: 24px;
+    }
+    .empty-cart h2 { font-size: 24px; margin-bottom: 12px; }
+    .empty-cart p { color: var(--muted); margin-bottom: 24px; }
+
+    .promo-code {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    .promo-code input {
+      flex: 1;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 14px;
+    }
+    .promo-code button {
+      padding: 10px 16px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <header class="topnav">
+    <div class="container topnav-inner">
+      <a href="index.html" class="logo">NOVA</a>
+      <nav class="nav-links">
+        <a href="products.html">产品</a>
+        <a href="about.html">品牌</a>
+        <a href="content.html">内容</a>
+        <a href="stores.html">门店</a>
+        <a href="contact.html">联系我们</a>
+      </nav>
+      <div class="nav-actions">
+        <a href="member.html" class="btn btn-ghost">登录</a>
+        <a href="cart.html" class="btn btn-ghost" style="position:relative;">
+          🛒
+          <span class="cart-count" style="position:absolute;top:0;right:0;background:var(--accent);color:white;width:18px;height:18px;border-radius:50%;font-size:10px;display:none;align-items:center;justify-content:center;">0</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <div class="page-header">
+        <h1 class="page-title">购物车</h1>
+      </div>
+
+      <div id="cart-content">
+        <!-- Cart items will be rendered here -->
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom" style="border:none;padding:0;">
+        <span>© 2026 NOVA Design Co. All rights reserved.</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+  <script>
+    function renderCart() {
+      const items = NOVA.Cart.getItems();
+      const container = document.getElementById('cart-content');
+
+      if (items.length === 0) {
+        container.innerHTML = `
+          <div class="empty-cart">
+            <div class="empty-cart-icon">🛒</div>
+            <h2>购物车是空的</h2>
+            <p>快去挑选心仪的商品吧</p>
+            <a href="products.html" class="btn btn-primary">去购物</a>
+          </div>
+        `;
+        return;
+      }
+
+      const total = NOVA.Cart.getTotal();
+      const shipping = total >= 299 ? 0 : 15;
+
+      container.innerHTML = `
+        <div class="cart-layout">
+          <div class="cart-items">
+            ${items.map(item => `
+              <div class="cart-item">
+                <div class="cart-item-img">产品图</div>
+                <div class="cart-item-info">
+                  <h3>${item.name}</h3>
+                  <p>${item.name}</p>
+                  <div class="cart-item-price">¥${item.price}</div>
+                </div>
+                <div class="cart-item-actions">
+                  <div class="qty-control">
+                    <button onclick="updateQty(${item.id}, -1)">−</button>
+                    <input type="number" value="${item.quantity}" min="1" onchange="setQty(${item.id}, this.value)">
+                    <button onclick="updateQty(${item.id}, 1)">+</button>
+                  </div>
+                  <a href="#" class="remove-btn" onclick="removeItem(${item.id})">删除</a>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+          <div class="cart-summary">
+            <h3 class="summary-title">订单摘要</h3>
+            <div class="summary-row">
+              <span>商品总额</span>
+              <span>¥${total.toFixed(2)}</span>
+            </div>
+            <div class="summary-row">
+              <span>运费</span>
+              <span>${shipping === 0 ? '免费' : '¥' + shipping}</span>
+            </div>
+            <div class="promo-code">
+              <input type="text" placeholder="输入优惠码">
+              <button>使用</button>
+            </div>
+            <div class="summary-row total">
+              <span>合计</span>
+              <span class="summary-value">¥${(total + shipping).toFixed(2)}</span>
+            </div>
+            <a href="checkout.html" class="btn btn-primary checkout-btn">去结算</a>
+            <p class="summary-note">* 满299元免运费</p>
+          </div>
+        </div>
+      `;
+    }
+
+    function updateQty(id, delta) {
+      const items = NOVA.Cart.getItems();
+      const item = items.find(i => i.id === id);
+      if (item) {
+        NOVA.Cart.updateQuantity(id, item.quantity + delta);
+        renderCart();
+      }
+    }
+
+    function setQty(id, val) {
+      NOVA.Cart.updateQuantity(id, parseInt(val));
+      renderCart();
+    }
+
+    function removeItem(id) {
+      NOVA.Cart.removeItem(id);
+      renderCart();
+    }
+
+    renderCart();
+  </script>
+</body>
+</html>

@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>产品列表 · NOVA</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .page-header {
+      background: var(--surface);
+      padding: 40px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .breadcrumb {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+    .breadcrumb a { color: var(--muted); }
+    .breadcrumb a:hover { color: var(--fg); }
+    .page-title { font-family: var(--font-display); font-size: 32px; margin-bottom: 8px; }
+    .page-desc { color: var(--muted); }
+
+    .filter-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .filter-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+    .filter-tag {
+      padding: 8px 16px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .filter-tag:hover, .filter-tag.active {
+      background: var(--fg);
+      color: white;
+      border-color: var(--fg);
+    }
+    .filter-sort {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .filter-sort select {
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 13px;
+    }
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+    }
+    @media (max-width: 992px) { .product-grid { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 768px) { .product-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 480px) { .product-grid { grid-template-columns: 1fr; } }
+
+    .product-card .product-card-img {
+      aspect-ratio: 1;
+      background: linear-gradient(135deg, #f5f5f5, #ebebeb);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      font-size: 12px;
+      position: relative;
+    }
+    .product-card .quick-actions {
+      position: absolute;
+      bottom: 12px;
+      left: 12px;
+      right: 12px;
+      display: flex;
+      gap: 8px;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .product-card:hover .quick-actions { opacity: 1; }
+    .quick-actions .btn {
+      flex: 1;
+      padding: 8px;
+      font-size: 12px;
+      background: white;
+      border-radius: 6px;
+      text-align: center;
+    }
+    .quick-actions .btn:hover {
+      background: var(--accent);
+      color: white;
+    }
+
+    .pagination {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 48px;
+    }
+    .pagination button {
+      width: 40px;
+      height: 40px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    .pagination button:hover, .pagination button.active {
+      background: var(--fg);
+      color: white;
+      border-color: var(--fg);
+    }
+    .pagination button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .sidebar {
+      width: 280px;
+      flex-shrink: 0;
+    }
+    .filter-section {
+      margin-bottom: 32px;
+    }
+    .filter-section-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .filter-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .filter-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .filter-option:hover { color: var(--fg); }
+    .filter-option input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--accent);
+    }
+    .filter-option-count {
+      margin-left: auto;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .price-range {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .price-range input {
+      width: 100px;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 13px;
+    }
+
+    .products-layout {
+      display: flex;
+      gap: 48px;
+    }
+    @media (max-width: 992px) {
+      .products-layout { flex-direction: column; }
+      .sidebar { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topnav">
+    <div class="container topnav-inner">
+      <a href="index.html" class="logo">NOVA</a>
+      <nav class="nav-links">
+        <a href="products.html" class="active">产品</a>
+        <a href="about.html">品牌</a>
+        <a href="content.html">内容</a>
+        <a href="stores.html">门店</a>
+        <a href="contact.html">联系我们</a>
+      </nav>
+      <div class="nav-actions">
+        <a href="member.html" class="btn btn-ghost">登录</a>
+        <a href="cart.html" class="btn btn-ghost" style="position:relative;">
+          🛒
+          <span class="cart-count" style="position:absolute;top:0;right:0;background:var(--accent);color:white;width:18px;height:18px;border-radius:50%;font-size:10px;display:none;align-items:center;justify-content:center;">0</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="page-header">
+      <div class="container">
+        <p class="breadcrumb"><a href="index.html">首页</a> / 产品</p>
+        <h1 class="page-title">全部产品</h1>
+        <p class="page-desc">共 128 件商品</p>
+      </div>
+    </div>
+
+    <section class="section">
+      <div class="container">
+        <div class="filter-bar">
+          <div class="filter-tags">
+            <span class="filter-tag active" data-filter="all">全部</span>
+            <span class="filter-tag" data-filter="on_sale">热卖</span>
+            <span class="filter-tag" data-filter="stockout">缺货</span>
+          </div>
+          <div class="filter-sort">
+            <span>排序：</span>
+            <select>
+              <option>综合推荐</option>
+              <option>销量优先</option>
+              <option>价格从低到高</option>
+              <option>价格从高到低</option>
+              <option>最新上架</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="products-layout">
+          <!-- Sidebar Filters -->
+          <aside class="sidebar">
+            <div class="filter-section">
+              <h3 class="filter-section-title">商品分类</h3>
+              <div class="filter-options">
+                <label class="filter-option">
+                  <input type="checkbox" checked> 全部
+                </label>
+                <label class="filter-option">
+                  <input type="checkbox"> 家居装饰 <span class="filter-option-count">45</span>
+                </label>
+                <label class="filter-option">
+                  <input type="checkbox"> 餐厨用品 <span class="filter-option-count">38</span>
+                </label>
+                <label class="filter-option">
+                  <input type="checkbox"> 个人护理 <span class="filter-option-count">26</span>
+                </label>
+                <label class="filter-option">
+                  <input type="checkbox"> 办公文具 <span class="filter-option-count">19</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="filter-section">
+              <h3 class="filter-section-title">价格区间</h3>
+              <div class="price-range">
+                <input type="number" placeholder="最低价" value="0">
+                <span>—</span>
+                <input type="number" placeholder="最高价" value="1000">
+              </div>
+            </div>
+
+            <div class="filter-section">
+              <h3 class="filter-section-title">材质</h3>
+              <div class="filter-options">
+                <label class="filter-option"><input type="checkbox"> 实木</label>
+                <label class="filter-option"><input type="checkbox"> 陶瓷</label>
+                <label class="filter-option"><input type="checkbox"> 玻璃</label>
+                <label class="filter-option"><input type="checkbox"> 金属</label>
+                <label class="filter-option"><input type="checkbox"> 布艺</label>
+              </div>
+            </div>
+
+            <div class="filter-section">
+              <h3 class="filter-section-title">颜色</h3>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <span style="width:24px;height:24px;background:#1a1a2e;border-radius:50%;cursor:pointer;"></span>
+                <span style="width:24px;height:24px;background:#c96442;border-radius:50%;cursor:pointer;"></span>
+                <span style="width:24px;height:24px;background:#10b981;border-radius:50%;cursor:pointer;"></span>
+                <span style="width:24px;height:24px;background:#f59e0b;border-radius:50%;cursor:pointer;"></span>
+                <span style="width:24px;height:24px;background:#6b6964;border-radius:50%;cursor:pointer;"></span>
+                <span style="width:24px;height:24px;background:#f5f5f5;border-radius:50%;cursor:pointer;border:1px solid var(--border);"></span>
+              </div>
+            </div>
+          </aside>
+
+          <!-- Product Grid -->
+          <div class="product-grid" id="product-grid">
+            <!-- Products loaded from localStorage -->
+          </div>
+        </div>
+
+        <div class="pagination" id="pagination">
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom" style="border:none;padding:0;">
+        <span>© 2026 NOVA Design Co. All rights reserved.</span>
+        <div class="flex gap-lg">
+          <a href="#" style="color:rgba(255,255,255,0.5);">隐私政策</a>
+          <a href="#" style="color:rgba(255,255,255,0.5);">使用条款</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+  <script>
+    (function(){
+      var allProducts = JSON.parse(localStorage.getItem('nova_products') || '[]');
+      var currentPage = 1;
+      var pageSize = 8;
+      var currentFilter = 'all';
+      var grid = document.getElementById('product-grid');
+      var pagEl = document.getElementById('pagination');
+      var countEl = document.querySelector('.page-desc');
+
+      function getFiltered() {
+        return allProducts.filter(function(p) {
+          if (currentFilter === 'on_sale') return p.status === 'on_sale' && p.stock > 0;
+          if (currentFilter === 'stockout') return p.stock === 0;
+          return p.status === 'on_sale' && p.stock > 0;
+        });
+      }
+
+      function renderProducts() {
+        var filtered = getFiltered();
+        var total = filtered.length;
+        if (countEl) countEl.textContent = '共 ' + total + ' 件商品';
+        var start = (currentPage - 1) * pageSize;
+        var page = filtered.slice(start, start + pageSize);
+
+        if (!page.length) {
+          grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--muted);padding:60px 0;">暂无产品，请从后台添加</p>';
+          pagEl.innerHTML = '';
+          return;
+        }
+
+        grid.innerHTML = page.map(function(p) {
+          var tags = '';
+          if (p.featured) tags += '<span class="product-tag" style="background:#10b981;">精选</span>';
+          if (p.stock === 0) tags += '<span class="product-tag" style="background:#f59e0b;">缺货</span>';
+          var priceHtml = '¥' + p.price;
+          if (p.originalPrice && p.originalPrice > p.price) {
+            priceHtml = '¥' + p.price + '<span class="original">¥' + p.originalPrice + '</span>';
+          }
+          return '<div class="product-card">' +
+            (tags ? '<div class="product-tags">' + tags + '</div>' : '') +
+            '<div class="product-card-img">产品图<div class="quick-actions">' +
+            '<button class="btn" onclick="NOVA.Cart.addItem({id:\'' + p.id + '\',name:\'' + String(p.name).replace(/'/g, "\\'") + '\',price:' + p.price + '})">加入购物车</button>' +
+            '</div></div>' +
+            '<div class="product-card-body">' +
+            '<h3 class="product-card-title">' + p.name + '</h3>' +
+            '<p class="product-card-meta">' + (p.desc||'').substring(0,20) + '</p>' +
+            '<span class="product-card-price">' + priceHtml + '</span>' +
+            '</div></div>';
+        }).join('');
+
+        var totalPages = Math.ceil(total / pageSize);
+        var pagHtml = '<button ' + (currentPage<=1?'disabled':'onclick="changePage(' + (currentPage-1) + ')"') + '>‹</button>';
+        for (var i=1; i<=totalPages; i++) {
+          pagHtml += '<button ' + (i===currentPage?'class="active"':'onclick="changePage(' + i + ')"') + '>' + i + '</button>';
+        }
+        pagHtml += '<button ' + (currentPage>=totalPages?'disabled':'onclick="changePage(' + (currentPage+1) + ')"') + '>›</button>';
+        pagEl.innerHTML = pagHtml;
+      }
+
+      window.changePage = function(n) {
+        currentPage = n;
+        renderProducts();
+        window.scrollTo({top: grid.offsetTop - 120, behavior:'smooth'});
+      };
+
+      document.querySelectorAll('.filter-tag').forEach(function(tag) {
+        tag.addEventListener('click', function() {
+          document.querySelectorAll('.filter-tag').forEach(function(t){ t.classList.remove('active'); });
+          this.classList.add('active');
+          currentFilter = this.dataset.filter || 'all';
+          currentPage = 1;
+          renderProducts();
+        });
+      });
+
+      renderProducts();
+    })();
+  </script>
+</body>
+</html>

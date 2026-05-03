@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>订单管理 · NOVA CMS</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root { --bg: #0a0a0a; --surface: #141414; --surface2: #1c1c1c; --border: #2a2a2a; --text: #e0e0e0; --muted: #666; --accent: #e07b39; --green: #48bb78; --red: #f56565; --yellow: #ecc94b; --sidebar-w: 220px; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    .admin-layout { display: flex; min-height: 100vh; }
+    .sidebar { width: var(--sidebar-w); background: var(--surface); border-right: 1px solid var(--border); position: fixed; height: 100vh; overflow-y: auto; display: flex; flex-direction: column; }
+    .sidebar-logo { padding: 20px; border-bottom: 1px solid var(--border); }
+    .sidebar-logo h1 { font-size: 20px; color: #fff; letter-spacing: 3px; }
+    .sidebar-logo span { font-size: 10px; color: var(--muted); letter-spacing: 1px; }
+    .sidebar-nav { flex: 1; padding: 12px 0; }
+    .nav-group { margin-bottom: 8px; }
+    .nav-group-title { padding: 8px 20px; font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 20px; color: #999; text-decoration: none; font-size: 13px; cursor: pointer; border-left: 3px solid transparent; transition: all 0.15s; }
+    .nav-item:hover { background: var(--surface2); color: var(--text); }
+    .nav-item.active { background: var(--surface2); color: var(--accent); border-left-color: var(--accent); }
+    .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+    .nav-badge { margin-left: auto; background: var(--accent); color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 10px; }
+    .main { flex: 1; margin-left: var(--sidebar-w); }
+    .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+    .topbar-left { display: flex; align-items: center; gap: 16px; }
+    .topbar h2 { font-size: 15px; font-weight: 500; }
+    .breadcrumb { color: var(--muted); font-size: 13px; }
+    .admin-avatar { width: 36px; height: 36px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; cursor: pointer; }
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+    .content { padding: 24px; }
+    .panel { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); margin-bottom: 24px; }
+    .panel-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .panel-title { font-size: 14px; font-weight: 500; }
+    .panel-body { padding: 20px; }
+    .btn { display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; border: none; text-decoration: none; }
+    .btn-sm { padding: 4px 8px; font-size: 11px; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-ghost { background: transparent; color: #999; border: 1px solid var(--border); }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-success { background: rgba(72,187,120,0.15); color: var(--green); }
+    .btn-warning { background: rgba(236,201,75,0.15); color: var(--yellow); }
+    .btn-danger { background: rgba(245,101,101,0.15); color: var(--red); }
+    .filter-row { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+    .filter-btn { padding: 6px 14px; border: 1px solid var(--border); border-radius: 999px; font-size: 12px; cursor: pointer; color: var(--muted); background: none; }
+    .filter-btn:hover, .filter-btn.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+    .search-box { display: flex; gap: 8px; margin-left: auto; }
+    .search-box input, .search-box select { padding: 8px 14px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 13px; }
+    .search-box input { width: 180px; }
+    .table { width: 100%; border-collapse: collapse; }
+    .table th, .table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); }
+    .table th { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; background: var(--bg); }
+    .table tr:last-child td { border-bottom: none; }
+    .table tr:hover { background: var(--surface2); }
+    .status { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 11px; }
+    .status-success { background: rgba(72,187,120,0.15); color: var(--green); }
+    .status-warning { background: rgba(236,201,75,0.15); color: var(--yellow); }
+    .status-error { background: rgba(245,101,101,0.15); color: var(--red); }
+    .status-info { background: rgba(56,178,172,0.15); color: #38b2ac; }
+    .action-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+    .tag { display: inline-block; padding: 2px 8px; background: var(--surface2); border-radius: 4px; font-size: 11px; margin-right: 4px; }
+    .order-goods { font-size: 12px; color: var(--muted); }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+    .modal { background: var(--surface); border-radius: 12px; padding: 28px; width: 600px; max-width: 90%; max-height: 90vh; overflow-y: auto; border: 1px solid var(--border); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .modal-title { font-size: 16px; font-weight: 500; }
+    .modal-close { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; cursor: pointer; color: var(--muted); font-size: 18px; }
+    .modal-close:hover { background: var(--surface2); }
+    .modal-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
+    .order-detail-section { margin-bottom: 20px; }
+    .order-detail-section h4 { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .order-detail-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 13px; }
+    .order-detail-row .label { color: var(--muted); }
+    .order-items { background: var(--surface2); border-radius: 8px; padding: 12px; }
+    .order-item { display: flex; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .order-item:last-child { border-bottom: none; }
+    .order-item-thumb { width: 48px; height: 48px; background: var(--bg); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+    .order-item-info { flex: 1; }
+    .order-item-name { font-size: 13px; margin-bottom: 4px; }
+    .order-item-meta { font-size: 11px; color: var(--muted); }
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+    .form-select, .form-textarea { width: 100%; padding: 10px 14px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 13px; }
+    .form-select { appearance: none; cursor: pointer; }
+    .form-select:focus, .form-textarea:focus { outline: none; border-color: var(--accent); }
+    .form-textarea { min-height: 80px; resize: vertical; }
+    .flex { display: flex; }
+    .items-center { align-items: center; }
+    .gap-8 { gap: 8px; }
+    .text-muted { color: var(--muted); }
+    .text-sm { font-size: 12px; }
+    .text-xs { font-size: 11px; }
+    .hidden { display: none !important; }
+    .toast { position: fixed; bottom: 24px; right: 24px; background: var(--text); color: var(--bg); padding: 14px 20px; border-radius: 8px; font-size: 13px; z-index: 2000; animation: slideIn 0.3s ease; }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+  </style>
+</head>
+<body>
+  <div class="admin-layout">
+    <aside class="sidebar">
+      <div class="sidebar-logo"><h1>NOVA</h1><span>CMS ADMIN</span></div>
+      <nav class="sidebar-nav">
+        <div class="nav-group"><div class="nav-group-title">主面板</div>
+          <a class="nav-item" href="index.html"><span class="nav-icon">📊</span> 工作台</a>
+          <a class="nav-item" href="analytics.html"><span class="nav-icon">📈</span> 数据统计</a>
+        </div>
+        <div class="nav-group"><div class="nav-group-title">内容管理</div>
+          <a class="nav-item" href="pages.html"><span class="nav-icon">📄</span> 页面管理</a>
+          <a class="nav-item" href="media.html"><span class="nav-icon">🖼️</span> 素材中心</a>
+          <a class="nav-item" href="content.html"><span class="nav-icon">📝</span> 内容管理</a>
+          <a class="nav-item" href="messages.html"><span class="nav-icon">💬</span> 留言管理</a>
+        </div>
+        <div class="nav-group"><div class="nav-group-title">商品管理</div>
+          <a class="nav-item" href="products.html"><span class="nav-icon">📦</span> 产品管理</a>
+          <a class="nav-item" href="categories.html"><span class="nav-icon">🏷️</span> 分类管理</a>
+          <a class="nav-item" href="inventory.html"><span class="nav-icon">📋</span> 库存管理</a>
+        </div>
+        <div class="nav-group"><div class="nav-group-title">用户与订单</div>
+          <a class="nav-item" href="members.html"><span class="nav-icon">👥</span> 会员管理</a>
+          <a class="nav-item active" href="orders.html"><span class="nav-icon">🛒</span> 订单管理</a>
+          <a class="nav-item" href="stores.html"><span class="nav-icon">🏪</span> 门店管理</a>
+        </div>
+        <div class="nav-group"><div class="nav-group-title">营销工具</div>
+          <a class="nav-item" href="coupon.html"><span class="nav-icon">🎫</span> 优惠券</a>
+          <a class="nav-item" href="promo.html"><span class="nav-icon">🔥</span> 促销活动</a>
+        </div>
+        <div class="nav-group"><div class="nav-group-title">系统</div>
+          <a class="nav-item" href="settings.html"><span class="nav-icon">⚙️</span> 设置</a>
+          <a class="nav-item" href="login.html"><span class="nav-icon">🚪</span> 退出</a>
+        </div>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-left">
+          <h2>NOVA 管理后台</h2>
+          <span class="breadcrumb">/ 用户与订单 / 订单管理</span>
+        </div>
+        <div class="topbar-right">
+          <button class="btn btn-ghost btn-sm">📊 批量导出</button>
+          <div class="admin-avatar">管</div>
+        </div>
+      </header>
+
+      <div class="content">
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">🛒 订单列表</span>
+            <span class="text-sm text-muted">共 <span id="total-count">0</span> 个订单</span>
+          </div>
+          <div class="panel-body">
+            <div class="filter-row">
+              <button class="filter-btn active" data-filter="all" onclick="setFilter('all')">全部</button>
+              <button class="filter-btn" data-filter="pending" onclick="setFilter('pending')">待付款</button>
+              <button class="filter-btn" data-filter="paid" onclick="setFilter('paid')">待发货</button>
+              <button class="filter-btn" data-filter="shipped" onclick="setFilter('shipped')">已发货</button>
+              <button class="filter-btn" data-filter="completed" onclick="setFilter('completed')">已完成</button>
+              <button class="filter-btn" data-filter="cancelled" onclick="setFilter('cancelled')">已取消</button>
+              <div class="search-box">
+                <input type="text" placeholder="搜索订单号/用户..." id="search-input" oninput="renderOrders()">
+              </div>
+            </div>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>订单号</th>
+                  <th>用户</th>
+                  <th>商品</th>
+                  <th>金额</th>
+                  <th>支付方式</th>
+                  <th>状态</th>
+                  <th>时间</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="order-table"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="modal-overlay hidden" id="order-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title">📋 订单详情</span>
+        <div class="modal-close" onclick="closeOrderModal()">×</div>
+      </div>
+      <div id="order-detail-content"></div>
+      <div id="order-action-area"></div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeOrderModal()">关闭</button>
+        <button class="btn btn-primary btn-sm" onclick="saveOrderNote()">保存备注</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    if (!sessionStorage.getItem('nova_admin')) location.href = 'login.html';
+
+    const ORDERS_KEY = 'nova_orders';
+    let orders = JSON.parse(localStorage.getItem(ORDERS_KEY) || 'null') || [
+      { id: 'NO20260428001', user: '张伟', phone: '138****8821', products: [{name:'极简陶瓷餐具套装', qty: 1, price: 1280}], total: 1280, shipping: 0, discount: 0, payment: '微信支付', status: 'completed', address: '上海市静安区南京西路1788号', note: '', date: '2026-04-28 10:23:18' },
+      { id: 'NO20260428002', user: '李娜', phone: '139****3301', products: [{name:'北欧实木书桌', qty: 1, price: 3800}], total: 3800, shipping: 0, discount: 200, payment: '支付宝', status: 'paid', address: '北京市朝阳区三里屯路19号院', note: '', date: '2026-04-28 10:15:42' },
+      { id: 'NO20260428003', user: '王芳', phone: '137****7762', products: [{name:'智能香薰机', qty: 2, price: 916}], total: 1832, shipping: 10, discount: 0, payment: '微信支付', status: 'pending', address: '深圳市罗湖区宝安南路万象城', note: '', date: '2026-04-28 09:58:05' },
+      { id: 'NO20260428004', user: '赵雷', phone: '136****5510', products: [{name:'极简台灯', qty: 1, price: 680}, {name:'记忆棉抱枕', qty: 2, price: 316}], total: 996, shipping: 0, discount: 50, payment: '支付宝', status: 'shipped', address: '杭州市上城区平海路100号', note: '客户要求周末送货', date: '2026-04-28 09:42:33' },
+      { id: 'NO20260428005', user: '陈静', phone: '135****2289', products: [{name:'手工玻璃花瓶', qty: 1, price: 320}], total: 320, shipping: 0, discount: 0, payment: '微信支付', status: 'cancelled', address: '成都市锦江区春熙路', note: '用户主动取消', date: '2026-04-28 09:30:15' },
+      { id: 'NO20260427001', user: '刘洋', phone: '186****7721', products: [{name:'羊毛盖毯', qty: 1, price: 890}], total: 890, shipping: 0, discount: 0, payment: '支付宝', status: 'completed', address: '广州市天河区天河路', note: '', date: '2026-04-27 18:20:00' },
+      { id: 'NO20260427002', user: '周明', phone: '155****4410', products: [{name:'不锈钢保温杯', qty: 3, price: 594}], total: 594, shipping: 0, discount: 0, payment: '微信支付', status: 'completed', address: '武汉市江汉区解放大道', note: '', date: '2026-04-27 16:45:22' },
+    ];
+    let currentOrderId = null;
+    let currentFilter = 'all';
+
+    save();
+
+    function save() { localStorage.setItem(ORDERS_KEY, JSON.stringify(orders)); }
+
+    function toast(msg) {
+      const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(() => { t.style.animation = 'slideIn 0.3s ease reverse'; setTimeout(() => t.remove(), 300); }, 2500);
+    }
+
+    function getStatusHtml(status) {
+      const map = {
+        pending: ['待付款', 'status-info'],
+        paid: ['待发货', 'status-warning'],
+        shipped: ['已发货', 'status-info'],
+        completed: ['已完成', 'status-success'],
+        cancelled: ['已取消', 'status-error']
+      };
+      const [label, cls] = map[status] || ['未知', ''];
+      return `<span class="status ${cls}">${label}</span>`;
+    }
+
+    function setFilter(f) {
+      currentFilter = f;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.dataset.filter === f));
+      renderOrders();
+    }
+
+    function renderOrders() {
+      const search = document.getElementById('search-input').value.toLowerCase();
+      let filtered = orders.filter(o => {
+        const matchFilter = currentFilter === 'all' || o.status === currentFilter;
+        const matchSearch = !search || o.id.toLowerCase().includes(search) || o.user.includes(search);
+        return matchFilter && matchSearch;
+      });
+
+      document.getElementById('total-count').textContent = filtered.length;
+
+      const tbody = document.getElementById('order-table');
+      tbody.innerHTML = filtered.map(o => `
+        <tr>
+          <td style="font-size:12px;font-family:var(--font-mono);">${o.id}</td>
+          <td>
+            <div style="font-size:13px;">${o.user}</div>
+            <div class="text-xs text-muted">${o.phone}</div>
+          </td>
+          <td class="order-goods">${o.products.map(p => `${p.name}×${p.qty}`).join('<br>')}</td>
+          <td>
+            <span style="color:var(--accent);font-weight:600;">¥${o.total.toLocaleString()}</span>
+            ${o.discount > 0 ? `<div class="text-xs" style="color:var(--green);">-¥${o.discount}</div>` : ''}
+          </td>
+          <td class="text-sm">${o.payment}</td>
+          <td>${getStatusHtml(o.status)}</td>
+          <td class="text-xs text-muted">${o.date}</td>
+          <td>
+            <div class="action-btns">
+              <button class="btn btn-ghost btn-sm" onclick="openOrderDetail('${o.id}')">查看</button>
+              ${o.status === 'paid' ? `<button class="btn btn-primary btn-sm" onclick="shipOrder('${o.id}')">发货</button>` : ''}
+              ${o.status === 'pending' ? `<button class="btn btn-warning btn-sm" onclick="cancelOrder('${o.id}')">取消</button>` : ''}
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function openOrderDetail(id) {
+      currentOrderId = id;
+      const o = orders.find(x => x.id === id);
+      if (!o) return;
+      document.getElementById('order-detail-content').innerHTML = `
+        <div class="order-detail-section">
+          <h4>基本信息</h4>
+          <div class="order-detail-row"><span class="label">订单号</span><span>${o.id}</span></div>
+          <div class="order-detail-row"><span class="label">下单时间</span><span>${o.date}</span></div>
+          <div class="order-detail-row"><span class="label">支付方式</span><span>${o.payment}</span></div>
+          <div class="order-detail-row"><span class="label">订单状态</span><span>${getStatusHtml(o.status)}</span></div>
+        </div>
+        <div class="order-detail-section">
+          <h4>收件人信息</h4>
+          <div class="order-detail-row"><span class="label">姓名</span><span>${o.user}</span></div>
+          <div class="order-detail-row"><span class="label">手机</span><span>${o.phone}</span></div>
+          <div class="order-detail-row"><span class="label">地址</span><span>${o.address}</span></div>
+        </div>
+        <div class="order-detail-section">
+          <h4>商品信息</h4>
+          <div class="order-items">
+            ${o.products.map(p => `
+              <div class="order-item">
+                <div class="order-item-thumb">📦</div>
+                <div class="order-item-info">
+                  <div class="order-item-name">${p.name}</div>
+                  <div class="order-item-meta">× ${p.qty} · ¥${p.price.toLocaleString()}</div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+        <div class="order-detail-section">
+          <h4>金额信息</h4>
+          <div class="order-detail-row"><span class="label">商品金额</span><span>¥${o.products.reduce((s,p)=>s+p.price*p.qty,0).toLocaleString()}</span></div>
+          <div class="order-detail-row"><span class="label">运费</span><span>${o.shipping === 0 ? '免运费' : '¥'+o.shipping}</span></div>
+          ${o.discount > 0 ? `<div class="order-detail-row"><span class="label">优惠</span><span style="color:var(--green);">-¥${o.discount}</span></div>` : ''}
+          <div class="order-detail-row" style="font-weight:600;font-size:15px;padding-top:8px;border-top:1px solid var(--border);margin-top:4px;"><span class="label">实付金额</span><span style="color:var(--accent);">¥${o.total.toLocaleString()}</span></div>
+        </div>
+        <div class="order-detail-section">
+          <h4>订单备注</h4>
+          <textarea class="form-textarea" id="order-note" placeholder="添加订单备注...">${o.note || ''}</textarea>
+        </div>
+      `;
+
+      let actions = '';
+      if (o.status === 'paid') actions = '<button class="btn btn-primary" onclick="shipOrder(\'' + o.id + '\')" style="width:100%;">📦 确认发货</button>';
+      else if (o.status === 'pending') actions = '<button class="btn btn-warning" onclick="cancelOrder(\'' + o.id + '\')" style="width:100%;">❌ 取消订单</button>';
+      else if (o.status === 'completed') actions = '<button class="btn btn-success" style="width:100%;">✅ 订单已完成</button>';
+      else if (o.status === 'cancelled') actions = '<button class="btn btn-ghost" style="width:100%;">订单已取消</button>';
+      document.getElementById('order-action-area').innerHTML = actions;
+      document.getElementById('order-modal').classList.remove('hidden');
+    }
+
+    function closeOrderModal() { document.getElementById('order-modal').classList.add('hidden'); currentOrderId = null; }
+
+    function shipOrder(id) {
+      const o = orders.find(x => x.id === id);
+      if (o) { o.status = 'shipped'; save(); renderOrders(); closeOrderModal(); toast('订单已发货'); }
+    }
+
+    function cancelOrder(id) {
+      if (!confirm('确定取消此订单？')) return;
+      const o = orders.find(x => x.id === id);
+      if (o) { o.status = 'cancelled'; save(); renderOrders(); closeOrderModal(); toast('订单已取消'); }
+    }
+
+    function saveOrderNote() {
+      const o = orders.find(x => x.id === currentOrderId);
+      if (o) { o.note = document.getElementById('order-note').value; save(); toast('备注已保存'); }
+    }
+
+    document.querySelector('.admin-avatar').addEventListener('click', function() { if (confirm('确定要退出登录吗？')) location.href = 'login.html'; });
+
+    renderOrders();
+  </script>
+</body>
+</html>

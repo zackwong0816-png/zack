@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>内容管理 · NOVA CMS</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root { --bg: #0a0a0a; --surface: #141414; --surface2: #1c1c1c; --border: #2a2a2a; --text: #e0e0e0; --muted: #666; --accent: #e07b39; --green: #48bb78; --red: #f56565; --yellow: #ecc94b; --sidebar-w: 220px; }
+    body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    .admin-layout { display: flex; min-height: 100vh; }
+    .sidebar { width: var(--sidebar-w); background: var(--surface); border-right: 1px solid var(--border); position: fixed; height: 100vh; overflow-y: auto; display: flex; flex-direction: column; }
+    .sidebar-logo { padding: 20px; border-bottom: 1px solid var(--border); }
+    .sidebar-logo h1 { font-size: 20px; color: #fff; letter-spacing: 3px; }
+    .sidebar-logo span { font-size: 10px; color: var(--muted); }
+    .sidebar-nav { flex: 1; padding: 12px 0; }
+    .nav-group { margin-bottom: 8px; }
+    .nav-group-title { padding: 8px 20px; font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 20px; color: #999; font-size: 13px; cursor: pointer; border-left: 3px solid transparent; transition: all 0.15s; }
+    .nav-item:hover { background: var(--surface2); color: var(--text); }
+    .nav-item.active { background: var(--surface2); color: var(--accent); border-left-color: var(--accent); }
+    .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+    .main { flex: 1; margin-left: var(--sidebar-w); }
+    .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; height: 60px; display: flex; align-items: center; justify-content: space-between; }
+    .topbar-left { display: flex; align-items: center; gap: 16px; }
+    .topbar h2 { font-size: 15px; }
+    .breadcrumb { color: var(--muted); font-size: 13px; }
+    .admin-avatar { width: 36px; height: 36px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; cursor: pointer; }
+    .content { padding: 24px; }
+    .panel { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); margin-bottom: 24px; }
+    .panel-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .panel-title { font-size: 14px; font-weight: 500; }
+    .panel-body { padding: 20px; }
+    .btn { display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; border: none; }
+    .btn-sm { padding: 4px 8px; font-size: 11px; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-ghost { background: transparent; color: #999; border: 1px solid var(--border); }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-danger { background: rgba(245,101,101,0.15); color: var(--red); }
+    .btn-success { background: rgba(72,187,120,0.15); color: var(--green); }
+    .filter-row { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+    .filter-btn { padding: 6px 14px; border: 1px solid var(--border); border-radius: 999px; font-size: 12px; cursor: pointer; color: var(--muted); background: none; }
+    .filter-btn:hover, .filter-btn.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+    .search-box { display: flex; gap: 8px; margin-left: auto; }
+    .search-box input { padding: 8px 14px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 13px; width: 180px; }
+    .table { width: 100%; border-collapse: collapse; }
+    .table th, .table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); }
+    .table th { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; background: var(--bg); }
+    .table tr:last-child td { border-bottom: none; }
+    .table tr:hover { background: var(--surface2); }
+    .article-row { display: flex; align-items: center; gap: 12px; }
+    .article-thumb { width: 60px; height: 40px; background: var(--surface2); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+    .article-title { font-size: 13px; font-weight: 500; }
+    .article-sub { font-size: 11px; color: var(--muted); }
+    .status { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 11px; }
+    .status-success { background: rgba(72,187,120,0.15); color: var(--green); }
+    .status-warning { background: rgba(236,201,75,0.15); color: var(--yellow); }
+    .action-btns { display: flex; gap: 6px; }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+    .modal { background: var(--surface); border-radius: 12px; padding: 28px; width: 700px; max-width: 90%; max-height: 90vh; overflow-y: auto; border: 1px solid var(--border); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .modal-title { font-size: 16px; font-weight: 500; }
+    .modal-close { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; cursor: pointer; color: var(--muted); }
+    .modal-close:hover { background: var(--surface2); }
+    .modal-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+    .form-input, .form-select, .form-textarea { width: 100%; padding: 10px 14px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 13px; }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { outline: none; border-color: var(--accent); }
+    .form-textarea { min-height: 120px; resize: vertical; }
+    .form-select { appearance: none; cursor: pointer; }
+    .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .tag { display: inline-block; padding: 2px 8px; background: var(--surface2); border-radius: 4px; font-size: 11px; margin-right: 4px; }
+    .text-muted { color: var(--muted); }
+    .text-sm { font-size: 12px; }
+    .text-xs { font-size: 11px; }
+    .hidden { display: none !important; }
+    .toast { position: fixed; bottom: 24px; right: 24px; background: var(--text); color: var(--bg); padding: 14px 20px; border-radius: 8px; font-size: 13px; z-index: 2000; animation: slideIn 0.3s ease; }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+  </style>
+</head>
+<body>
+  <div class="admin-layout">
+    <aside class="sidebar">
+      <div class="sidebar-logo"><h1>NOVA</h1><span>CMS ADMIN</span></div>
+      <nav class="sidebar-nav">
+        <div class="nav-group"><div class="nav-group-title">主面板</div>
+          <a class="nav-item" href="index.html"><span class="nav-icon">📊</span> 工作台</a>
+          <a class="nav-item" href="analytics.html"><span class="nav-icon">📈</span> 数据统计</a>
+        </div>
+        <div class="nav-group"><div class="nav-group-title">内容管理</div>
+          <a class="nav-item" href="pages.html"><span class="nav-icon">📄</span> 页面管理</a>
+          <a class="nav-item" href="media.html"><span class="nav-icon">🖼️</span> 素材中心</a>
+          <a class="nav-item active" href="content.html"><span class="nav-icon">📝</span> 内容管理</a>
+          <a class="nav-item" href="messages.html"><span class="nav-icon">💬</span> 留言管理</a>
+        </div>
+        <div class="nav-group"><div class="nav-group-title">商品管理</div>
+          <a class="nav-item" href="products.html"><span class="nav-icon">📦</span> 产品管理</a>
+          <a class="nav-item" href="categories.html"><span class="nav-icon">🏷️</span> 分类管理</a>
+          <a class="nav-item" href="inventory.html"><span class="nav-icon">📋</span> 库存管理</a>
+        </div>
+        <div class="nav-group"><div class="nav-group-title">用户与订单</div>
+          <a class="nav-item" href="members.html"><span class="nav-icon">👥</span> 会员管理</a>
+          <a class="nav-item" href="orders.html"><span class="nav-icon">🛒</span> 订单管理</a>
+          <a class="nav-item" href="stores.html"><span class="nav-icon">🏪</span> 门店管理</a>
+        </div>
+        <div class="nav-group"><div class="nav-group-title">营销工具</div>
+          <a class="nav-item" href="coupon.html"><span class="nav-icon">🎫</span> 优惠券</a>
+          <a class="nav-item" href="promo.html"><span class="nav-icon">🔥</span> 促销活动</a>
+        </div>
+        <div class="nav-group"><div class="nav-group-title">系统</div>
+          <a class="nav-item" href="settings.html"><span class="nav-icon">⚙️</span> 设置</a>
+          <a class="nav-item" href="login.html"><span class="nav-icon">🚪</span> 退出</a>
+        </div>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-left"><h2>NOVA 管理后台</h2><span class="breadcrumb">/ 内容管理 / 内容管理</span></div>
+        <div class="topbar-right">
+          <button class="btn btn-primary" onclick="openArticleModal()">+ 发布文章</button>
+          <div class="admin-avatar">管</div>
+        </div>
+      </header>
+
+      <div class="content">
+        <div class="panel">
+          <div class="panel-header"><span class="panel-title">📝 文章列表</span></div>
+          <div class="panel-body">
+            <div class="filter-row">
+              <button class="filter-btn active" data-filter="all" onclick="setFilter('all')">全部</button>
+              <button class="filter-btn" data-filter="lifestyle" onclick="setFilter('lifestyle')">生活方式</button>
+              <button class="filter-btn" data-filter="product" onclick="setFilter('product')">产品故事</button>
+              <button class="filter-btn" data-filter="guide" onclick="setFilter('guide')">选购指南</button>
+              <button class="filter-btn" data-filter="brand" onclick="setFilter('brand')">品牌动态</button>
+              <div class="search-box">
+                <input type="text" placeholder="搜索文章标题..." id="search-input" oninput="renderArticles()">
+              </div>
+            </div>
+            <table class="table">
+              <thead><tr><th>文章</th><th>分类</th><th>状态</th><th>发布时间</th><th>阅读</th><th>操作</th></tr></thead>
+              <tbody id="article-table"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="modal-overlay hidden" id="article-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title" id="modal-title">发布文章</span>
+        <div class="modal-close" onclick="closeArticleModal()">×</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">文章标题 *</label>
+        <input type="text" class="form-input" id="a-title" placeholder="输入文章标题">
+      </div>
+      <div class="modal-grid">
+        <div class="form-group">
+          <label class="form-label">分类</label>
+          <select class="form-select" id="a-category">
+            <option value="lifestyle">生活方式</option>
+            <option value="product">产品故事</option>
+            <option value="guide">选购指南</option>
+            <option value="brand">品牌动态</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">状态</label>
+          <select class="form-select" id="a-status">
+            <option value="published">立即发布</option>
+            <option value="draft">存为草稿</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">封面图 URL</label>
+        <input type="text" class="form-input" id="a-cover" placeholder="https://...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">文章摘要</label>
+        <textarea class="form-textarea" id="a-excerpt" placeholder="文章摘要..." style="min-height:60px;"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">文章内容 *</label>
+        <textarea class="form-textarea" id="a-content" placeholder="输入文章正文内容..."></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeArticleModal()">取消</button>
+        <button class="btn btn-primary" onclick="saveArticle()">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    if (!sessionStorage.getItem('nova_admin')) location.href = 'login.html';
+
+    const ARTICLES_KEY = 'nova_articles';
+    let articles = JSON.parse(localStorage.getItem(ARTICLES_KEY) || 'null') || [
+      { id: 'a1', title: '如何用一盏台灯改变你的工作环境', category: 'lifestyle', categoryName: '生活方式', status: 'published', cover: '', excerpt: '好的照明不仅仅是让空间明亮，更是营造氛围、提升效率的关键。', content: '', views: 2580, date: '2026-04-28' },
+      { id: 'a2', title: '从森林到书桌：一块木材的旅程', category: 'product', categoryName: '产品故事', status: 'published', cover: '', excerpt: '每一块用于NOVA产品的木材都经过严格挑选，让我们带你了解木材的来源和加工过程。', content: '', views: 1892, date: '2026-04-25' },
+      { id: 'a3', title: 'NOVA 2026 春夏系列正式发布', category: 'brand', categoryName: '品牌动态', status: 'published', cover: '', excerpt: '新系列延续北欧极简设计，融入更多自然元素，为你的生活空间带来清新气息。', content: '', views: 5678, date: '2026-04-20' },
+      { id: 'a4', title: '极简生活：从整理你的桌面开始', category: 'lifestyle', categoryName: '生活方式', status: 'published', cover: '', excerpt: '一个整洁的桌面可以带来清晰的思绪。分享5个打造极简工作空间的技巧。', content: '', views: 4123, date: '2026-04-18' },
+      { id: 'a5', title: '一位工匠的坚守：手工制作的意义', category: 'product', categoryName: '产品故事', status: 'draft', cover: '', excerpt: '在自动化生产的今天，为什么我们仍然坚持手工制作？听听工匠们的故事。', content: '', views: 0, date: '2026-04-28' },
+      { id: 'a6', title: '陶瓷餐具选购指南：材质、工艺与保养', category: 'guide', categoryName: '选购指南', status: 'published', cover: '', excerpt: '陶瓷餐具是我们日常使用最多的器皿之一，了解它们帮助你做出更好的选择。', content: '', views: 1543, date: '2026-04-12' },
+    ];
+    let editingId = null;
+    let currentFilter = 'all';
+
+    save();
+
+    function save() { localStorage.setItem(ARTICLES_KEY, JSON.stringify(articles)); }
+
+    function toast(msg) {
+      const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(() => { t.style.animation = 'slideIn 0.3s ease reverse'; setTimeout(() => t.remove(), 300); }, 2500);
+    }
+
+    function setFilter(f) {
+      currentFilter = f;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.dataset.filter === f));
+      renderArticles();
+    }
+
+    function renderArticles() {
+      const search = document.getElementById('search-input').value.toLowerCase();
+      let filtered = articles.filter(a => {
+        const matchFilter = currentFilter === 'all' || a.category === currentFilter;
+        const matchSearch = !search || a.title.toLowerCase().includes(search);
+        return matchFilter && matchSearch;
+      });
+
+      const tbody = document.getElementById('article-table');
+      tbody.innerHTML = filtered.map(a => `
+        <tr>
+          <td>
+            <div class="article-row">
+              <div class="article-thumb">📄</div>
+              <div>
+                <div class="article-title">${a.title}</div>
+                <div class="article-sub">${a.excerpt.slice(0, 40)}...</div>
+              </div>
+            </div>
+          </td>
+          <td><span class="tag">${a.categoryName}</span></td>
+          <td><span class="status ${a.status === 'published' ? 'status-success' : 'status-warning'}">${a.status === 'published' ? '已发布' : '草稿'}</span></td>
+          <td class="text-xs text-muted">${a.date}</td>
+          <td class="text-xs">${a.views.toLocaleString()}</td>
+          <td>
+            <div class="action-btns">
+              <button class="btn btn-ghost btn-sm" onclick="editArticle('${a.id}')">编辑</button>
+              ${a.status === 'draft' ? `<button class="btn btn-success btn-sm" onclick="publishArticle('${a.id}')">发布</button>` : `<button class="btn btn-warning btn-sm" onclick="unpublishArticle('${a.id}')">下架</button>`}
+              <button class="btn btn-danger btn-sm" onclick="deleteArticle('${a.id}')">删除</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function openArticleModal(id) {
+      editingId = id;
+      document.getElementById('modal-title').textContent = id ? '编辑文章' : '发布文章';
+      if (id) {
+        const a = articles.find(x => x.id === id);
+        if (a) {
+          document.getElementById('a-title').value = a.title;
+          document.getElementById('a-category').value = a.category;
+          document.getElementById('a-status').value = a.status;
+          document.getElementById('a-cover').value = a.cover || '';
+          document.getElementById('a-excerpt').value = a.excerpt || '';
+          document.getElementById('a-content').value = a.content || '';
+        }
+      } else {
+        ['a-title','a-cover','a-excerpt','a-content'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('a-category').value = 'lifestyle';
+        document.getElementById('a-status').value = 'published';
+      }
+      document.getElementById('article-modal').classList.remove('hidden');
+    }
+
+    function editArticle(id) { openArticleModal(id); }
+    function closeArticleModal() { document.getElementById('article-modal').classList.add('hidden'); editingId = null; }
+
+    function saveArticle() {
+      const title = document.getElementById('a-title').value.trim();
+      const content = document.getElementById('a-content').value.trim();
+      if (!title) { toast('请填写标题'); return; }
+      const cats = { lifestyle: '生活方式', product: '产品故事', guide: '选购指南', brand: '品牌动态' };
+      const data = {
+        title, content, excerpt: document.getElementById('a-excerpt').value,
+        category: document.getElementById('a-category').value,
+        categoryName: cats[document.getElementById('a-category').value] || '生活方式',
+        status: document.getElementById('a-status').value,
+        cover: document.getElementById('a-cover').value,
+        views: editingId ? (articles.find(x => x.id === editingId)?.views || 0) : 0,
+      };
+      if (editingId) {
+        const idx = articles.findIndex(x => x.id === editingId);
+        if (idx > -1) articles[idx] = { ...articles[idx], ...data };
+      } else {
+        data.id = 'a_' + Date.now();
+        data.date = new Date().toISOString().slice(0, 10);
+        articles.unshift(data);
+      }
+      save();
+      closeArticleModal();
+      renderArticles();
+      toast(editingId ? '文章已更新' : '文章已保存');
+    }
+
+    function publishArticle(id) {
+      const a = articles.find(x => x.id === id);
+      if (a) { a.status = 'published'; save(); renderArticles(); toast('文章已发布'); }
+    }
+
+    function unpublishArticle(id) {
+      const a = articles.find(x => x.id === id);
+      if (a) { a.status = 'draft'; save(); renderArticles(); toast('文章已下架'); }
+    }
+
+    function deleteArticle(id) {
+      if (!confirm('确定删除此文章？')) return;
+      articles = articles.filter(x => x.id !== id);
+      save();
+      renderArticles();
+      toast('文章已删除');
+    }
+
+    document.querySelector('.admin-avatar').addEventListener('click', function() { if (confirm('确定要退出登录吗？')) location.href = 'login.html'; });
+
+    renderArticles();
+  </script>
+</body>
+</html>

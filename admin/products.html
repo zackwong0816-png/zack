@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>产品管理 · NOVA CMS</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root { --bg: #0a0a0a; --surface: #141414; --surface2: #1c1c1c; --border: #2a2a2a; --text: #e0e0e0; --muted: #666; --accent: #e07b39; --green: #48bb78; --red: #f56565; --yellow: #ecc94b; --sidebar-w: 220px; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    .admin-layout { display: flex; min-height: 100vh; }
+    .sidebar { width: var(--sidebar-w); background: var(--surface); border-right: 1px solid var(--border); position: fixed; height: 100vh; overflow-y: auto; display: flex; flex-direction: column; }
+    .sidebar-logo { padding: 20px; border-bottom: 1px solid var(--border); }
+    .sidebar-logo h1 { font-size: 20px; color: #fff; letter-spacing: 3px; }
+    .sidebar-logo span { font-size: 10px; color: var(--muted); letter-spacing: 1px; }
+    .sidebar-nav { flex: 1; padding: 12px 0; }
+    .nav-group { margin-bottom: 8px; }
+    .nav-group-title { padding: 8px 20px; font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 20px; color: #999; text-decoration: none; font-size: 13px; cursor: pointer; border-left: 3px solid transparent; transition: all 0.15s; }
+    .nav-item:hover { background: var(--surface2); color: var(--text); }
+    .nav-item.active { background: var(--surface2); color: var(--accent); border-left-color: var(--accent); }
+    .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+    .nav-badge { margin-left: auto; background: var(--accent); color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 10px; }
+    .main { flex: 1; margin-left: var(--sidebar-w); }
+    .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+    .topbar-left { display: flex; align-items: center; gap: 16px; }
+    .topbar h2 { font-size: 15px; font-weight: 500; }
+    .breadcrumb { color: var(--muted); font-size: 13px; }
+    .admin-avatar { width: 36px; height: 36px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; cursor: pointer; }
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+    .content { padding: 24px; }
+
+    .panel { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); margin-bottom: 24px; }
+    .panel-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .panel-title { font-size: 14px; font-weight: 500; }
+    .panel-body { padding: 20px; }
+
+    .btn { display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; border: none; text-decoration: none; }
+    .btn-sm { padding: 4px 8px; font-size: 11px; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: #c96a2d; }
+    .btn-ghost { background: transparent; color: #999; border: 1px solid var(--border); }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-danger { background: rgba(245,101,101,0.15); color: var(--red); }
+    .btn-success { background: rgba(72,187,120,0.15); color: var(--green); }
+    .btn-warning { background: rgba(236,201,75,0.15); color: var(--yellow); }
+
+    .filter-row { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+    .filter-btn { padding: 6px 14px; border: 1px solid var(--border); border-radius: 999px; font-size: 12px; cursor: pointer; color: var(--muted); background: none; }
+    .filter-btn:hover, .filter-btn.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+    .search-box { display: flex; gap: 8px; margin-left: auto; }
+    .search-box input, .search-box select { padding: 8px 14px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 13px; }
+    .search-box input { width: 180px; }
+    .search-box input:focus, .search-box select:focus { outline: none; border-color: var(--accent); }
+
+    .table { width: 100%; border-collapse: collapse; }
+    .table th, .table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); }
+    .table th { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; background: var(--bg); }
+    .table tr:last-child td { border-bottom: none; }
+    .table tr:hover { background: var(--surface2); }
+    .product-row { display: flex; align-items: center; gap: 12px; }
+    .product-thumb { width: 48px; height: 48px; background: var(--surface2); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+    .product-name { font-size: 13px; font-weight: 500; }
+    .product-sub { font-size: 11px; color: var(--muted); }
+
+    .status { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 11px; }
+    .status-success { background: rgba(72,187,120,0.15); color: var(--green); }
+    .status-warning { background: rgba(236,201,75,0.15); color: var(--yellow); }
+    .status-error { background: rgba(245,101,101,0.15); color: var(--red); }
+    .status-info { background: rgba(56,178,172,0.15); color: #38b2ac; }
+
+    .tag { display: inline-block; padding: 2px 8px; background: var(--surface2); border-radius: 4px; font-size: 11px; margin-right: 4px; }
+
+    .action-btns { display: flex; gap: 6px; }
+
+    .pagination { display: flex; justify-content: center; gap: 4px; margin-top: 20px; }
+    .pagination button { width: 32px; height: 32px; border: 1px solid var(--border); background: none; color: var(--muted); border-radius: 6px; cursor: pointer; font-size: 12px; }
+    .pagination button:hover { border-color: var(--accent); color: var(--accent); }
+    .pagination button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+    .modal { background: var(--surface); border-radius: 12px; padding: 28px; width: 700px; max-width: 90%; max-height: 90vh; overflow-y: auto; border: 1px solid var(--border); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .modal-title { font-size: 16px; font-weight: 500; }
+    .modal-close { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; cursor: pointer; color: var(--muted); font-size: 18px; }
+    .modal-close:hover { background: var(--surface2); }
+    .modal-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
+    .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 600px) { .modal-grid { grid-template-columns: 1fr; } }
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+    .form-input, .form-select, .form-textarea { width: 100%; padding: 10px 14px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 13px; }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { outline: none; border-color: var(--accent); }
+    .form-textarea { min-height: 80px; resize: vertical; }
+    .form-select { appearance: none; cursor: pointer; }
+
+    .img-upload { border: 2px dashed var(--border); border-radius: 8px; padding: 24px; text-align: center; cursor: pointer; transition: all 0.2s; font-size: 13px; color: var(--muted); }
+    .img-upload:hover { border-color: var(--accent); }
+    .img-preview { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 12px; }
+    .img-preview-item { aspect-ratio: 1; background: var(--surface2); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 24px; position: relative; }
+    .img-preview-item .del { position: absolute; top: 4px; right: 4px; width: 20px; height: 20px; background: var(--red); color: #fff; border: none; border-radius: 50%; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+    .spec-row { display: flex; gap: 8px; margin-bottom: 8px; }
+    .spec-row input { flex: 1; }
+
+    .flex { display: flex; }
+    .items-center { align-items: center; }
+    .gap-8 { gap: 8px; }
+    .gap-16 { gap: 16px; }
+    .mb-16 { margin-bottom: 16px; }
+    .mb-24 { margin-bottom: 24px; }
+    .text-muted { color: var(--muted); }
+    .text-sm { font-size: 12px; }
+    .text-xs { font-size: 11px; }
+    .hidden { display: none !important; }
+    .toast { position: fixed; bottom: 24px; right: 24px; background: var(--text); color: var(--bg); padding: 14px 20px; border-radius: 8px; font-size: 13px; z-index: 2000; animation: slideIn 0.3s ease; }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+  </style>
+</head>
+<body>
+  <div class="admin-layout">
+    <aside class="sidebar">
+      <div class="sidebar-logo"><h1>NOVA</h1><span>CMS ADMIN</span></div>
+      <nav class="sidebar-nav">
+        <div class="nav-group"><div class="nav-group-title">主面板</div>
+          <a class="nav-item" href="index.html"><span class="nav-icon">📊</span> 工作台</a>
+          <a class="nav-item" href="analytics.html"><span class="nav-icon">📈</span> 数据统计</a>
+        </div>
+        <div class="nav-group"><div class="nav-group-title">内容管理</div>
+          <a class="nav-item" href="pages.html"><span class="nav-icon">📄</span> 页面管理</a>
+          <a class="nav-item" href="media.html"><span class="nav-icon">🖼️</span> 素材中心</a>
+          <a class="nav-item" href="content.html"><span class="nav-icon">📝</span> 内容管理</a>
+          <a class="nav-item" href="messages.html"><span class="nav-icon">💬</span> 留言管理</a>
+        </div>
+        <div class="nav-group"><div class="nav-group-title">商品管理</div>
+          <a class="nav-item active" href="products.html"><span class="nav-icon">📦</span> 产品管理</a>
+          <a class="nav-item" href="categories.html"><span class="nav-icon">🏷️</span> 分类管理</a>
+          <a class="nav-item" href="inventory.html"><span class="nav-icon">📋</span> 库存管理</a>
+        </div>
+        <div class="nav-group"><div class="nav-group-title">用户与订单</div>
+          <a class="nav-item" href="members.html"><span class="nav-icon">👥</span> 会员管理</a>
+          <a class="nav-item" href="orders.html"><span class="nav-icon">🛒</span> 订单管理</a>
+          <a class="nav-item" href="stores.html"><span class="nav-icon">🏪</span> 门店管理</a>
+        </div>
+        <div class="nav-group"><div class="nav-group-title">营销工具</div>
+          <a class="nav-item" href="coupon.html"><span class="nav-icon">🎫</span> 优惠券</a>
+          <a class="nav-item" href="promo.html"><span class="nav-icon">🔥</span> 促销活动</a>
+        </div>
+        <div class="nav-group"><div class="nav-group-title">系统</div>
+          <a class="nav-item" href="settings.html"><span class="nav-icon">⚙️</span> 设置</a>
+          <a class="nav-item" href="login.html"><span class="nav-icon">🚪</span> 退出</a>
+        </div>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-left">
+          <h2>NOVA 管理后台</h2>
+          <span class="breadcrumb">/ 商品管理 / 产品管理</span>
+        </div>
+        <div class="topbar-right">
+          <button class="btn btn-primary" onclick="openProductModal()">+ 添加产品</button>
+          <div class="admin-avatar">管</div>
+        </div>
+      </header>
+
+      <div class="content">
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">📦 产品列表</span>
+            <span class="text-sm text-muted">共 <span id="total-count">0</span> 个产品</span>
+          </div>
+          <div class="panel-body">
+            <div class="filter-row">
+              <button class="filter-btn active" data-filter="all" onclick="setFilter('all')">全部</button>
+              <button class="filter-btn" data-filter="on_sale" onclick="setFilter('on_sale')">在售</button>
+              <button class="filter-btn" data-filter="off_sale" onclick="setFilter('off_sale')">已下架</button>
+              <button class="filter-btn" data-filter="stockout" onclick="setFilter('stockout')">缺货</button>
+              <div class="search-box">
+                <select id="category-filter">
+                  <option value="">全部分类</option>
+                  <option value="家居">家居</option>
+                  <option value="家具">家具</option>
+                  <option value="家电">家电</option>
+                  <option value="餐厨">餐厨</option>
+                  <option value="灯具">灯具</option>
+                </select>
+                <input type="text" placeholder="搜索产品名称..." id="search-input" oninput="renderProducts()">
+              </div>
+            </div>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th style="width:50px;"><input type="checkbox" id="select-all" onchange="toggleSelectAll(this)"></th>
+                  <th>产品</th>
+                  <th>分类</th>
+                  <th>价格</th>
+                  <th>库存</th>
+                  <th>销量</th>
+                  <th>状态</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="product-table"></tbody>
+            </table>
+            <div class="pagination" id="pagination"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="modal-overlay hidden" id="product-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title" id="modal-title">添加产品</span>
+        <div class="modal-close" onclick="closeProductModal()">×</div>
+      </div>
+      <div class="modal-grid">
+        <div class="form-group" style="grid-column:1/-1;">
+          <label class="form-label">产品名称 *</label>
+          <input type="text" class="form-input" id="p-name" placeholder="例如：极简陶瓷餐具套装">
+        </div>
+        <div class="form-group">
+          <label class="form-label">分类</label>
+          <select class="form-select" id="p-category">
+            <option value="">选择分类</option>
+            <option value="家居">家居</option>
+            <option value="家具">家具</option>
+            <option value="家电">家电</option>
+            <option value="餐厨">餐厨</option>
+            <option value="灯具">灯具</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">品牌</label>
+          <input type="text" class="form-input" id="p-brand" value="NOVA" placeholder="品牌名称">
+        </div>
+        <div class="form-group">
+          <label class="form-label">价格 (¥) *</label>
+          <input type="number" class="form-input" id="p-price" placeholder="0.00" min="0" step="0.01">
+        </div>
+        <div class="form-group">
+          <label class="form-label">原价 (¥)</label>
+          <input type="number" class="form-input" id="p-original-price" placeholder="划线价格" min="0" step="0.01">
+        </div>
+        <div class="form-group">
+          <label class="form-label">库存 *</label>
+          <input type="number" class="form-input" id="p-stock" placeholder="库存数量" min="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">销量</label>
+          <input type="number" class="form-input" id="p-sales" placeholder="已售数量" min="0" value="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">单位</label>
+          <input type="text" class="form-input" id="p-unit" placeholder="例如：件、套、个" value="件">
+        </div>
+        <div class="form-group" style="grid-column:1/-1;">
+          <label class="form-label">产品描述</label>
+          <textarea class="form-textarea" id="p-desc" placeholder="详细描述产品特点、材质、尺寸等信息"></textarea>
+        </div>
+        <div class="form-group" style="grid-column:1/-1;">
+          <label class="form-label">产品图片</label>
+          <div class="img-upload" onclick="document.getElementById('p-img-input').click()">
+            📷 点击上传产品图片（最多6张）
+          </div>
+          <input type="file" id="p-img-input" multiple accept="image/*" style="display:none;" onchange="handleProductImgs(this.files)">
+          <div class="img-preview" id="p-img-preview"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">状态</label>
+          <select class="form-select" id="p-status">
+            <option value="on_sale">上架</option>
+            <option value="off_sale">下架</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">是否推荐</label>
+          <select class="form-select" id="p-featured">
+            <option value="0">否</option>
+            <option value="1">是</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeProductModal()">取消</button>
+        <button class="btn btn-primary" onclick="saveProduct()">保存产品</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay hidden" id="delete-modal">
+    <div class="modal" style="width:400px;">
+      <div class="modal-header">
+        <span class="modal-title">⚠️ 确认删除</span>
+        <div class="modal-close" onclick="closeDeleteModal()">×</div>
+      </div>
+      <p style="font-size:14px;color:var(--muted);margin-bottom:16px;">确定要删除产品「<span id="del-name" style="color:var(--text);"></span>」吗？此操作不可恢复。</p>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeDeleteModal()">取消</button>
+        <button class="btn btn-danger" onclick="confirmDelete()">确认删除</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    if (!sessionStorage.getItem('nova_admin')) location.href = 'login.html';
+
+    const PRODUCTS_KEY = 'nova_products';
+    let products = JSON.parse(localStorage.getItem(PRODUCTS_KEY) || 'null') || [
+      { id: 'p1', name: '极简陶瓷餐具套装', category: '餐厨', brand: 'NOVA', price: 1280, originalPrice: 1580, stock: 58, sales: 234, unit: '套', desc: '精选景德镇优质陶瓷，适合家庭日常使用。包含碗、盘、碟共20件套。', images: [], status: 'on_sale', featured: 1, date: '2026-04-20' },
+      { id: 'p2', name: '北欧实木书桌', category: '家具', brand: 'NOVA', price: 3800, originalPrice: 4200, stock: 12, sales: 89, unit: '张', desc: '进口白蜡木框架，环保水性漆，可容纳双人使用。尺寸：140×70×75cm。', images: [], status: 'on_sale', featured: 1, date: '2026-04-18' },
+      { id: 'p3', name: '智能香薰机', category: '家电', brand: 'NOVA', price: 458, originalPrice: 580, stock: 0, sales: 567, unit: '台', desc: '超声波雾化，容量300ml，4档定时，LED氛围灯，静音设计。', images: [], status: 'on_sale', featured: 0, date: '2026-04-15' },
+      { id: 'p4', name: '极简台灯', category: '灯具', brand: 'NOVA', price: 680, originalPrice: 0, stock: 45, sales: 321, unit: '盏', desc: '铝合金灯体，可调节色温，触控调光，适合书房和卧室。', images: [], status: 'on_sale', featured: 0, date: '2026-04-12' },
+      { id: 'p5', name: '手工玻璃花瓶', category: '家居', brand: 'NOVA', price: 320, originalPrice: 400, stock: 80, sales: 156, unit: '个', desc: '人工吹制玻璃，手工上色，每件独一无二。高度25cm，直径15cm。', images: [], status: 'on_sale', featured: 0, date: '2026-04-10' },
+      { id: 'p6', name: '记忆棉抱枕', category: '家居', brand: 'NOVA', price: 158, originalPrice: 0, stock: 120, sales: 445, unit: '个', desc: '亲肤棉麻面料，优选慢回弹记忆棉，透气舒适。尺寸：50×50cm。', images: [], status: 'on_sale', featured: 0, date: '2026-04-08' },
+      { id: 'p7', name: '羊毛盖毯', category: '家居', brand: 'NOVA', price: 890, originalPrice: 1200, stock: 0, sales: 78, unit: '条', desc: '100%新西兰羊毛，柔软保暖，经典格纹设计。尺寸：130×160cm。', images: [], status: 'off_sale', featured: 0, date: '2026-04-05' },
+      { id: 'p8', name: '不锈钢保温杯', category: '餐厨', brand: 'NOVA', price: 198, originalPrice: 0, stock: 300, sales: 890, unit: '个', desc: '304不锈钢，500ml容量，12小时保温保冷，清洗方便。', images: [], status: 'on_sale', featured: 0, date: '2026-04-01' },
+    ];
+    let editingId = null;
+    let deleteTargetId = null;
+    let currentPage = 1;
+    let pageSize = 10;
+    let currentFilter = 'all';
+
+    save();
+
+    function save() { localStorage.setItem(PRODUCTS_KEY, JSON.stringify(products)); }
+
+    function toast(msg) {
+      const t = document.createElement('div');
+      t.className = 'toast';
+      t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(() => { t.style.animation = 'slideIn 0.3s ease reverse'; setTimeout(() => t.remove(), 300); }, 2500);
+    }
+
+    function formatPrice(p) { return '¥' + parseFloat(p).toLocaleString('zh-CN', { minimumFractionDigits: 2 }); }
+
+    function getStatusHtml(p) {
+      if (p.stock === 0) return '<span class="status status-error">缺货</span>';
+      if (p.status === 'off_sale') return '<span class="status status-warning">已下架</span>';
+      return '<span class="status status-success">在售</span>';
+    }
+
+    function setFilter(f) {
+      currentFilter = f;
+      currentPage = 1;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.dataset.filter === f));
+      renderProducts();
+    }
+
+    function renderProducts() {
+      const cat = document.getElementById('category-filter').value;
+      const search = document.getElementById('search-input').value.toLowerCase();
+
+      let filtered = products.filter(p => {
+        const matchFilter = currentFilter === 'all' ||
+          (currentFilter === 'on_sale' && p.status === 'on_sale' && p.stock > 0) ||
+          (currentFilter === 'off_sale' && p.status === 'off_sale') ||
+          (currentFilter === 'stockout' && p.stock === 0);
+        const matchCat = !cat || p.category === cat;
+        const matchSearch = !search || p.name.toLowerCase().includes(search);
+        return matchFilter && matchCat && matchSearch;
+      });
+
+      document.getElementById('total-count').textContent = filtered.length;
+
+      const totalPages = Math.ceil(filtered.length / pageSize);
+      const start = (currentPage - 1) * pageSize;
+      const pageItems = filtered.slice(start, start + pageSize);
+
+      const tbody = document.getElementById('product-table');
+      tbody.innerHTML = pageItems.map(p => `
+        <tr>
+          <td><input type="checkbox" data-id="${p.id}" onchange="updateBulkActions()"></td>
+          <td>
+            <div class="product-row">
+              <div class="product-thumb">📦</div>
+              <div>
+                <div class="product-name">${p.name}</div>
+                <div class="product-sub">${p.brand} · ${p.unit}</div>
+              </div>
+            </div>
+          </td>
+          <td><span class="tag">${p.category}</span></td>
+          <td>
+            <span style="color:var(--accent);font-weight:600;">${formatPrice(p.price)}</span>
+            ${p.originalPrice > 0 ? `<div style="font-size:11px;color:var(--muted);text-decoration:line-through;">${formatPrice(p.originalPrice)}</div>` : ''}
+          </td>
+          <td><span style="color:${p.stock === 0 ? 'var(--red)' : 'var(--text)'};">${p.stock === 0 ? '缺货' : p.stock}</span></td>
+          <td class="text-muted text-xs">${p.sales}</td>
+          <td>${getStatusHtml(p)}</td>
+          <td>
+            <div class="action-btns">
+              <button class="btn btn-ghost btn-sm" onclick="editProduct('${p.id}')">✏️ 编辑</button>
+              ${p.status === 'on_sale' ? `<button class="btn btn-warning btn-sm" onclick="toggleStatus('${p.id}')">下架</button>` : `<button class="btn btn-success btn-sm" onclick="toggleStatus('${p.id}')">上架</button>`}
+              <button class="btn btn-danger btn-sm" onclick="openDeleteModal('${p.id}')">🗑️</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+
+      // Pagination
+      const pag = document.getElementById('pagination');
+      if (totalPages <= 1) { pag.innerHTML = ''; return; }
+      let html = '';
+      for (let i = 1; i <= totalPages; i++) {
+        html += `<button class="${i === currentPage ? 'active' : ''}" onclick="goPage(${i})">${i}</button>`;
+      }
+      pag.innerHTML = html;
+    }
+
+    function goPage(p) { currentPage = p; renderProducts(); }
+
+    function toggleSelectAll(el) {
+      document.querySelectorAll('#product-table input[type="checkbox"]').forEach(cb => cb.checked = el.checked);
+      updateBulkActions();
+    }
+
+    function updateBulkActions() {
+      // placeholder for bulk actions
+    }
+
+    function openProductModal(id) {
+      editingId = id;
+      document.getElementById('modal-title').textContent = id ? '编辑产品' : '添加产品';
+      document.getElementById('p-img-preview').innerHTML = '';
+
+      if (id) {
+        const p = products.find(x => x.id === id);
+        if (p) {
+          document.getElementById('p-name').value = p.name;
+          document.getElementById('p-category').value = p.category;
+          document.getElementById('p-brand').value = p.brand;
+          document.getElementById('p-price').value = p.price;
+          document.getElementById('p-original-price').value = p.originalPrice || '';
+          document.getElementById('p-stock').value = p.stock;
+          document.getElementById('p-sales').value = p.sales;
+          document.getElementById('p-unit').value = p.unit;
+          document.getElementById('p-desc').value = p.desc || '';
+          document.getElementById('p-status').value = p.status;
+          document.getElementById('p-featured').value = p.featured ? '1' : '0';
+        }
+      } else {
+        ['p-name', 'p-category', 'p-brand', 'p-price', 'p-original-price', 'p-stock', 'p-sales', 'p-unit', 'p-desc'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('p-brand').value = 'NOVA';
+        document.getElementById('p-unit').value = '件';
+        document.getElementById('p-sales').value = '0';
+        document.getElementById('p-status').value = 'on_sale';
+        document.getElementById('p-featured').value = '0';
+      }
+      document.getElementById('product-modal').classList.remove('hidden');
+    }
+
+    function editProduct(id) { openProductModal(id); }
+
+    function closeProductModal() { document.getElementById('product-modal').classList.add('hidden'); editingId = null; }
+
+    function saveProduct() {
+      const name = document.getElementById('p-name').value.trim();
+      const price = parseFloat(document.getElementById('p-price').value);
+      const stock = parseInt(document.getElementById('p-stock').value);
+
+      if (!name || isNaN(price) || isNaN(stock)) { toast('请填写必填项'); return; }
+
+      const data = {
+        name,
+        category: document.getElementById('p-category').value || '家居',
+        brand: document.getElementById('p-brand').value || 'NOVA',
+        price,
+        originalPrice: parseFloat(document.getElementById('p-original-price').value) || 0,
+        stock,
+        sales: parseInt(document.getElementById('p-sales').value) || 0,
+        unit: document.getElementById('p-unit').value || '件',
+        desc: document.getElementById('p-desc').value,
+        status: document.getElementById('p-status').value,
+        featured: parseInt(document.getElementById('p-featured').value),
+        images: [],
+      };
+
+      if (editingId) {
+        const idx = products.findIndex(p => p.id === editingId);
+        if (idx > -1) { products[idx] = { ...products[idx], ...data }; }
+      } else {
+        data.id = 'p_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+        data.date = new Date().toISOString().slice(0, 10);
+        products.unshift(data);
+      }
+
+      save();
+      closeProductModal();
+      renderProducts();
+      toast(editingId ? '产品已更新' : '产品已添加');
+    }
+
+    function toggleStatus(id) {
+      const p = products.find(x => x.id === id);
+      if (p) {
+        p.status = p.status === 'on_sale' ? 'off_sale' : 'on_sale';
+        save();
+        renderProducts();
+        toast('状态已更新为：' + (p.status === 'on_sale' ? '在售' : '已下架'));
+      }
+    }
+
+    function openDeleteModal(id) {
+      deleteTargetId = id;
+      const p = products.find(x => x.id === id);
+      document.getElementById('del-name').textContent = p ? p.name : '';
+      document.getElementById('delete-modal').classList.remove('hidden');
+    }
+
+    function closeDeleteModal() { document.getElementById('delete-modal').classList.add('hidden'); deleteTargetId = null; }
+
+    function confirmDelete() {
+      if (deleteTargetId) {
+        products = products.filter(p => p.id !== deleteTargetId);
+        save();
+        renderProducts();
+        toast('产品已删除');
+      }
+      closeDeleteModal();
+    }
+
+    function handleProductImgs(files) {
+      const preview = document.getElementById('p-img-preview');
+      Array.from(files).slice(0, 6).forEach(file => {
+        const url = URL.createObjectURL(file);
+        preview.innerHTML += `<div class="img-preview-item">📷<button class="del" onclick="this.parentElement.remove()">×</button></div>`;
+      });
+    }
+
+    document.querySelector('.admin-avatar').addEventListener('click', function() {
+      if (confirm('确定要退出登录吗？')) location.href = 'login.html';
+    });
+
+    renderProducts();
+  </script>
+</body>
+</html>

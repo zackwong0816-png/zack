@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>库存管理 · NOVA CMS</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root { --bg: #0a0a0a; --surface: #141414; --surface2: #1c1c1c; --border: #2a2a2a; --text: #e0e0e0; --muted: #666; --accent: #e07b39; --green: #48bb78; --red: #f56565; --yellow: #ecc94b; --sidebar-w: 220px; }
+    body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    .admin-layout { display: flex; min-height: 100vh; }
+    .sidebar { width: var(--sidebar-w); background: var(--surface); border-right: 1px solid var(--border); position: fixed; height: 100vh; overflow-y: auto; display: flex; flex-direction: column; }
+    .sidebar-logo { padding: 20px; border-bottom: 1px solid var(--border); }
+    .sidebar-logo h1 { font-size: 20px; color: #fff; letter-spacing: 3px; }
+    .sidebar-logo span { font-size: 10px; color: var(--muted); }
+    .sidebar-nav { flex: 1; padding: 12px 0; }
+    .nav-group { margin-bottom: 8px; }
+    .nav-group-title { padding: 8px 20px; font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 20px; color: #999; font-size: 13px; cursor: pointer; border-left: 3px solid transparent; transition: all 0.15s; }
+    .nav-item:hover { background: var(--surface2); color: var(--text); }
+    .nav-item.active { background: var(--surface2); color: var(--accent); border-left-color: var(--accent); }
+    .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+    .main { flex: 1; margin-left: var(--sidebar-w); }
+    .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; height: 60px; display: flex; align-items: center; justify-content: space-between; }
+    .topbar-left { display: flex; align-items: center; gap: 16px; }
+    .topbar h2 { font-size: 15px; }
+    .breadcrumb { color: var(--muted); font-size: 13px; }
+    .admin-avatar { width: 36px; height: 36px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; cursor: pointer; }
+    .content { padding: 24px; }
+    .panel { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); margin-bottom: 24px; }
+    .panel-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .panel-title { font-size: 14px; font-weight: 500; }
+    .panel-body { padding: 20px; }
+    .btn { display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; border: none; }
+    .btn-sm { padding: 4px 8px; font-size: 11px; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-ghost { background: transparent; color: #999; border: 1px solid var(--border); }
+    .btn-success { background: rgba(72,187,120,0.15); color: var(--green); }
+    .filter-row { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+    .filter-btn { padding: 6px 14px; border: 1px solid var(--border); border-radius: 999px; font-size: 12px; cursor: pointer; color: var(--muted); background: none; }
+    .filter-btn:hover, .filter-btn.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+    .search-box { display: flex; gap: 8px; margin-left: auto; }
+    .search-box input { padding: 8px 14px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 13px; width: 180px; }
+    .table { width: 100%; border-collapse: collapse; }
+    .table th, .table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); }
+    .table th { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; background: var(--bg); }
+    .table tr:last-child td { border-bottom: none; }
+    .table tr:hover { background: var(--surface2); }
+    .status { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 11px; }
+    .status-success { background: rgba(72,187,120,0.15); color: var(--green); }
+    .status-warning { background: rgba(236,201,75,0.15); color: var(--yellow); }
+    .status-error { background: rgba(245,101,101,0.15); color: var(--red); }
+    .progress-cell { width: 120px; }
+    .progress-bar { height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 3px; transition: width 0.5s; }
+    .action-btns { display: flex; gap: 6px; }
+    .text-muted { color: var(--muted); }
+    .text-sm { font-size: 12px; }
+    .toast { position: fixed; bottom: 24px; right: 24px; background: var(--text); color: var(--bg); padding: 14px 20px; border-radius: 8px; font-size: 13px; z-index: 2000; animation: slideIn 0.3s ease; }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+  </style>
+</head>
+<body>
+  <div class="admin-layout">
+    <aside class="sidebar">
+      <div class="sidebar-logo"><h1>NOVA</h1><span>CMS ADMIN</span></div>
+      <nav class="sidebar-nav">
+        <div class="nav-group"><div class="nav-group-title">主面板</div>
+          <a class="nav-item" href="index.html"><span class="nav-icon">📊</span> 工作台</a>
+          <a class="nav-item" href="analytics.html"><span class="nav-icon">📈</span> 数据统计</a>
+        </div>
+        <div class="nav-group"><div class="nav-group-title">内容管理</div>
+          <a class="nav-item" href="pages.html"><span class="nav-icon">📄</span> 页面管理</a>
+          <a class="nav-item" href="media.html"><span class="nav-icon">🖼️</span> 素材中心</a>
+          <a class="nav-item" href="content.html"><span class="nav-icon">📝</span> 内容管理</a>
+          <a class="nav-item" href="messages.html"><span class="nav-icon">💬</span> 留言管理</a>
+        </div>
+        <div class="nav-group"><div class="nav-group-title">商品管理</div>
+          <a class="nav-item" href="products.html"><span class="nav-icon">📦</span> 产品管理</a>
+          <a class="nav-item" href="categories.html"><span class="nav-icon">🏷️</span> 分类管理</a>
+          <a class="nav-item active" href="inventory.html"><span class="nav-icon">📋</span> 库存管理</a>
+        </div>
+        <div class="nav-group"><div class="nav-group-title">用户与订单</div>
+          <a class="nav-item" href="members.html"><span class="nav-icon">👥</span> 会员管理</a>
+          <a class="nav-item" href="orders.html"><span class="nav-icon">🛒</span> 订单管理</a>
+          <a class="nav-item" href="stores.html"><span class="nav-icon">🏪</span> 门店管理</a>
+        </div>
+        <div class="nav-group"><div class="nav-group-title">营销工具</div>
+          <a class="nav-item" href="coupon.html"><span class="nav-icon">🎫</span> 优惠券</a>
+          <a class="nav-item" href="promo.html"><span class="nav-icon">🔥</span> 促销活动</a>
+        </div>
+        <div class="nav-group"><div class="nav-group-title">系统</div>
+          <a class="nav-item" href="settings.html"><span class="nav-icon">⚙️</span> 设置</a>
+          <a class="nav-item" href="login.html"><span class="nav-icon">🚪</span> 退出</a>
+        </div>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-left"><h2>NOVA 管理后台</h2><span class="breadcrumb">/ 商品管理 / 库存管理</span></div>
+        <div class="topbar-right"><div class="admin-avatar">管</div></div>
+      </header>
+      <div class="content">
+        <div class="panel">
+          <div class="panel-header"><span class="panel-title">📋 库存列表</span></div>
+          <div class="panel-body">
+            <div class="filter-row">
+              <button class="filter-btn active" onclick="this.classList.add('active');this.parentElement.querySelectorAll('.filter-btn:not([onclick])').forEach(b=>b.classList.remove('active'))">全部</button>
+              <button class="filter-btn" onclick="this.classList.add('active');document.querySelectorAll('.filter-btn').forEach(b=>{if(b!==this)b.classList.remove('active')})">⚠️ 库存预警</button>
+              <button class="filter-btn" onclick="this.classList.add('active');document.querySelectorAll('.filter-btn').forEach(b=>{if(b!==this)b.classList.remove('active')})">❌ 缺货</button>
+              <div class="search-box">
+                <input type="text" placeholder="搜索产品..." oninput="renderInventory(this.value)">
+              </div>
+            </div>
+            <table class="table">
+              <thead><tr><th>产品</th><th>分类</th><th>库存</th><th>预警阈值</th><th>库容使用</th><th>状态</th><th>操作</th></tr></thead>
+              <tbody id="inventory-table"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    if (!sessionStorage.getItem('nova_admin')) location.href = 'login.html';
+    const INV_KEY = 'nova_inventory';
+    let inventory = JSON.parse(localStorage.getItem(INV_KEY) || 'null') || [
+      { id: 'i1', name: '极简陶瓷餐具套装', category: '餐厨', stock: 58, threshold: 20, capacity: 100 },
+      { id: 'i2', name: '北欧实木书桌', category: '家具', stock: 12, threshold: 15, capacity: 50 },
+      { id: 'i3', name: '智能香薰机', category: '家电', stock: 0, threshold: 10, capacity: 80 },
+      { id: 'i4', name: '极简台灯', category: '灯具', stock: 45, threshold: 20, capacity: 60 },
+      { id: 'i5', name: '手工玻璃花瓶', category: '家居', stock: 80, threshold: 15, capacity: 100 },
+      { id: 'i6', name: '记忆棉抱枕', category: '家居', stock: 120, threshold: 30, capacity: 150 },
+      { id: 'i7', name: '羊毛盖毯', category: '家居', stock: 0, threshold: 10, capacity: 50 },
+      { id: 'i8', name: '不锈钢保温杯', category: '餐厨', stock: 300, threshold: 50, capacity: 500 },
+    ];
+    save();
+    function save() { localStorage.setItem(INV_KEY, JSON.stringify(inventory)); }
+    function toast(msg) { const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; document.body.appendChild(t); setTimeout(() => { t.style.animation = 'slideIn 0.3s ease reverse'; setTimeout(() => t.remove(), 300); }, 2500); }
+
+    function getStatus(s, t) {
+      if (s === 0) return ['缺货', 'status-error'];
+      if (s < t) return ['库存预警', 'status-warning'];
+      return ['正常', 'status-success'];
+    }
+
+    function renderInventory(search) {
+      const filtered = inventory.filter(i => !search || i.name.includes(search));
+      document.getElementById('inventory-table').innerHTML = filtered.map(i => {
+        const [label, cls] = getStatus(i.stock, i.threshold);
+        const pct = Math.round((i.stock / i.capacity) * 100);
+        const color = pct > 80 ? 'var(--green)' : pct > 40 ? 'var(--yellow)' : 'var(--red)';
+        return `<tr>
+          <td style="font-size:13px;">${i.name}</td>
+          <td><span class="text-muted text-sm">${i.category}</span></td>
+          <td style="font-weight:600;color:${i.stock===0?'var(--red)':'var(--text)'};">${i.stock === 0 ? '缺货' : i.stock}</td>
+          <td class="text-muted text-sm">${i.threshold}</td>
+          <td class="progress-cell">
+            <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">${pct}%</div>
+            <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${color};"></div></div>
+          </td>
+          <td><span class="status ${cls}">${label}</span></td>
+          <td>
+            <div class="action-btns">
+              <button class="btn btn-ghost btn-sm" onclick="restock('${i.id}')">补货</button>
+              <button class="btn btn-success btn-sm" onclick="setThreshold('${i.id}')">阈值</button>
+            </div>
+          </td>
+        </tr>`;
+      }).join('');
+    }
+
+    function restock(id) {
+      const item = inventory.find(x => x.id === id);
+      if (item) {
+        const amt = prompt(`为「${item.name}」输入补货数量：`, '50');
+        if (amt && !isNaN(amt)) {
+          item.stock += parseInt(amt);
+          save();
+          renderInventory();
+          toast(`已为「${item.name}」补货 ${amt} 件`);
+        }
+      }
+    }
+
+    function setThreshold(id) {
+      const item = inventory.find(x => x.id === id);
+      if (item) {
+        const t = prompt(`为「${item.name}」设置预警阈值：`, String(item.threshold));
+        if (t && !isNaN(t)) {
+          item.threshold = parseInt(t);
+          save();
+          renderInventory();
+          toast('预警阈值已更新');
+        }
+      }
+    }
+
+    document.querySelector('.admin-avatar').addEventListener('click', function() { if (confirm('确定要退出登录吗？')) location.href = 'login.html'; });
+    renderInventory();
+  </script>
+</body>
+</html>

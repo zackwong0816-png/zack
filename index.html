@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NOVA · 发现生活之美</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* 首页专用样式 */
+    .promo-banner {
+      background: linear-gradient(135deg, #c96442, #e07a5f);
+      color: white;
+      padding: 12px 24px;
+      text-align: center;
+      font-size: 14px;
+    }
+    .promo-banner strong { font-weight: 600; }
+    .promo-banner a { color: white; text-decoration: underline; }
+
+    /* Hero Section */
+    .hero-split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+      padding: 60px 0;
+    }
+    .hero-visual {
+      aspect-ratio: 1;
+      background: linear-gradient(135deg, #f5f5f5, #ebebeb);
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    /* Features */
+    .feature-item {
+      padding: 32px;
+      border-radius: 16px;
+      transition: all 0.3s;
+    }
+    .feature-item:hover {
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+    .feature-icon {
+      width: 48px;
+      height: 48px;
+      background: var(--accent);
+      color: white;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      margin-bottom: 20px;
+    }
+
+    /* Stats */
+    .stat-item {
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    /* Products */
+    .product-card {
+      position: relative;
+    }
+    .product-tags {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      display: flex;
+      gap: 6px;
+    }
+    .product-tag {
+      padding: 4px 8px;
+      background: var(--accent);
+      color: white;
+      font-size: 11px;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+
+    /* Story */
+    .story-image {
+      aspect-ratio: 3/4;
+      background: linear-gradient(135deg, #f0f0f0, #e0e0e0);
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .story-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 20px;
+    }
+    .story-tag {
+      padding: 6px 12px;
+      background: var(--bg);
+      border-radius: 999px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* Quote */
+    .quote-section {
+      background: var(--surface);
+      padding: 80px 0;
+    }
+    .quote-text {
+      font-family: var(--font-display);
+      font-size: clamp(24px, 3vw, 32px);
+      line-height: 1.4;
+      max-width: 700px;
+      margin: 0 auto 24px;
+      font-style: italic;
+    }
+    .quote-author {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    /* CTA */
+    .cta-section {
+      background: var(--primary);
+      color: white;
+      text-align: center;
+      padding: 100px 0;
+    }
+    .cta-section h2 {
+      font-family: var(--font-display);
+      font-size: clamp(28px, 4vw, 40px);
+      margin-bottom: 16px;
+    }
+    .cta-section p {
+      opacity: 0.8;
+      margin-bottom: 32px;
+    }
+
+    @media (max-width: 768px) {
+      .hero-split { grid-template-columns: 1fr; gap: 40px; }
+      .hero-visual { aspect-ratio: 16/9; }
+    }
+  </style>
+</head>
+<body>
+  <!-- 促销横幅 -->
+  <div class="promo-banner">
+    🎉 新品首发 · 全场满300减50 · <a href="products.html"><strong>立即查看</strong></a>
+  </div>
+
+  <!-- 导航栏 -->
+  <header class="topnav">
+    <div class="container topnav-inner">
+      <a href="index.html" class="logo">NOVA</a>
+      <nav class="nav-links">
+        <div class="dropdown">
+          <a href="products.html">产品</a>
+          <div class="dropdown-menu">
+            <a href="products.html">全部产品</a>
+            <a href="products.html?tag=new">新品上市</a>
+            <a href="products.html?tag=hot">热销榜单</a>
+            <a href="products.html?tag=sale">限时特惠</a>
+          </div>
+        </div>
+        <div class="dropdown">
+          <a href="about.html">品牌</a>
+          <div class="dropdown-menu">
+            <a href="about.html">品牌故事</a>
+            <a href="about.html#design">设计理念</a>
+            <a href="about.html#media">合作媒体</a>
+          </div>
+        </div>
+        <a href="content.html">内容</a>
+        <a href="stores.html">门店</a>
+        <a href="contact.html">联系我们</a>
+      </nav>
+      <div class="nav-actions">
+        <a href="member.html" class="btn btn-ghost">登录</a>
+        <a href="member.html?action=register" class="btn btn-primary">加入会员</a>
+        <a href="cart.html" class="btn btn-ghost" style="position:relative;">
+          🛒
+          <span class="cart-count" style="position:absolute;top:0;right:0;background:var(--accent);color:white;width:18px;height:18px;border-radius:50%;font-size:10px;display:none;align-items:center;justify-content:center;">0</span>
+        </a>
+      </div>
+      <button class="mobile-menu-btn">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="container">
+        <div class="hero-split">
+          <div>
+            <p class="text-muted mb-md" style="font-size:13px;text-transform:uppercase;letter-spacing:0.1em;">NOVA 2026 春夏系列</p>
+            <h1 class="hero-title">发现属于你的<br>独特生活方式</h1>
+            <p class="hero-lead">源自北欧设计美学，融合东方匠心工艺。为追求品质与个性的你，打造兼具功能性与美学的生活好物。</p>
+            <div class="flex gap-md">
+              <a href="products.html" class="btn btn-primary btn-lg">探索新品</a>
+              <a href="about.html" class="btn btn-secondary btn-lg">了解品牌</a>
+            </div>
+          </div>
+          <div class="hero-visual">
+            [ 春夏系列主视觉图 1:1 ]
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section class="section" style="background:var(--surface);">
+      <div class="container">
+        <div class="text-center mb-lg">
+          <p style="color:var(--accent);font-size:12px;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:12px;">品牌理念</p>
+          <h2 class="section-title">为什么选择 NOVA</h2>
+        </div>
+        <div class="grid grid-3">
+          <div class="feature-item">
+            <div class="feature-icon">🌿</div>
+            <h3 style="font-size:18px;margin-bottom:12px;">北欧设计</h3>
+            <p class="text-muted">极简线条与实用主义，每一件产品都经过精心设计，兼具美观与功能，让生活回归本真。</p>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">👐</div>
+            <h3 style="font-size:18px;margin-bottom:12px;">匠心品质</h3>
+            <p class="text-muted">甄选环保材质，传统手工工艺，每一道工序都精益求精，只为呈现最好的品质。</p>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">✨</div>
+            <h3 style="font-size:18px;margin-bottom:12px;">个性表达</h3>
+            <p class="text-muted">不仅仅是产品，更是你生活态度的独特表达。每一件好物，都诉说你的故事。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Products -->
+    <section class="section">
+      <div class="container">
+        <div class="flex justify-between items-center mb-lg">
+          <div>
+            <p style="color:var(--accent);font-size:12px;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;">精选产品</p>
+            <h2 class="section-title" style="margin-bottom:0;">热门商品</h2>
+          </div>
+          <a href="products.html" class="btn btn-ghost">查看全部 →</a>
+        </div>
+        <div class="grid grid-4" id="featured-products">
+          <!-- Products loaded from localStorage -->
+        </div>
+        <script>
+          (function(){
+            var prods = JSON.parse(localStorage.getItem('nova_products') || '[]');
+            var featured = prods.filter(function(p){ return p.status === 'on_sale' && p.stock > 0; }).slice(0, 4);
+            var cont = document.getElementById('featured-products');
+            if (!featured.length) {
+              cont.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--muted);padding:40px;">暂无产品，请从后台添加</p>';
+              return;
+            }
+            cont.innerHTML = featured.map(function(p) {
+              var tag = '';
+              if (p.featured) tag = '<span class="product-tag">精选</span>';
+              var priceHtml = '<span class="product-card-price">¥' + p.price + '</span>';
+              if (p.originalPrice && p.originalPrice > p.price) {
+                priceHtml = '<span class="product-card-price">¥' + p.price + '<span class="original">¥' + p.originalPrice + '</span></span>';
+              }
+              return '<div class="product-card">' +
+                (tag ? '<div class="product-tags">' + tag + '</div>' : '') +
+                '<a href="product-detail.html?id=' + p.id + '"><div class="product-card-img">产品图 1:1</div></a>' +
+                '<div class="product-card-body">' +
+                '<h3 class="product-card-title">' + p.name + '</h3>' +
+                '<p class="product-card-meta">' + (p.desc||'').substring(0,20) + '</p>' +
+                '<div class="flex justify-between items-center">' +
+                priceHtml +
+                '<button class="btn btn-sm btn-primary" onclick="NOVA.Cart.addItem({id:\'' + p.id + '\',name:\'' + String(p.name).replace(/'/g, "\\'") + '\',price:' + p.price + '})">加入购物车</button>' +
+                '</div></div></div>';
+            }).join('');
+          })();
+        </script>
+      </div>
+    </section>
+
+    <!-- Stats -->
+    <section class="section" style="background:var(--surface);">
+      <div class="container">
+        <div class="grid grid-3">
+          <div class="stat-item">
+            <div class="stat-number">120<span style="font-size:0.4em;">万</span></div>
+            <p class="stat-label">忠实用户的选择与信赖</p>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">98<span style="font-size:0.4em;">%</span></div>
+            <p class="stat-label">用户好评率，持续领跑行业</p>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">50<span style="font-size:0.4em;">+</span></div>
+            <p class="stat-label">覆盖全国一二线城市的线下门店</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Story -->
+    <section class="section">
+      <div class="container">
+        <div class="grid" style="grid-template-columns: 1fr 1.5fr; gap: 80px; align-items: center;">
+          <div class="story-image">[ 品牌故事配图 3:4 ]</div>
+          <div>
+            <p style="color:var(--accent);font-size:12px;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:12px;">品牌故事</p>
+            <h2 class="section-title">从北欧出发，<br>走向你的生活</h2>
+            <p class="hero-lead" style="margin-top:16px;">NOVA 创立于哥本哈根，由一群热爱生活的设计师和工匠组成。我们相信，好的产品不仅仅是功能的载体，更是生活美学的传递者。</p>
+            <p class="text-muted mt-md">每一件 NOVA 产品，都承载着我们对美好生活的向往。从材质选择到工艺打磨，从功能设计到美学呈现，我们始终追求极致，只为给你的生活带来一点点不同。</p>
+            <div class="story-tags">
+              <span class="story-tag">♻️ 环保材质</span>
+              <span class="story-tag">👐 手工制作</span>
+              <span class="story-tag">🏆 红点设计奖</span>
+              <span class="story-tag">📦 简约包装</span>
+            </div>
+            <a href="about.html" class="btn btn-secondary mt-lg">阅读更多</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quote -->
+    <section class="quote-section">
+      <div class="container text-center">
+        <p style="font-size:64px;opacity:0.1;margin-bottom:-20px;">"</p>
+        <p class="quote-text">NOVA 的每一件产品都让我感受到生活的美好。不仅是使用，更是一种生活态度的表达。</p>
+        <p class="quote-author">— @生活美学家 · 小红书博主</p>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section">
+      <div class="container">
+        <p style="color:var(--accent);font-size:12px;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:12px;">加入 NOVA</p>
+        <h2>成为会员，尊享专属权益</h2>
+        <p>注册即送新人礼包 · 积分当钱花 · 专属折扣季</p>
+        <div class="flex justify-center gap-md">
+          <a href="member.html?action=register" class="btn btn-primary btn-lg">立即注册</a>
+          <a href="about.html" class="btn btn-lg" style="background:rgba(255,255,255,0.1);color:white;border:1px solid rgba(255,255,255,0.2);">了解更多</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-brand">NOVA</div>
+          <p class="footer-desc">源自北欧，专注于生活美学与匠心工艺的融合。为你打造兼具功能性与美学的生活好物，让每一个日常都充满仪式感。</p>
+        </div>
+        <div>
+          <div class="footer-title">产品</div>
+          <div class="footer-links">
+            <a href="products.html">全部产品</a>
+            <a href="products.html?tag=new">新品上市</a>
+            <a href="products.html?tag=hot">热销榜单</a>
+            <a href="products.html?tag=sale">限时特惠</a>
+          </div>
+        </div>
+        <div>
+          <div class="footer-title">品牌</div>
+          <div class="footer-links">
+            <a href="about.html">品牌故事</a>
+            <a href="about.html#design">设计理念</a>
+            <a href="content.html">内容中心</a>
+            <a href="stores.html">门店信息</a>
+          </div>
+        </div>
+        <div>
+          <div class="footer-title">支持</div>
+          <div class="footer-links">
+            <a href="member.html">会员中心</a>
+            <a href="contact.html">联系我们</a>
+            <a href="#">配送说明</a>
+            <a href="#">退换政策</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 NOVA Design Co. All rights reserved.</span>
+        <div class="flex gap-lg">
+          <a href="#">隐私政策</a>
+          <a href="#">使用条款</a>
+          <a href="#">ICP备案</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

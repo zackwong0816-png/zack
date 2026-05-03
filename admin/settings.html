@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>系统设置 · NOVA CMS</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root { --bg: #0a0a0a; --surface: #141414; --surface2: #1c1c1c; --border: #2a2a2a; --text: #e0e0e0; --muted: #666; --accent: #e07b39; --green: #48bb78; --red: #f56565; --yellow: #ecc94b; --sidebar-w: 220px; }
+    body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    .admin-layout { display: flex; min-height: 100vh; }
+    .sidebar { width: var(--sidebar-w); background: var(--surface); border-right: 1px solid var(--border); position: fixed; height: 100vh; overflow-y: auto; display: flex; flex-direction: column; }
+    .sidebar-logo { padding: 20px; border-bottom: 1px solid var(--border); }
+    .sidebar-logo h1 { font-size: 20px; color: #fff; letter-spacing: 3px; }
+    .sidebar-logo span { font-size: 10px; color: var(--muted); }
+    .sidebar-nav { flex: 1; padding: 12px 0; }
+    .nav-group { margin-bottom: 8px; }
+    .nav-group-title { padding: 8px 20px; font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 20px; color: #999; font-size: 13px; cursor: pointer; border-left: 3px solid transparent; transition: all 0.15s; }
+    .nav-item:hover { background: var(--surface2); color: var(--text); }
+    .nav-item.active { background: var(--surface2); color: var(--accent); border-left-color: var(--accent); }
+    .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+    .main { flex: 1; margin-left: var(--sidebar-w); }
+    .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; height: 60px; display: flex; align-items: center; justify-content: space-between; }
+    .topbar-left { display: flex; align-items: center; gap: 16px; }
+    .topbar h2 { font-size: 15px; }
+    .breadcrumb { color: var(--muted); font-size: 13px; }
+    .admin-avatar { width: 36px; height: 36px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; cursor: pointer; }
+    .content { padding: 24px; max-width: 800px; }
+    .panel { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); margin-bottom: 24px; }
+    .panel-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .panel-title { font-size: 14px; font-weight: 500; }
+    .panel-body { padding: 20px; }
+    .btn { display: inline-flex; align-items: center; gap: 4px; padding: 8px 16px; border-radius: 6px; font-size: 13px; cursor: pointer; border: none; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: #c96a2d; }
+    .btn-ghost { background: transparent; color: #999; border: 1px solid var(--border); }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+    .form-group { margin-bottom: 20px; }
+    .form-label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+    .form-input, .form-select, .form-textarea { width: 100%; padding: 12px 16px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 14px; max-width: 500px; }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { outline: none; border-color: var(--accent); }
+    .form-textarea { min-height: 100px; resize: vertical; }
+    .form-select { appearance: none; cursor: pointer; }
+    .form-hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
+    .setting-section { margin-bottom: 24px; }
+    .setting-section h3 { font-size: 13px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .toggle-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--border); }
+    .toggle-row:last-child { border-bottom: none; }
+    .toggle-info h4 { font-size: 14px; margin-bottom: 4px; }
+    .toggle-info p { font-size: 12px; color: var(--muted); }
+    .toggle { width: 44px; height: 24px; background: var(--border); border-radius: 12px; cursor: pointer; position: relative; transition: background 0.2s; }
+    .toggle.on { background: var(--accent); }
+    .toggle::after { content: ''; position: absolute; width: 18px; height: 18px; background: #fff; border-radius: 50%; top: 3px; left: 3px; transition: transform 0.2s; }
+    .toggle.on::after { transform: translateX(20px); }
+    .admin-info { display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--surface2); border-radius: 10px; margin-bottom: 20px; }
+    .admin-avatar-lg { width: 56px; height: 56px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #fff; }
+    .admin-info h3 { font-size: 16px; margin-bottom: 4px; }
+    .admin-info p { font-size: 12px; color: var(--muted); }
+    .danger-zone { border-color: rgba(245,101,101,0.3); }
+    .danger-zone .panel-header { border-color: rgba(245,101,101,0.2); }
+    .btn-danger { background: rgba(245,101,101,0.15); color: var(--red); border: 1px solid rgba(245,101,101,0.3); }
+    .btn-danger:hover { background: rgba(245,101,101,0.25); }
+    .log-list { max-height: 300px; overflow-y: auto; }
+    .log-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+    .log-item:last-child { border-bottom: none; }
+    .log-time { color: var(--muted); white-space: nowrap; min-width: 140px; }
+    .log-msg { color: #999; }
+    .log-msg strong { color: var(--text); }
+    .text-muted { color: var(--muted); }
+    .text-sm { font-size: 12px; }
+    .mb-16 { margin-bottom: 16px; }
+    .hidden { display: none !important; }
+    .toast { position: fixed; bottom: 24px; right: 24px; background: var(--text); color: var(--bg); padding: 14px 20px; border-radius: 8px; font-size: 13px; z-index: 2000; animation: slideIn 0.3s ease; }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+  </style>
+</head>
+<body>
+  <div class="admin-layout">
+    <aside class="sidebar">
+      <div class="sidebar-logo"><h1>NOVA</h1><span>CMS ADMIN</span></div>
+      <nav class="sidebar-nav">
+        <div class="nav-group"><div class="nav-group-title">主面板</div>
+          <a class="nav-item" href="index.html"><span class="nav-icon">📊</span> 工作台</a>
+          <a class="nav-item" href="analytics.html"><span class="nav-icon">📈</span> 数据统计</a>
+        </div>
+        <div class="nav-group"><div class="nav-group-title">内容管理</div>
+          <a class="nav-item" href="pages.html"><span class="nav-icon">📄</span> 页面管理</a>
+          <a class="nav-item" href="media.html"><span class="nav-icon">🖼️</span> 素材中心</a>
+          <a class="nav-item" href="content.html"><span class="nav-icon">📝</span> 内容管理</a>
+          <a class="nav-item" href="messages.html"><span class="nav-icon">💬</span> 留言管理</a>
+        </div>
+        <div class="nav-group"><div class="nav-group-title">商品管理</div>
+          <a class="nav-item" href="products.html"><span class="nav-icon">📦</span> 产品管理</a>
+          <a class="nav-item" href="categories.html"><span class="nav-icon">🏷️</span> 分类管理</a>
+          <a class="nav-item" href="inventory.html"><span class="nav-icon">📋</span> 库存管理</a>
+        </div>
+        <div class="nav-group"><div class="nav-group-title">用户与订单</div>
+          <a class="nav-item" href="members.html"><span class="nav-icon">👥</span> 会员管理</a>
+          <a class="nav-item" href="orders.html"><span class="nav-icon">🛒</span> 订单管理</a>
+          <a class="nav-item" href="stores.html"><span class="nav-icon">🏪</span> 门店管理</a>
+        </div>
+        <div class="nav-group"><div class="nav-group-title">营销工具</div>
+          <a class="nav-item" href="coupon.html"><span class="nav-icon">🎫</span> 优惠券</a>
+          <a class="nav-item" href="promo.html"><span class="nav-icon">🔥</span> 促销活动</a>
+        </div>
+        <div class="nav-group"><div class="nav-group-title">系统</div>
+          <a class="nav-item active" href="settings.html"><span class="nav-icon">⚙️</span> 设置</a>
+          <a class="nav-item" href="login.html"><span class="nav-icon">🚪</span> 退出</a>
+        </div>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-left"><h2>NOVA 管理后台</h2><span class="breadcrumb">/ 系统 / 设置</span></div>
+        <div class="topbar-right">
+          <button class="btn btn-primary" onclick="saveSettings()">💾 保存设置</button>
+          <div class="admin-avatar">管</div>
+        </div>
+      </header>
+
+      <div class="content">
+        <div class="admin-info">
+          <div class="admin-avatar-lg">管</div>
+          <div>
+            <h3>管理员账号</h3>
+            <p>admin@nova.com · 上次登录：2026-04-28 09:20</p>
+          </div>
+          <button class="btn btn-ghost btn-sm" style="margin-left:auto;" onclick="changePassword()">修改密码</button>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header"><span class="panel-title">⚙️ 基本设置</span></div>
+          <div class="panel-body">
+            <div class="setting-section">
+              <h3>网站信息</h3>
+              <div class="form-group">
+                <label class="form-label">网站名称</label>
+                <input type="text" class="form-input" id="s-site-name" value="NOVA">
+              </div>
+              <div class="form-group">
+                <label class="form-label">网站描述</label>
+                <textarea class="form-textarea" id="s-site-desc">北欧风格生活品牌，为你打造简约、舒适、高品质的生活空间。</textarea>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">客服电话</label>
+                  <input type="text" class="form-input" id="s-phone" value="400-888-8888">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">客服邮箱</label>
+                  <input type="email" class="form-input" id="s-email" value="service@nova.com">
+                </div>
+              </div>
+            </div>
+
+            <div class="setting-section">
+              <h3>运营设置</h3>
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <h4>新用户注册</h4>
+                  <p>允许新用户在前台注册账号</p>
+                </div>
+                <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <h4>订单自动确认收货</h4>
+                  <p>发货后14天自动确认收货</p>
+                </div>
+                <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <h4>库存预警</h4>
+                  <p>当商品库存低于阈值时发送提醒</p>
+                </div>
+                <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <h4>维护模式</h4>
+                  <p>开启后前台将显示维护公告</p>
+                </div>
+                <div class="toggle" onclick="this.classList.toggle('on')"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header"><span class="panel-title">📜 操作日志</span><button class="btn btn-ghost btn-sm">导出</button></div>
+          <div class="panel-body">
+            <div class="log-list" id="log-list">
+              <div class="log-item"><span class="log-time">2026-04-28 10:30:15</span><span class="log-msg"><strong>管理员</strong> 编辑了页面 <strong>内容中心</strong></span></div>
+              <div class="log-item"><span class="log-time">2026-04-28 10:15:08</span><span class="log-msg"><strong>管理员</strong> 上架了产品 <strong>极简陶瓷餐具套装</strong></span></div>
+              <div class="log-item"><span class="log-time">2026-04-28 09:45:22</span><span class="log-msg"><strong>管理员</strong> 创建了优惠券 <strong>五一黄金周特惠</strong></span></div>
+              <div class="log-item"><span class="log-time">2026-04-28 09:20:11</span><span class="log-msg"><strong>管理员</strong> 登录了系统</span></div>
+              <div class="log-item"><span class="log-time">2026-04-27 18:30:45</span><span class="log-msg"><strong>管理员</strong> 发布了文章 <strong>NOVA 2026 春夏系列正式发布</strong></span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel danger-zone">
+          <div class="panel-header"><span class="panel-title" style="color:var(--red);">⚠️ 危险操作</span></div>
+          <div class="panel-body">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div>
+                <h4 style="font-size:14px;margin-bottom:4px;">清空所有数据</h4>
+                <p style="font-size:12px;color:var(--muted);">谨慎操作，此操作不可恢复</p>
+              </div>
+              <button class="btn btn-danger" onclick="clearAllData()">清空数据</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    if (!sessionStorage.getItem('nova_admin')) location.href = 'login.html';
+
+    function toast(msg) {
+      const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(() => { t.style.animation = 'slideIn 0.3s ease reverse'; setTimeout(() => t.remove(), 300); }, 2500);
+    }
+
+    function saveSettings() { toast('设置已保存！'); }
+
+    function changePassword() {
+      const oldP = prompt('请输入旧密码：');
+      if (!oldP) return;
+      const newP = prompt('请输入新密码：');
+      if (!newP) return;
+      const confirmP = prompt('请再次输入新密码：');
+      if (newP !== confirmP) { toast('两次密码不一致'); return; }
+      toast('密码已修改（演示模式）');
+    }
+
+    function clearAllData() {
+      if (!confirm('确定清空所有数据？此操作不可恢复！')) return;
+      if (!confirm('再次确认：确定要清空 localStorage 中的所有数据？')) return;
+      localStorage.clear();
+      toast('所有数据已清空');
+      setTimeout(() => location.reload(), 1000);
+    }
+
+    document.querySelector('.admin-avatar').addEventListener('click', function() { if (confirm('确定要退出登录吗？')) location.href = 'login.html'; });
+  </script>
+</body>
+</html>
