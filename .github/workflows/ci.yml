@@ -88,7 +88,6 @@ jobs:
             sleep 2
           done
           echo "API failed"
-          cat /tmp/server.log | tail -20
           exit 1
         env:
           MONGODB_URI: mongodb://localhost:27017/nova
