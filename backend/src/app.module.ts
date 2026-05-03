@@ -11,6 +11,7 @@ import { AdminModule } from './modules/admin/admin.module'
 import { StoresModule } from './modules/stores/stores.module'
 import { ArticlesModule } from './modules/articles/articles.module'
 import { PromoModule } from './modules/promo/promo.module'
+import { HealthController } from './health.controller'
 
 @Module({
   imports: [
@@ -27,5 +28,6 @@ import { PromoModule } from './modules/promo/promo.module'
     ArticlesModule,
     PromoModule,
   ],
+  controllers: [HealthController],
 })
 export class AppModule {}

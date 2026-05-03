@@ -32,7 +32,7 @@ jobs:
 
       - run: npm install
       - run: npm run build
-      - run: sleep 15 && node dist/main &
+      - run: sleep 30 && node dist/main &
       - run: |
           for i in $(seq 1 30); do
             sleep 2
