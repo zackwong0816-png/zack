@@ -33,6 +33,7 @@ jobs:
       - run: npm install
       - run: npm run build
       - run: |
+          sleep 15
           node dist/main &
           for i in $(seq 1 30); do
             sleep 2
@@ -40,7 +41,7 @@ jobs:
               echo "API is up!"
               exit 0
             fi
-            echo "Waiting... attempt $i/30"
+            echo "Waiting for API... attempt $i/30"
           done
           echo "API failed to start"
           exit 1
