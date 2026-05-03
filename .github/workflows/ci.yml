@@ -58,6 +58,10 @@ jobs:
           ADMIN_PASS: admin123
 
       - run: |
+          echo "=== Server log (at start of check) ==="
+          cat /tmp/server.log 2>&1 || echo "(log missing)"
+          echo "=== Node processes ==="
+          ps aux | grep node | grep -v grep || echo "No node"
           echo "=== Waiting for API ==="
           for i in $(seq 1 60); do
             sleep 2
@@ -69,7 +73,8 @@ jobs:
             fi
           done
           echo "API failed"
-          cat /tmp/server.log | tail -30
+          echo "=== Server log (at failure) ==="
+          cat /tmp/server.log | tail -50
           exit 1
         env:
           MONGODB_URI: mongodb://localhost:27017/nova
