@@ -33,14 +33,14 @@ jobs:
       - run: npm install
       - run: npm run build
       - run: |
-          npm run start &
+          node dist/main &
           for i in $(seq 1 30); do
             sleep 2
             if curl -sf http://localhost:3000/api > /dev/null 2>&1; then
               echo "API is up!"
               exit 0
             fi
-            echo "Waiting for API... attempt $i/30"
+            echo "Waiting... attempt $i/30"
           done
           echo "API failed to start"
           exit 1
