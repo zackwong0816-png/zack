@@ -17,7 +17,16 @@ export const useAuthStore = defineStore('auth', () => {
   const member = ref<Member | null>(null)
 
   const isLoggedIn = computed(() => !!token.value)
-  const isAdmin = computed(() => localStorage.getItem('nova_admin_role') === 'admin')
+  const isAdmin = computed(() => {
+    const token = localStorage.getItem('nova_access_token')
+    if (!token) return false
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]))
+      return payload.role === 'admin'
+    } catch {
+      return false
+    }
+  })
 
   function setToken(accessToken: string, refresh?: string) {
     token.value = accessToken
@@ -32,7 +41,6 @@ export const useAuthStore = defineStore('auth', () => {
     const data = await api.post('/auth/login', { phone, password }) as any
     setToken(data.accessToken, data.refreshToken)
     member.value = data.member
-    localStorage.setItem('nova_admin_role', data.role || '')
     return data
   }
 
@@ -58,7 +66,6 @@ export const useAuthStore = defineStore('auth', () => {
     member.value = null
     localStorage.removeItem('nova_access_token')
     localStorage.removeItem('nova_refresh_token')
-    localStorage.removeItem('nova_admin_role')
   }
 
   return { token, member, isLoggedIn, isAdmin, setToken, login, register, fetchProfile, logout }

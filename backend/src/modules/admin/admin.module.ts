@@ -16,10 +16,12 @@ import { Article, ArticleSchema } from '../articles/articles.schema'
 import { Store, StoreSchema } from '../stores/stores.schema'
 import { Promo, PromoSchema } from '../promo/promo.schema'
 
+if (!process.env.JWT_SECRET) throw new Error('JWT_SECRET environment variable is required')
+
 @Module({
   imports: [
     PassportModule,
-    JwtModule.register({ secret: process.env.JWT_SECRET || 'nova-jwt-secret-2024' }),
+    JwtModule.register({ secret: process.env.JWT_SECRET }),
     MongooseModule.forFeature([
       { name: Member.name, schema: MemberSchema },
       { name: Order.name, schema: OrderSchema },

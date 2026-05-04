@@ -16,6 +16,13 @@ export class OrdersService {
   async create(memberId: string, address: string, items: any[], paymentMethod: string) {
     if (!items || items.length === 0) throw new BadRequestException('订单商品不能为空')
     if (!address) throw new BadRequestException('收货地址不能为空')
+    if (!paymentMethod) throw new BadRequestException('支付方式不能为空')
+
+    for (const item of items) {
+      if (!item.productId || typeof item.productId !== 'string') throw new BadRequestException('商品ID格式无效')
+      if (!Types.ObjectId.isValid(item.productId)) throw new BadRequestException('商品ID格式无效')
+      if (!Number.isInteger(item.quantity) || item.quantity <= 0) throw new BadRequestException('商品数量必须为正整数')
+    }
 
     const productIds = items.map((i: any) => new Types.ObjectId(i.productId))
     const products = await this.productModel.find({ _id: { $in: productIds } }).lean()

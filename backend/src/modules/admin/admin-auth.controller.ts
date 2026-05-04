@@ -1,7 +1,9 @@
-import { Controller, Post, Body } from '@nestjs/common'
+import { Controller, Post, Body, UseGuards } from '@nestjs/common'
+import { ThrottlerGuard } from '@nestjs/throttler'
 import { AdminService } from './admin.service'
 
 @Controller('auth')
+@UseGuards(ThrottlerGuard)
 export class AdminAuthController {
   constructor(private adminService: AdminService) {}
 

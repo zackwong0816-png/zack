@@ -15,7 +15,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       const exResponse = exception.getResponse()
       message = typeof exResponse === 'string' ? exResponse : (exResponse as any).message || exception.message
     } else if (exception instanceof Error) {
-      message = exception.message
+      message = '服务器内部错误'
     }
 
     response.status(status).json({

@@ -22,8 +22,9 @@ async function bootstrap() {
     app.useGlobalFilters(new GlobalExceptionFilter())
     console.log('[Bootstrap] Global exception filter registered')
 
+    const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:5173').split(',').map(o => o.trim()).filter(Boolean)
     app.enableCors({
-      origin: (process.env.CORS_ORIGINS || 'http://localhost:5173').split(','),
+      origin: allowedOrigins,
       credentials: true,
     })
     console.log('[Bootstrap] CORS enabled')

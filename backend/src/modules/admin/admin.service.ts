@@ -30,8 +30,8 @@ export class AdminService {
 
     const payload = { sub: 'admin', role: 'admin' }
     return {
-      accessToken: this.jwtService.sign(payload, { expiresIn: '1h' }),
-      refreshToken: this.jwtService.sign(payload, { expiresIn: '7d' }),
+      accessToken: this.jwtService.sign(payload, { algorithm: 'HS256', expiresIn: '1h' }),
+      refreshToken: this.jwtService.sign(payload, { algorithm: 'HS256', expiresIn: '7d' }),
     }
   }
 

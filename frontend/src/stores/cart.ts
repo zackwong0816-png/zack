@@ -2,6 +2,26 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import api from '@/api/axios'
 
+function safeParseCart(raw: string | null): CartItem[] {
+  if (!raw) return []
+  try {
+    const parsed = JSON.parse(raw)
+    if (!Array.isArray(parsed)) return []
+    return parsed.filter(
+      (item): item is CartItem =>
+        item !== null &&
+        typeof item === 'object' &&
+        typeof item.productId === 'string' &&
+        typeof item.name === 'string' &&
+        typeof item.price === 'number' &&
+        typeof item.quantity === 'number' &&
+        item.quantity > 0,
+    )
+  } catch {
+    return []
+  }
+}
+
 export interface CartItem {
   productId: string
   name: string
@@ -11,7 +31,7 @@ export interface CartItem {
 }
 
 export const useCartStore = defineStore('cart', () => {
-  const items = ref<CartItem[]>(JSON.parse(localStorage.getItem('nova_cart') || '[]'))
+  const items = ref<CartItem[]>(safeParseCart(localStorage.getItem('nova_cart')))
 
   const count = computed(() => items.value.reduce((s, i) => s + i.quantity, 0))
   const total = computed(() => items.value.reduce((s, i) => s + i.price * i.quantity, 0))

@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common'
+import { Injectable, UnauthorizedException, Logger } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
@@ -8,6 +8,8 @@ import { LoginDto, RegisterDto } from './auth.dto'
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name)
+
   constructor(
     @InjectModel(Member.name) private memberModel: Model<MemberDocument>,
     private jwtService: JwtService,
@@ -45,9 +47,13 @@ export class AuthService {
         secret: process.env.JWT_SECRET,
       })
       const member = await this.memberModel.findById(payload.sub)
-      if (!member || member.status === 'banned') return null
+      if (!member || member.status === 'banned') {
+        this.logger.warn(`Refresh token failed: member not found or banned [sub=${payload.sub}]`)
+        return null
+      }
       return this.generateToken(member)
-    } catch {
+    } catch (err) {
+      this.logger.warn(`Refresh token failed: ${err.message}`)
       return null
     }
   }
@@ -77,8 +83,8 @@ export class AuthService {
 
   private generateToken(member: MemberDocument) {
     const payload = { sub: member._id, phone: member.phone, role: 'member' }
-    const accessToken = this.jwtService.sign(payload, { expiresIn: '1h' })
-    const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' })
+    const accessToken = this.jwtService.sign(payload, { algorithm: 'HS256', expiresIn: '1h' })
+    const refreshToken = this.jwtService.sign(payload, { algorithm: 'HS256', expiresIn: '7d' })
     return {
       accessToken,
       refreshToken,

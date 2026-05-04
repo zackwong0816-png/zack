@@ -40,7 +40,6 @@ async function handleLogin() {
   try {
     const res = await api.post('/auth/admin/login', form.value) as any
     auth.setToken(res.accessToken, res.refreshToken)
-    localStorage.setItem('nova_admin_role', 'admin')
     toast.success('登录成功')
     router.push('/admin/dashboard')
   } catch (e: any) {
