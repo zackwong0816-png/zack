@@ -12,6 +12,15 @@ export class CouponsService {
   async create(data: Partial<Coupon>) { return this.couponModel.create(data) }
 
   async claim(id: string, memberId: string) {
+    const coupon = await this.couponModel.findById(id)
+    if (!coupon) throw new BadRequestException('优惠券不存在')
+    if (coupon.status !== 'active') throw new BadRequestException('优惠券已失效')
+
+    const now = new Date()
+    if (coupon.startDate && now < coupon.startDate) throw new BadRequestException('优惠券还未开始')
+    if (coupon.endDate && now > coupon.endDate) throw new BadRequestException('优惠券已过期')
+    if ((coupon.claimedBy as string[]).includes(memberId)) throw new BadRequestException('已领取过该优惠券')
+
     const result = await this.couponModel.findByIdAndUpdate(
       {
         _id: new Types.ObjectId(id),

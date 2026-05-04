@@ -73,13 +73,28 @@ export class OrdersService {
   async updateStatus(id: string, status: string) {
     const allowed = ['pending', 'paid', 'shipped', 'completed', 'cancelled']
     if (!allowed.includes(status)) throw new BadRequestException('无效的订单状态')
-    const order = await this.orderModel.findByIdAndUpdate(id, { status }, { new: true })
+    const order = await this.orderModel.findById(id)
+    if (!order) throw new BadRequestException('订单不存在')
 
-    if (['paid', 'shipped', 'completed'].includes(status)) {
+    const transitions: Record<string, string[]> = {
+      pending: ['paid', 'cancelled'],
+      paid: ['shipped', 'cancelled'],
+      shipped: ['completed'],
+      completed: [],
+      cancelled: [],
+    }
+    if (!transitions[order.status]?.includes(status)) {
+      throw new BadRequestException(`订单从${order.status}状态无法直接转为${status}`)
+    }
+
+    const isStatUpdate = ['paid', 'shipped', 'completed'].includes(status) && order.status === 'pending'
+    const updatedOrder = await this.orderModel.findByIdAndUpdate(id, { status }, { new: true })
+
+    if (isStatUpdate) {
       await this.updateMemberStats(order.memberId.toString(), order.totalAmount)
     }
 
-    return order
+    return updatedOrder
   }
 
   private async updateMemberStats(memberId: string, totalAmount: number) {
@@ -110,7 +125,7 @@ export class OrdersService {
 
     await this.orderModel.findByIdAndUpdate(id, { status: 'cancelled' })
     for (const item of order.items) {
-      await this.productModel.findByIdAndUpdate(item.productId, { $inc: { stock: item.qty, sales: -item.qty } })
+      await this.productModel.findByIdAndUpdate(item.productId, { $inc: { stock: item.qty } })
     }
     return { message: '订单已取消' }
   }

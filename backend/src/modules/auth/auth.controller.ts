@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Put, Body, UseGuards, Req, HttpCode, HttpStatus } from '@nestjs/common'
+import { Controller, Post, Get, Put, Body, UseGuards, Req, HttpCode, HttpStatus, UnauthorizedException } from '@nestjs/common'
 import { ThrottlerGuard } from '@nestjs/throttler'
 import { AuthService } from './auth.service'
 import { LoginDto, RegisterDto, ChangePasswordDto, UpdateProfileDto, RefreshDto } from './auth.dto'
@@ -24,7 +24,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async refresh(@Body() dto: RefreshDto) {
     const result = await this.authService.refresh(dto.refreshToken)
-    if (!result) throw new Error('Refresh token 无效或已过期')
+    if (!result) throw new UnauthorizedException('Refresh token 无效或已过期')
     return result
   }
 

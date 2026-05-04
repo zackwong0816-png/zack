@@ -44,7 +44,7 @@ export class MembersService {
     const newOrderCount = member.orderCount + 1
     const newPoints = member.points + pointsEarned
 
-    let newLevel = member.level
+    let newLevel = member.level || 'bronze'
     if (newTotalSpent >= 10000) newLevel = 'gold'
     else if (newTotalSpent >= 5000) newLevel = 'silver'
 

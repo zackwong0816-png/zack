@@ -27,9 +27,10 @@ api.interceptors.response.use(
       if (refreshToken) {
         try {
           const res = await axios.post('/api/auth/refresh', { refreshToken })
-          localStorage.setItem('nova_access_token', res.data.accessToken)
-          auth.setToken(res.data.accessToken)
-          err.config.headers.Authorization = `Bearer ${res.data.accessToken}`
+          const { accessToken, refreshToken: newRefreshToken } = res.data
+          localStorage.setItem('nova_access_token', accessToken)
+          auth.setToken(accessToken, newRefreshToken)
+          err.config.headers.Authorization = `Bearer ${accessToken}`
           return api(err.config)
         } catch {
           auth.logout()
