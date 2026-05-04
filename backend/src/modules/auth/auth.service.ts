@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, UnauthorizedException } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
@@ -15,7 +15,7 @@ export class AuthService {
 
   async register(dto: RegisterDto) {
     const existing = await this.memberModel.findOne({ phone: dto.phone })
-    if (existing) throw new Error('该手机号已注册')
+    if (existing) throw new UnauthorizedException('该手机号已注册')
 
     const hashedPassword = await bcrypt.hash(dto.password, 12)
     const member = await this.memberModel.create({
@@ -29,30 +29,46 @@ export class AuthService {
 
   async login(dto: LoginDto) {
     const member = await this.memberModel.findOne({ phone: dto.phone })
-    if (!member) throw new Error('手机号或密码错误')
+    if (!member) throw new UnauthorizedException('手机号或密码错误')
+
+    if (member.status === 'banned') throw new UnauthorizedException('账号已被禁用')
 
     const valid = await bcrypt.compare(dto.password, member.password)
-    if (!valid) throw new Error('手机号或密码错误')
+    if (!valid) throw new UnauthorizedException('手机号或密码错误')
 
     return this.generateToken(member)
   }
 
+  async refresh(refreshToken: string) {
+    try {
+      const payload = this.jwtService.verify(refreshToken, {
+        secret: process.env.JWT_SECRET,
+      })
+      const member = await this.memberModel.findById(payload.sub)
+      if (!member || member.status === 'banned') return null
+      return this.generateToken(member)
+    } catch {
+      return null
+    }
+  }
+
   async getProfile(memberId: string) {
     const member = await this.memberModel.findById(memberId).select('-password')
-    if (!member) throw new Error('会员不存在')
+    if (!member) throw new UnauthorizedException('会员不存在')
     return member
   }
 
   async updateMember(memberId: string, data: Partial<Member>) {
-    return this.memberModel.findByIdAndUpdate(memberId, data, { new: true }).select('-password')
+    const { password, phone, role, status, ...safeData } = data
+    return this.memberModel.findByIdAndUpdate(memberId, safeData, { new: true }).select('-password')
   }
 
   async changePassword(memberId: string, oldPassword: string, newPassword: string) {
     const member = await this.memberModel.findById(memberId)
-    if (!member) throw new Error('会员不存在')
+    if (!member) throw new UnauthorizedException('会员不存在')
 
     const valid = await bcrypt.compare(oldPassword, member.password)
-    if (!valid) throw new Error('原密码错误')
+    if (!valid) throw new UnauthorizedException('原密码错误')
 
     member.password = await bcrypt.hash(newPassword, 12)
     await member.save()
@@ -61,7 +77,7 @@ export class AuthService {
 
   private generateToken(member: MemberDocument) {
     const payload = { sub: member._id, phone: member.phone, role: 'member' }
-    const accessToken = this.jwtService.sign(payload)
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '1h' })
     const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' })
     return {
       accessToken,

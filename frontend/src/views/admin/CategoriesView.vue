@@ -36,7 +36,7 @@ const showForm = ref(false)
 const editing = ref<any>(null)
 const form = ref({ name:'', slug:'', sort:0 })
 onMounted(() => load())
-async function load() { categories.value = await api.get('/categories') as any[] }
+async function load() { categories.value = await api.get('/categories') as unknown as any[] }
 function openForm(c?: any) { editing.value = c || null; form.value = c ? { name: c.name, slug: c.slug, sort: c.sort } : { name:'', slug:'', sort:0 }; showForm.value = true }
 async function save() { if (editing.value) await api.put(`/categories/${editing.value.id}`, form.value); else await api.post('/categories', form.value); showForm.value = false; load() }
 </script>

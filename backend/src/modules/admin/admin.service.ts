@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
+import * as bcrypt from 'bcrypt'
 import { Member, MemberDocument } from '../auth/member.schema'
 import { Order, OrderDocument } from '../orders/orders.schema'
 import { Message, MessageDocument } from './message.schema'
@@ -16,12 +17,20 @@ export class AdminService {
   ) {}
 
   async adminLogin(username: string, password: string) {
-    const ADMIN_USER = process.env.ADMIN_USER || 'admin'
-    const ADMIN_PASS = process.env.ADMIN_PASS || ''
-    if (username !== ADMIN_USER || password !== ADMIN_PASS) throw new Error('账号或密码错误')
+    const ADMIN_USER = process.env.ADMIN_USER
+    const ADMIN_PASS = process.env.ADMIN_PASS
+
+    if (!ADMIN_USER || !ADMIN_PASS) {
+      throw new Error('管理员未配置，请设置 ADMIN_USER 和 ADMIN_PASS 环境变量')
+    }
+
+    if (username !== ADMIN_USER || password !== ADMIN_PASS) {
+      throw new Error('账号或密码错误')
+    }
+
     const payload = { sub: 'admin', role: 'admin' }
     return {
-      accessToken: this.jwtService.sign(payload),
+      accessToken: this.jwtService.sign(payload, { expiresIn: '1h' }),
       refreshToken: this.jwtService.sign(payload, { expiresIn: '7d' }),
     }
   }
@@ -56,8 +65,12 @@ export class AdminService {
     return { items, total, page, pages: Math.ceil(total / limit) }
   }
 
-  async updateMember(id: string, data: Partial<Member>) {
-    return this.memberModel.findByIdAndUpdate(id, data, { new: true }).select('-password')
+  async updateMember(id: string, data: any) {
+    const { password, ...safeData } = data
+    if (password) {
+      safeData.password = await bcrypt.hash(password, 12)
+    }
+    return this.memberModel.findByIdAndUpdate(id, safeData, { new: true }).select('-password')
   }
 
   async getMessages(query: any) {
@@ -69,10 +82,7 @@ export class AdminService {
   }
 
   async updateSettings(data: any) {
-    if (data.password) {
-      process.env.ADMIN_PASS = data.password
-    }
-    return { message: '设置已更新' }
+    return { message: '请通过环境变量修改管理员配置' }
   }
 
   async createMessage(data: any) {

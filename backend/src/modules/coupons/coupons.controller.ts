@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Param, Body, UseGuards } from '@nestjs/common'
 import { CouponsService } from './coupons.service'
 import { JwtAuthGuard } from '../auth/jwt-auth.guard'
+import { CurrentUser } from '../../common/decorators/current-user.decorator'
 
 @Controller('coupons')
 export class CouponsController {
@@ -15,5 +16,7 @@ export class CouponsController {
 
   @Post(':id/claim')
   @UseGuards(JwtAuthGuard)
-  claim(@Param('id') id: string) { return this.couponsService.claim(id) }
+  claim(@Param('id') id: string, @CurrentUser('sub') memberId: string) {
+    return this.couponsService.claim(id, memberId)
+  }
 }

@@ -1,8 +1,12 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, BadRequestException } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model, Types } from 'mongoose'
 import { Product, ProductDocument, Category, CategoryDocument } from './products.schema'
 import { CreateProductDto, UpdateProductDto } from './products.dto'
+
+function escapeRegex(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
 
 @Injectable()
 export class ProductsService {
@@ -16,9 +20,10 @@ export class ProductsService {
     if (query.status) filter.status = query.status
     if (query.category) filter.category = new Types.ObjectId(query.category)
     if (query.keyword) {
+      const safeKeyword = escapeRegex(String(query.keyword))
       filter.$or = [
-        { name: { $regex: query.keyword, $options: 'i' } },
-        { desc: { $regex: query.keyword, $options: 'i' } },
+        { name: { $regex: safeKeyword, $options: 'i' } },
+        { desc: { $regex: safeKeyword, $options: 'i' } },
       ]
     }
 
@@ -35,8 +40,9 @@ export class ProductsService {
   }
 
   async findOne(id: string) {
+    if (!Types.ObjectId.isValid(id)) throw new BadRequestException('无效的商品ID')
     const product = await this.productModel.findById(id).populate('category')
-    if (!product) throw new Error('产品不存在')
+    if (!product) throw new BadRequestException('产品不存在')
     return product
   }
 

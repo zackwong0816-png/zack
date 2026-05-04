@@ -69,8 +69,8 @@ const form = ref({ name:'', desc:'', price:0, originalPrice:0, stock:0, category
 onMounted(() => { loadData() })
 
 async function loadData() {
-  products.value = await productApi.list({ keyword: keyword.value || undefined }) as any[]
-  categories.value = await productApi.categories() as any[]
+  products.value = await productApi.list({ keyword: keyword.value || undefined }) as unknown as any[]
+  categories.value = await productApi.categories() as unknown as any[]
 }
 
 function openForm(p?: any) {

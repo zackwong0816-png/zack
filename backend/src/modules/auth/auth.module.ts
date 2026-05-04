@@ -7,10 +7,12 @@ import { AuthService } from './auth.service'
 import { JwtStrategy } from './jwt.strategy'
 import { Member, MemberSchema } from './member.schema'
 
+if (!process.env.JWT_SECRET) throw new Error('JWT_SECRET environment variable is required')
+
 @Module({
   imports: [
     PassportModule,
-    JwtModule.register({ secret: process.env.JWT_SECRET || 'nova-jwt-secret-2024', signOptions: { expiresIn: '7d' } }),
+    JwtModule.register({ secret: process.env.JWT_SECRET, signOptions: { expiresIn: '7d' } }),
     MongooseModule.forFeature([{ name: Member.name, schema: MemberSchema }]),
   ],
   controllers: [AuthController],

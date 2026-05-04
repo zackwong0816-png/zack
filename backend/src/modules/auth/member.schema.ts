@@ -31,6 +31,11 @@ export class Member {
 
   @Prop({ default: 0 })
   orderCount: number
+
+  @Prop({ default: 'member', enum: ['member', 'admin'] })
+  role: string
 }
 
 export const MemberSchema = SchemaFactory.createForClass(Member)
+MemberSchema.index({ phone: 1 })
+MemberSchema.index({ status: 1 })

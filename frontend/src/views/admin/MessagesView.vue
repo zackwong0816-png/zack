@@ -35,7 +35,7 @@ const showReply = ref(false)
 const replyingTo = ref<any>(null)
 const replyText = ref('')
 onMounted(() => load())
-async function load() { messages.value = await adminApi.messages() as any[] }
+async function load() { messages.value = await adminApi.messages() as unknown as any[] }
 function openReply(m: any) { replyingTo.value = m; replyText.value = ''; showReply.value = true }
 async function sendReply() { await adminApi.replyMessage(replyingTo.value.id, replyText.value); showReply.value = false; load() }
 </script>

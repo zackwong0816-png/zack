@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core'
 import { ValidationPipe } from '@nestjs/common'
 import { AppModule } from './app.module'
+import { GlobalExceptionFilter } from './common/filters/global-exception.filter'
 
 async function bootstrap() {
   try {
@@ -18,8 +19,11 @@ async function bootstrap() {
     }))
     console.log('[Bootstrap] Global pipes set')
 
+    app.useGlobalFilters(new GlobalExceptionFilter())
+    console.log('[Bootstrap] Global exception filter registered')
+
     app.enableCors({
-      origin: ['http://localhost:5173', 'http://localhost:3000'],
+      origin: (process.env.CORS_ORIGINS || 'http://localhost:5173').split(','),
       credentials: true,
     })
     console.log('[Bootstrap] CORS enabled')

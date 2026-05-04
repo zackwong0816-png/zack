@@ -20,7 +20,17 @@ export const useCartStore = defineStore('cart', () => {
     localStorage.setItem('nova_cart', JSON.stringify(items.value))
   }
 
+  function snapshot(): CartItem[] {
+    return JSON.parse(JSON.stringify(items.value))
+  }
+
+  function restore(snap: CartItem[]) {
+    items.value = snap
+    save()
+  }
+
   async function addItem(product: Omit<CartItem, 'quantity'>, qty = 1) {
+    const snap = snapshot()
     const idx = items.value.findIndex(i => i.productId === product.productId)
     if (idx > -1) {
       items.value[idx].quantity += qty
@@ -29,51 +39,64 @@ export const useCartStore = defineStore('cart', () => {
     }
     save()
     try {
-      await api.post('/cart/items', { productId: product.productId, quantity: qty })
-    } catch {
-      // 离线乐观更新，已本地保存
+      const updated = await api.post('/cart/items', { productId: product.productId, quantity: qty }) as unknown as CartItem[]
+      items.value = updated
+      save()
+    } catch (e: any) {
+      restore(snap)
+      throw e
     }
   }
 
   async function updateQuantity(productId: string, quantity: number) {
-    const item = items.value.find(i => i.productId === productId)
-    if (!item) return
     if (quantity <= 0) {
       await removeItem(productId)
       return
     }
+    const snap = snapshot()
+    const item = items.value.find(i => i.productId === productId)
+    if (!item) return
     item.quantity = quantity
     save()
     try {
-      await api.put(`/cart/items/${productId}`, { quantity })
-    } catch {
-      // 离线乐观更新
+      const updated = await api.put(`/cart/items/${productId}`, { quantity }) as unknown as CartItem[]
+      items.value = updated
+      save()
+    } catch (e: any) {
+      restore(snap)
+      throw e
     }
   }
 
   async function removeItem(productId: string) {
+    const snap = snapshot()
     items.value = items.value.filter(i => i.productId !== productId)
     save()
     try {
-      await api.delete(`/cart/items/${productId}`)
-    } catch {
-      // 离线乐观更新
+      const updated = await api.delete(`/cart/items/${productId}`) as unknown as CartItem[]
+      items.value = updated
+      save()
+    } catch (e: any) {
+      restore(snap)
+      throw e
     }
   }
 
   async function clear() {
+    const snap = snapshot()
     items.value = []
     save()
     try {
       await api.delete('/cart')
-    } catch {
-      // 离线乐观更新
+    } catch (e: any) {
+      restore(snap)
+      throw e
     }
   }
 
   async function syncFromServer() {
     try {
-      const serverItems = await api.get('/cart')
+      const serverItems = await api.get('/cart') as unknown as CartItem[]
       items.value = serverItems
       save()
     } catch {

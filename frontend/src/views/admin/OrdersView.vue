@@ -38,7 +38,7 @@ import { orderApi } from '@/api'
 const orders = ref<any[]>([])
 const statusFilter = ref('')
 onMounted(() => loadData())
-async function loadData() { orders.value = await orderApi.list({ status: statusFilter.value || undefined }) as any[] }
+async function loadData() { orders.value = await orderApi.list({ status: statusFilter.value || undefined }) as unknown as any[] }
 async function ship(id: string) { await orderApi.updateStatus(id, 'shipped'); loadData() }
 async function cancel(id: string) { if (confirm('确定取消？')) { await orderApi.cancel(id); loadData() } }
 function statusText(s: string) { return {pending:'待付款',paid:'已付款',shipped:'已发货',completed:'已完成',cancelled:'已取消'}[s]||s }

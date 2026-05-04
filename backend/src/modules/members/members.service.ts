@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
-import { Model } from 'mongoose'
+import { Model, Types } from 'mongoose'
 import { Member, MemberDocument } from '../auth/member.schema'
 import { Order, OrderDocument } from '../orders/orders.schema'
 
@@ -30,6 +30,29 @@ export class MembersService {
   }
 
   async getMemberPoints(memberId: string) {
-    return { points: 0, records: [] } // 简化实现
+    const member = await this.memberModel.findById(memberId)
+    if (!member) return { points: 0, records: [] }
+    return { points: member.points, records: [] }
+  }
+
+  async onOrderCompleted(memberId: string, totalAmount: number) {
+    const member = await this.memberModel.findById(memberId)
+    if (!member) return
+
+    const pointsEarned = Math.floor(totalAmount / 10)
+    const newTotalSpent = member.totalSpent + totalAmount
+    const newOrderCount = member.orderCount + 1
+    const newPoints = member.points + pointsEarned
+
+    let newLevel = member.level
+    if (newTotalSpent >= 10000) newLevel = 'gold'
+    else if (newTotalSpent >= 5000) newLevel = 'silver'
+
+    await this.memberModel.findByIdAndUpdate(memberId, {
+      totalSpent: newTotalSpent,
+      orderCount: newOrderCount,
+      points: newPoints,
+      level: newLevel,
+    })
   }
 }

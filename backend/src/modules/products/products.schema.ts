@@ -41,6 +41,9 @@ export class Product {
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product)
+ProductSchema.index({ category: 1 })
+ProductSchema.index({ status: 1 })
+ProductSchema.index({ name: 'text', desc: 'text' })
 
 @Schema({ timestamps: true })
 export class Category {

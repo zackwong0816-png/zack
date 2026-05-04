@@ -25,6 +25,6 @@ import { couponApi } from '@/api'
 const coupons = ref<any[]>([])
 const showForm = ref(false)
 onMounted(() => load())
-async function load() { coupons.value = await couponApi.list() as any[] }
+async function load() { coupons.value = await couponApi.list() as unknown as any[] }
 </script>
 <style scoped>.badge.muted { background: var(--surface-2); color: var(--muted); }</style>

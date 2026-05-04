@@ -61,14 +61,18 @@ const authStore = useAuthStore()
 const profile = ref<any>(null)
 const orders = ref<any[]>([])
 
-const levelText = computed(() => ({ bronze: '🥉 普通会员', silver: '🥈 银会员', gold: '🥇 金会员' }[profile.value?.level || authStore.member?.level || 'bronze']))
+const levelText = computed(() => {
+  const levelMap: Record<string, string> = { bronze: '🥉 普通会员', silver: '🥈 银会员', gold: '🥇 金会员' }
+  const level = (profile.value?.level || authStore.member?.level || 'bronze') as string
+  return levelMap[level] || level
+})
 
 const pendingOrders = computed(() => orders.value.filter((o: any) => ['pending','paid','shipped'].includes(o.status)).length)
 
 onMounted(async () => {
   try {
     profile.value = await api.get('/auth/profile')
-    orders.value = await api.get('/orders') as any[]
+    orders.value = await api.get('/orders') as unknown as any[]
   } catch { /* not logged in */ }
 })
 

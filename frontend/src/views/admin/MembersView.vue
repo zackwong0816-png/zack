@@ -33,7 +33,7 @@ const members = ref<any[]>([])
 const showEdit = ref(false)
 const editForm = ref({ id:'', points:0, level:'bronze' })
 onMounted(() => load())
-async function load() { members.value = await adminApi.members() as any[] }
+async function load() { members.value = await adminApi.members() as unknown as any[] }
 function levelText(l: string) { return {bronze:'普通',silver:'银',gold:'金'}[l]||l }
 function openEdit(m: any) { editForm.value = { id: m.id, points: m.points, level: m.level }; showEdit.value = true }
 async function saveEdit() { await adminApi.updateMember(editForm.value.id, { points: editForm.value.points, level: editForm.value.level }); showEdit.value = false; load() }

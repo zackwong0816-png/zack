@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { Document } from 'mongoose'
+import { Document, Types } from 'mongoose'
 
 export type CouponDocument = Coupon & Document
 
@@ -15,6 +15,8 @@ export class Coupon {
   @Prop({ default: 'active', enum: ['active', 'inactive'] }) status: string
   @Prop() startDate: Date
   @Prop() endDate: Date
+  @Prop({ type: [String], default: [] }) claimedBy: string[]
 }
 
 export const CouponSchema = SchemaFactory.createForClass(Coupon)
+CouponSchema.index({ claimedBy: 1 })
